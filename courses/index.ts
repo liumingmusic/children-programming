@@ -102,14 +102,49 @@ export const projects: CourseProject[] = [
     slug: "stars",
     title: "二零收集星星",
     ageGroup: "8-9 岁",
-    description: "用事件和判断让二零飞到星星旁边收集它们。",
-    missionBrief: "星球上散落着很多小星星。帮二零写一个程序，让它能飞过去收集星星。",
-    erLingHint: "当舞台被点击时，让二零移到鼠标位置。如果碰到星星，就让它说「收集到啦！」",
+    description: "帮二零飞到星星旁边，把它们一颗一颗收集起来。",
+    missionBrief: "星球上散落着 3 颗小星星。帮二零写一段程序，让它依次飞向每颗星星，收集它们。",
+    erLingHint: "用「飞向星星 1 号」积木让二零去收集星星，再用「说」积木让它宣布战果。试试把 3 颗星星都收集完！",
     steps: [
-      { id: 1, title: "响应点击事件" },
-      { id: 2, title: "判断二零是否碰到星星" },
-      { id: 3, title: "收集所有星星" },
+      { id: 1, title: "使用飞向星星积木" },
+      { id: 2, title: "让二零收集时说点什么" },
+      { id: 3, title: "收集所有 3 颗星星" },
     ],
+    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_goto_star">
+            <value name="INDEX">
+              <shadow type="math_number"><field name="NUM">1</field></shadow>
+            </value>
+            <next>
+              <block type="maker_say">
+                <value name="TEXT">
+                  <shadow type="text"><field name="TEXT">收集到啦！</field></shadow>
+                </value>
+                <value name="SECONDS">
+                  <shadow type="math_number"><field name="NUM">1</field></shadow>
+                </value>
+                <next>
+                  <block type="maker_goto_star">
+                    <value name="INDEX">
+                      <shadow type="math_number"><field name="NUM">2</field></shadow>
+                    </value>
+                    <next>
+                      <block type="maker_goto_star">
+                        <value name="INDEX">
+                          <shadow type="math_number"><field name="NUM">3</field></shadow>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>`,
   },
 ];
 

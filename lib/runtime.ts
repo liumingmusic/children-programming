@@ -8,6 +8,13 @@ export interface PenPath {
   color: string;
 }
 
+export interface Star {
+  id: number;
+  x: number;
+  y: number;
+  collected: boolean;
+}
+
 export interface ActorState {
   x: number;
   y: number;
@@ -24,6 +31,7 @@ export interface StageState {
   currentPath: PenPath | null;
   penColor: number; // hue 0-360
   penDown: boolean;
+  stars: Star[];
   running: boolean;
   log: string[];
 }
@@ -32,8 +40,15 @@ type Action =
   | { type: "move"; steps: number; duration: number }
   | { type: "turn"; degrees: number; duration: number }
   | { type: "goto"; x: number; y: number; duration: number }
+  | { type: "gotoStar"; index: number; duration: number }
   | { type: "say"; text: string; duration: number }
   | { type: "wait"; seconds: number };
+
+const DEFAULT_STARS: Star[] = [
+  { id: 1, x: -120, y: 80, collected: false },
+  { id: 2, x: 140, y: -60, collected: false },
+  { id: 3, x: 80, y: 110, collected: false },
+];
 
 export class Runtime {
   private actions: Action[] = [];
@@ -64,6 +79,7 @@ export class Runtime {
       currentPath: null,
       penColor: 0,
       penDown: false,
+      stars: DEFAULT_STARS.map((s) => ({ ...s })),
       running: false,
       log: [],
     };
@@ -86,6 +102,7 @@ export class Runtime {
     this.state.currentPath = null;
     this.state.penColor = 0;
     this.state.penDown = false;
+    this.state.stars = DEFAULT_STARS.map((s) => ({ ...s }));
     this.state.running = false;
     this.state.log = [];
     this.emit();
@@ -153,6 +170,10 @@ export class Runtime {
     this.actions.push({ type: "goto", x, y, duration: 500 });
   }
 
+  gotoStar(index: number) {
+    this.actions.push({ type: "gotoStar", index, duration: 600 });
+  }
+
   say(text: string, seconds: number) {
     this.actions.push({ type: "say", text, duration: seconds * 1000 });
   }
@@ -166,6 +187,7 @@ export class Runtime {
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.penDown = false;
+    this.state.stars = DEFAULT_STARS.map((s) => ({ ...s }));
   }
 
   end() {
@@ -184,6 +206,10 @@ export class Runtime {
     }
 
     this.commitCurrentPath();
+    const allCollected = this.state.stars.every((s) => s.collected);
+    if (allCollected) {
+      this.log("[系统] 恭喜！所有星星都收集完了");
+    }
     this.log("[系统] 程序执行完毕");
     this.state.running = false;
     this.emit();
@@ -208,6 +234,15 @@ export class Runtime {
   private recordPenPosition() {
     if (this.state.penDown && this.state.currentPath) {
       this.state.currentPath.points.push({ x: this.state.actor.x, y: this.state.actor.y });
+    }
+  }
+
+  private collectStar(index: number) {
+    const star = this.state.stars[index];
+    if (star && !star.collected) {
+      star.collected = true;
+      this.log(`[系统] 收集到星星 ${index + 1} 号！`);
+      this.emit();
     }
   }
 
@@ -260,7 +295,34 @@ export class Runtime {
               this.recordPenPosition();
               this.emit();
             },
-            resolve
+            () => {
+              this.collectNearbyStars();
+              resolve();
+            }
+          );
+          break;
+        }
+        case "gotoStar": {
+          const star = this.state.stars[action.index];
+          if (!star || star.collected) {
+            resolve();
+            break;
+          }
+          this.log("[系统] 二零飞向星星");
+          this.animateValue(
+            { x: this.state.actor.x, y: this.state.actor.y },
+            { x: star.x, y: star.y },
+            action.duration,
+            (v) => {
+              this.state.actor.x = v.x;
+              this.state.actor.y = v.y;
+              this.recordPenPosition();
+              this.emit();
+            },
+            () => {
+              this.collectStar(action.index);
+              resolve();
+            }
           );
           break;
         }
@@ -279,6 +341,18 @@ export class Runtime {
         case "wait": {
           setTimeout(resolve, action.seconds);
           break;
+        }
+      }
+    });
+  }
+
+  private collectNearbyStars() {
+    this.state.stars.forEach((star, index) => {
+      if (!star.collected) {
+        const dx = this.state.actor.x - star.x;
+        const dy = this.state.actor.y - star.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 30) {
+          this.collectStar(index);
         }
       }
     });

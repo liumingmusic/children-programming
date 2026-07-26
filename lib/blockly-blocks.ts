@@ -9,6 +9,7 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_move", inputs: { STEPS: { shadow: { type: "math_number", fields: { NUM: 100 } } } } },
     { kind: "block" as const, type: "maker_turn", inputs: { DEGREES: { shadow: { type: "math_number", fields: { NUM: 15 } } } } },
     { kind: "block" as const, type: "maker_goto", inputs: { X: { shadow: { type: "math_number", fields: { NUM: 0 } } }, Y: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
+    { kind: "block" as const, type: "maker_goto_star", inputs: { INDEX: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
     { kind: "block" as const, type: "maker_say", inputs: { TEXT: { shadow: { type: "text", fields: { TEXT: "你好！我是二零" } } }, SECONDS: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
     { kind: "block" as const, type: "maker_wait", inputs: { SECONDS: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
     { kind: "block" as const, type: "maker_pen_down" },
@@ -64,6 +65,18 @@ export function registerCustomBlocks() {
         this.setNextStatement(true, null);
         this.setColour(230);
         this.setTooltip("让二零直接移动到指定位置");
+        this.setHelpUrl("");
+      },
+    },
+    maker_goto_star: {
+      init() {
+        this.appendValueInput("INDEX").setCheck("Number").appendField("飞向星星");
+        this.appendDummyInput().appendField("号");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("让二零飞向指定编号的星星并收集它");
         this.setHelpUrl("");
       },
     },
@@ -157,6 +170,11 @@ export function registerCustomBlocks() {
     const x = generator.valueToCode(block, "X", Order.ATOMIC) || "0";
     const y = generator.valueToCode(block, "Y", Order.ATOMIC) || "0";
     return `__runtime.goto(${x}, ${y});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_goto_star"] = (block, generator) => {
+    const index = generator.valueToCode(block, "INDEX", Order.ATOMIC) || "1";
+    return `__runtime.gotoStar(${index} - 1);\n`;
   };
 
   javascriptGenerator.forBlock["maker_say"] = (block, generator) => {

@@ -50,6 +50,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     currentPath: null,
     penColor: 0,
     penDown: false,
+    stars: [
+      { id: 1, x: -120, y: 80, collected: false },
+      { id: 2, x: 140, y: -60, collected: false },
+      { id: 3, x: 80, y: 110, collected: false },
+    ],
     running: false,
     log: [],
   });
@@ -153,9 +158,9 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       else if (id === 2) done = code.includes("controls_repeat_ext") && code.includes("maker_move") && code.includes("maker_turn");
       else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
     } else if (project.slug === "stars") {
-      if (id === 1) done = code.includes("maker_when_clicked") || code.includes("maker_goto");
-      else if (id === 2) done = code.includes("maker_if_touching") && code.includes("maker_say");
-      else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
+      if (id === 1) done = code.includes("maker_goto_star");
+      else if (id === 2) done = logs.some((log) => log.startsWith("[二零]") && log.includes("收集"));
+      else if (id === 3) done = logs.some((log) => log.includes("所有星星都收集完了"));
     }
 
     return { ...step, done };

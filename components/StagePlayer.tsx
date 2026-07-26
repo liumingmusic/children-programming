@@ -122,6 +122,21 @@ export default function StagePlayer({ state }: StagePlayerProps) {
     state.penPaths.forEach((path) => drawPath(path));
     if (state.currentPath) drawPath(state.currentPath);
 
+    // Draw stars
+    state.stars.forEach((star) => {
+      if (star.collected) return;
+      const sx = centerX + star.x;
+      const sy = centerY - star.y;
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.fillStyle = "#FFD93D";
+      ctx.shadowColor = "#FFD93D";
+      ctx.shadowBlur = 12;
+      drawStarShape(ctx, 0, 0, 5, 14, 7);
+      ctx.fill();
+      ctx.restore();
+    });
+
     // Actor coordinates
     const actorX = centerX + state.actor.x;
     const actorY = centerY - state.actor.y;
@@ -302,4 +317,27 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   }
   if (currentLine) lines.push(currentLine);
   return lines.length ? lines : [text];
+}
+
+function drawStarShape(ctx: CanvasRenderingContext2D, cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number) {
+  let rot = (Math.PI / 2) * 3;
+  let x = cx;
+  let y = cy;
+  const step = Math.PI / spikes;
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - outerRadius);
+  for (let i = 0; i < spikes; i++) {
+    x = cx + Math.cos(rot) * outerRadius;
+    y = cy + Math.sin(rot) * outerRadius;
+    ctx.lineTo(x, y);
+    rot += step;
+
+    x = cx + Math.cos(rot) * innerRadius;
+    y = cy + Math.sin(rot) * innerRadius;
+    ctx.lineTo(x, y);
+    rot += step;
+  }
+  ctx.lineTo(cx, cy - outerRadius);
+  ctx.closePath();
 }
