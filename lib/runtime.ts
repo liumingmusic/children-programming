@@ -1,10 +1,12 @@
-export type Action =
-  | { type: "move"; steps: number; duration: number }
-  | { type: "turn"; degrees: number; duration: number }
-  | { type: "goto"; x: number; y: number; duration: number }
-  | { type: "say"; text: string; duration: number }
-  | { type: "wait"; seconds: number }
-  | { type: "reset" };
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface PenPath {
+  points: Point[];
+  color: string;
+}
 
 export interface ActorState {
   x: number;
@@ -18,9 +20,20 @@ export interface StageState {
   width: number;
   height: number;
   actor: ActorState;
+  penPaths: PenPath[];
+  currentPath: PenPath | null;
+  penColor: number; // hue 0-360
+  penDown: boolean;
   running: boolean;
   log: string[];
 }
+
+type Action =
+  | { type: "move"; steps: number; duration: number }
+  | { type: "turn"; degrees: number; duration: number }
+  | { type: "goto"; x: number; y: number; duration: number }
+  | { type: "say"; text: string; duration: number }
+  | { type: "wait"; seconds: number };
 
 export class Runtime {
   private actions: Action[] = [];
@@ -43,10 +56,14 @@ export class Runtime {
       actor: {
         x: 0,
         y: 0,
-        angle: 90, // face up by default
+        angle: 90,
         message: null,
         messageUntil: 0,
       },
+      penPaths: [],
+      currentPath: null,
+      penColor: 0,
+      penDown: false,
       running: false,
       log: [],
     };
@@ -65,6 +82,10 @@ export class Runtime {
       message: null,
       messageUntil: 0,
     };
+    this.state.penPaths = [];
+    this.state.currentPath = null;
+    this.state.penColor = 0;
+    this.state.penDown = false;
     this.state.running = false;
     this.state.log = [];
     this.emit();
@@ -86,7 +107,40 @@ export class Runtime {
     this.emit();
   }
 
-  // Called by generated Blockly code to queue actions
+  // --- Pen state (immediate, not queued) ---
+  penDown() {
+    this.state.penDown = true;
+    this.state.currentPath = {
+      points: [{ x: this.state.actor.x, y: this.state.actor.y }],
+      color: `hsl(${this.state.penColor % 360}, 80%, 60%)`,
+    };
+    this.log("[系统] 画笔落下");
+  }
+
+  penUp() {
+    this.state.penDown = false;
+    if (this.state.currentPath) {
+      this.state.penPaths.push(this.state.currentPath);
+      this.state.currentPath = null;
+    }
+    this.emit();
+  }
+
+  setPenColor(hue: number) {
+    this.commitCurrentPath();
+    this.state.penColor = hue % 360;
+    this.startCurrentPath();
+    this.log("[系统] 画笔颜色设置");
+  }
+
+  changePenColor(delta: number) {
+    this.commitCurrentPath();
+    this.state.penColor = (this.state.penColor + delta) % 360;
+    this.startCurrentPath();
+    this.log("[系统] 画笔颜色改变");
+  }
+
+  // --- Queued actions ---
   move(steps: number) {
     this.actions.push({ type: "move", steps, duration: Math.abs(steps) * 4 });
   }
@@ -109,6 +163,9 @@ export class Runtime {
 
   start() {
     this.actions = [];
+    this.state.penPaths = [];
+    this.state.currentPath = null;
+    this.state.penDown = false;
   }
 
   end() {
@@ -126,15 +183,39 @@ export class Runtime {
       await this.performAction(action);
     }
 
+    this.commitCurrentPath();
     this.log("[系统] 程序执行完毕");
     this.state.running = false;
     this.emit();
+  }
+
+  private commitCurrentPath() {
+    if (this.state.currentPath) {
+      this.state.penPaths.push(this.state.currentPath);
+      this.state.currentPath = null;
+    }
+  }
+
+  private startCurrentPath() {
+    if (this.state.penDown) {
+      this.state.currentPath = {
+        points: [{ x: this.state.actor.x, y: this.state.actor.y }],
+        color: `hsl(${this.state.penColor % 360}, 80%, 60%)`,
+      };
+    }
+  }
+
+  private recordPenPosition() {
+    if (this.state.penDown && this.state.currentPath) {
+      this.state.currentPath.points.push({ x: this.state.actor.x, y: this.state.actor.y });
+    }
   }
 
   private performAction(action: Action): Promise<void> {
     return new Promise((resolve) => {
       switch (action.type) {
         case "move": {
+          this.log("[系统] 二零开始移动");
           const rad = (this.state.actor.angle * Math.PI) / 180;
           const dx = action.steps * Math.cos(rad);
           const dy = action.steps * Math.sin(rad);
@@ -145,6 +226,7 @@ export class Runtime {
             (v) => {
               this.state.actor.x = v.x;
               this.state.actor.y = v.y;
+              this.recordPenPosition();
               this.emit();
             },
             resolve
@@ -152,6 +234,7 @@ export class Runtime {
           break;
         }
         case "turn": {
+          this.log("[系统] 二零开始转向");
           const startAngle = this.state.actor.angle;
           this.animateValue(
             { a: startAngle },
@@ -166,6 +249,7 @@ export class Runtime {
           break;
         }
         case "goto": {
+          this.log("[系统] 二零移动到指定位置");
           this.animateValue(
             { x: this.state.actor.x, y: this.state.actor.y },
             { x: action.x, y: action.y },
@@ -173,6 +257,7 @@ export class Runtime {
             (v) => {
               this.state.actor.x = v.x;
               this.state.actor.y = v.y;
+              this.recordPenPosition();
               this.emit();
             },
             resolve
@@ -193,11 +278,6 @@ export class Runtime {
         }
         case "wait": {
           setTimeout(resolve, action.seconds);
-          break;
-        }
-        case "reset": {
-          this.reset();
-          resolve();
           break;
         }
       }

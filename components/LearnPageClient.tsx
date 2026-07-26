@@ -46,6 +46,10 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     width: STAGE_WIDTH,
     height: STAGE_HEIGHT,
     actor: { x: 0, y: 0, angle: 90, message: null, messageUntil: 0 },
+    penPaths: [],
+    currentPath: null,
+    penColor: 0,
+    penDown: false,
     running: false,
     log: [],
   });
@@ -138,13 +142,22 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const stepStatus = project.steps.map((step) => {
     const id = step.id;
     let done = false;
-    if (id === 1) {
-      done = logs.some((log) => log.includes("[系统]") && (log.includes("移动") || log.includes("执行")));
-    } else if (id === 2) {
-      done = logs.some((log) => log.startsWith("[二零]"));
-    } else if (id === 3) {
-      done = logs.includes("[系统] 程序执行完毕");
+    const code = generatedCode;
+
+    if (project.slug === "hello") {
+      if (id === 1) done = logs.some((log) => log.includes("二零开始移动"));
+      else if (id === 2) done = logs.some((log) => log.startsWith("[二零]"));
+      else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
+    } else if (project.slug === "rainbow") {
+      if (id === 1) done = code.includes("penDown") && (code.includes("setPenColor") || code.includes("changePenColor"));
+      else if (id === 2) done = code.includes("controls_repeat_ext") && code.includes("maker_move") && code.includes("maker_turn");
+      else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
+    } else if (project.slug === "stars") {
+      if (id === 1) done = code.includes("maker_when_clicked") || code.includes("maker_goto");
+      else if (id === 2) done = code.includes("maker_if_touching") && code.includes("maker_say");
+      else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
     }
+
     return { ...step, done };
   });
 

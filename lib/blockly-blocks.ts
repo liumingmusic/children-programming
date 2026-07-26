@@ -5,11 +5,16 @@ export const TOOLBOX = {
   kind: "flyoutToolbox" as const,
   contents: [
     { kind: "block" as const, type: "maker_when_start" },
+    { kind: "block" as const, type: "controls_repeat_ext", inputs: { TIMES: { shadow: { type: "math_number", fields: { NUM: 10 } } } } },
     { kind: "block" as const, type: "maker_move", inputs: { STEPS: { shadow: { type: "math_number", fields: { NUM: 100 } } } } },
     { kind: "block" as const, type: "maker_turn", inputs: { DEGREES: { shadow: { type: "math_number", fields: { NUM: 15 } } } } },
     { kind: "block" as const, type: "maker_goto", inputs: { X: { shadow: { type: "math_number", fields: { NUM: 0 } } }, Y: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
     { kind: "block" as const, type: "maker_say", inputs: { TEXT: { shadow: { type: "text", fields: { TEXT: "你好！我是二零" } } }, SECONDS: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
     { kind: "block" as const, type: "maker_wait", inputs: { SECONDS: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
+    { kind: "block" as const, type: "maker_pen_down" },
+    { kind: "block" as const, type: "maker_pen_up" },
+    { kind: "block" as const, type: "maker_pen_set_color", inputs: { HUE: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
+    { kind: "block" as const, type: "maker_pen_change_color", inputs: { DELTA: { shadow: { type: "math_number", fields: { NUM: 10 } } } } },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -87,6 +92,49 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+    maker_pen_down: {
+      init() {
+        this.appendDummyInput().appendField("落笔");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(120);
+        this.setTooltip("开始画画");
+        this.setHelpUrl("");
+      },
+    },
+    maker_pen_up: {
+      init() {
+        this.appendDummyInput().appendField("抬笔");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(120);
+        this.setTooltip("停止画画");
+        this.setHelpUrl("");
+      },
+    },
+    maker_pen_set_color: {
+      init() {
+        this.appendValueInput("HUE").setCheck("Number").appendField("设置画笔颜色为");
+        this.appendDummyInput().appendField("(0-360)");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(120);
+        this.setTooltip("设置画笔颜色，数字 0-360 代表色相");
+        this.setHelpUrl("");
+      },
+    },
+    maker_pen_change_color: {
+      init() {
+        this.appendValueInput("DELTA").setCheck("Number").appendField("画笔颜色增加");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(120);
+        this.setTooltip("让画笔颜色增加指定数值");
+        this.setHelpUrl("");
+      },
+    },
   });
 
   // Hat block: when start runs the stack and then ends
@@ -120,5 +168,23 @@ export function registerCustomBlocks() {
   javascriptGenerator.forBlock["maker_wait"] = (block, generator) => {
     const seconds = generator.valueToCode(block, "SECONDS", Order.ATOMIC) || "1";
     return `__runtime.wait(${seconds});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_pen_down"] = () => {
+    return "__runtime.penDown();\n";
+  };
+
+  javascriptGenerator.forBlock["maker_pen_up"] = () => {
+    return "__runtime.penUp();\n";
+  };
+
+  javascriptGenerator.forBlock["maker_pen_set_color"] = (block, generator) => {
+    const hue = generator.valueToCode(block, "HUE", Order.ATOMIC) || "0";
+    return `__runtime.setPenColor(${hue});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_pen_change_color"] = (block, generator) => {
+    const delta = generator.valueToCode(block, "DELTA", Order.ATOMIC) || "10";
+    return `__runtime.changePenColor(${delta});\n`;
   };
 }

@@ -93,6 +93,35 @@ export default function StagePlayer({ state }: StagePlayerProps) {
     ctx.font = '12px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
     ctx.fillText("舞台中心", centerX + 6, centerY - 6);
 
+    // Draw pen paths (under actor)
+    const toCanvasPoint = (p: { x: number; y: number }) => ({
+      x: centerX + p.x,
+      y: centerY - p.y,
+    });
+
+    const drawPath = (path: { points: { x: number; y: number }[]; color: string }, lineWidth = 3) => {
+      if (path.points.length < 2) return;
+      ctx.save();
+      ctx.strokeStyle = path.color;
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.shadowColor = path.color;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      const start = toCanvasPoint(path.points[0]);
+      ctx.moveTo(start.x, start.y);
+      for (let i = 1; i < path.points.length; i++) {
+        const pt = toCanvasPoint(path.points[i]);
+        ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    state.penPaths.forEach((path) => drawPath(path));
+    if (state.currentPath) drawPath(state.currentPath);
+
     // Actor coordinates
     const actorX = centerX + state.actor.x;
     const actorY = centerY - state.actor.y;

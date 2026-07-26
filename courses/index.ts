@@ -55,12 +55,48 @@ export const projects: CourseProject[] = [
     ageGroup: "7-8 岁",
     description: "用循环和画笔命令让二零画出彩虹螺旋。",
     missionBrief: "二零捡到了一支神奇的画笔。只要重复转圈，它就能画出彩虹。",
-    erLingHint: "试试「重复执行」+「右转」+「移动」的组合，看看能画出什么图案。",
+    erLingHint: "先「落笔」，再用「重复执行」让二零边移动、边右转，同时不断改变画笔颜色。",
     steps: [
-      { id: 1, title: "使用循环积木" },
-      { id: 2, title: "让二零边移动边转向" },
+      { id: 1, title: "使用落笔和画笔颜色积木" },
+      { id: 2, title: "用循环让二零边移动边转向" },
       { id: 3, title: "运行并看到彩虹图案" },
     ],
+    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="controls_repeat_ext">
+                <value name="TIMES">
+                  <shadow type="math_number"><field name="NUM">36</field></shadow>
+                </value>
+                <statement name="DO">
+                  <block type="maker_move">
+                    <value name="STEPS">
+                      <shadow type="math_number"><field name="NUM">10</field></shadow>
+                    </value>
+                    <next>
+                      <block type="maker_turn">
+                        <value name="DEGREES">
+                          <shadow type="math_number"><field name="NUM">10</field></shadow>
+                        </value>
+                        <next>
+                          <block type="maker_pen_change_color">
+                            <value name="DELTA">
+                              <shadow type="math_number"><field name="NUM">10</field></shadow>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>`,
   },
   {
     slug: "stars",
