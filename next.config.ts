@@ -3,7 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'export',
   distDir: 'dist',
-  assetPrefix: '.',
+  basePath: '/children-programming',
+  assetPrefix: '/children-programming',
   images: {
     unoptimized: true,
   },
