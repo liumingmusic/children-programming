@@ -69,5 +69,15 @@ export async function markProgress(slug: string, completed: boolean, stars: numb
 
 export async function getProgress(slug: string): Promise<Progress | null> {
   if (!db) return null;
-  return await db.progress.where("slug").equals(slug).first() || null;
+  return (await db.progress.where("slug").equals(slug).first()) || null;
+}
+
+export async function getAllProjects(): Promise<Project[]> {
+  if (!db) return [];
+  return await db.projects.toArray();
+}
+
+export async function getAllProgress(): Promise<Progress[]> {
+  if (!db) return [];
+  return await db.progress.toArray();
 }

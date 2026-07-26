@@ -412,10 +412,10 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
                 继续探索
               </button>
               <Link
-                href="/"
+                href={`/certificate/${project.slug}`}
                 className="flex-1 rounded-xl bg-[#0F6E56] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#085041]"
               >
-                返回星球
+                查看证书
               </Link>
             </div>
           </div>
