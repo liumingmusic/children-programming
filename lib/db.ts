@@ -17,15 +17,31 @@ export interface Progress {
   stars: number;
 }
 
+export interface TimeLog {
+  id?: number;
+  slug: string;
+  date: string; // YYYY-MM-DD
+  seconds: number;
+}
+
+export interface TimeStats {
+  totalSeconds: number;
+  todaySeconds: number;
+  byProject: Record<string, number>;
+  last7Days: { date: string; seconds: number }[];
+}
+
 class MakerDatabase extends Dexie {
   projects!: Dexie.Table<Project, number>;
   progress!: Dexie.Table<Progress, number>;
+  timeLogs!: Dexie.Table<TimeLog, number>;
 
   constructor() {
     super("MakerPlanet");
-    this.version(1).stores({
+    this.version(2).stores({
       projects: "++id, slug, updatedAt",
       progress: "++id, slug",
+      timeLogs: "++id, [slug+date], date",
     });
   }
 }
@@ -80,4 +96,45 @@ export async function getAllProjects(): Promise<Project[]> {
 export async function getAllProgress(): Promise<Progress[]> {
   if (!db) return [];
   return await db.progress.toArray();
+}
+
+function today(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export async function recordSessionTime(slug: string, seconds: number) {
+  if (!db || seconds <= 0) return;
+  const date = today();
+  const existing = await db.timeLogs.where({ slug, date }).first();
+  if (existing) {
+    await db.timeLogs.update(existing.id!, { seconds: existing.seconds + seconds });
+  } else {
+    await db.timeLogs.add({ slug, date, seconds });
+  }
+}
+
+export async function getTimeStats(): Promise<TimeStats> {
+  if (!db) {
+    return { totalSeconds: 0, todaySeconds: 0, byProject: {}, last7Days: [] };
+  }
+  const logs = await db.timeLogs.toArray();
+  const totalSeconds = logs.reduce((sum, log) => sum + log.seconds, 0);
+  const date = today();
+  const todaySeconds = logs.filter((log) => log.date === date).reduce((sum, log) => sum + log.seconds, 0);
+  const byProject: Record<string, number> = {};
+  for (const log of logs) {
+    byProject[log.slug] = (byProject[log.slug] || 0) + log.seconds;
+  }
+
+  const last7Days: { date: string; seconds: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const seconds = logs.filter((log) => log.date === ds).reduce((sum, log) => sum + log.seconds, 0);
+    last7Days.push({ date: ds, seconds });
+  }
+
+  return { totalSeconds, todaySeconds, byProject, last7Days };
 }

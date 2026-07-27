@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles } from "lucide-react";
+import { ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles, Calendar } from "lucide-react";
 import type { Project, Progress } from "@/lib/db";
-import { getAllProjects, getAllProgress } from "@/lib/db";
+import { getAllProjects, getAllProgress, getTimeStats, type TimeStats } from "@/lib/db";
 import { getProject, projects as allCourses } from "@/courses";
 
 function ErLingAvatar({ className = "" }: { className?: string }) {
@@ -32,12 +32,17 @@ interface ChildStats {
 
 export default function ParentClient() {
   const [stats, setStats] = useState<ChildStats | null>(null);
+  const [timeStats, setTimeStats] = useState<TimeStats | null>(null);
   const [items, setItems] = useState<{ course: typeof allCourses[0]; progress: Progress | null; saved: Project | null }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [savedProjects, progressList] = await Promise.all([getAllProjects(), getAllProgress()]);
+      const [savedProjects, progressList, times] = await Promise.all([
+        getAllProjects(),
+        getAllProgress(),
+        getTimeStats(),
+      ]);
       const progressMap = new Map(progressList.map((p) => [p.slug, p]));
       const savedMap = new Map(savedProjects.map((p) => [p.slug, p]));
 
@@ -68,6 +73,7 @@ export default function ParentClient() {
         lastActive,
         recentProject: recentProject?.title || null,
       });
+      setTimeStats(times);
       setItems(merged);
       setLoading(false);
     }
@@ -98,7 +104,7 @@ export default function ParentClient() {
             <div>
               <h1 className="text-2xl font-medium text-[#04342C]">孩子的成长手稿</h1>
               <p className="mt-1 text-[#5F5E5A]">
-                这里记录着小创作者在造物星球的足迹，没有分数，只有作品。
+                这里记录着小创作者在造物星球的足迹，没有分数，只有作品和时间。
               </p>
             </div>
           </div>
@@ -112,11 +118,15 @@ export default function ParentClient() {
               <div className="mb-8 grid gap-4 md:grid-cols-4">
                 <StatCard icon={<CheckCircle className="h-5 w-5 text-[#0F6E56]" />} label="已完成项目" value={String(stats.completed)} />
                 <StatCard icon={<BookOpen className="h-5 w-5 text-[#378ADD]" />} label="进行中项目" value={String(stats.inProgress)} />
-                <StatCard icon={<Sparkles className="h-5 w-5 text-[#EF9F27]" />} label="全部项目" value={String(stats.total)} />
                 <StatCard
                   icon={<Clock className="h-5 w-5 text-[#7F77DD]" />}
-                  label="最近活跃"
-                  value={stats.lastActive ? formatDate(stats.lastActive) : "暂无"}
+                  label="总学习时长"
+                  value={formatDuration(timeStats?.totalSeconds || 0)}
+                />
+                <StatCard
+                  icon={<Sparkles className="h-5 w-5 text-[#EF9F27]" />}
+                  label="今日学习时长"
+                  value={formatDuration(timeStats?.todaySeconds || 0)}
                 />
               </div>
 
@@ -125,6 +135,32 @@ export default function ParentClient() {
                   <p className="text-sm text-[#0F6E56]">
                     二零告诉我：孩子最近创作了 <span className="font-medium text-[#04342C]">{stats.recentProject}</span>，记得夸夸TA！
                   </p>
+                </div>
+              )}
+
+              {timeStats && timeStats.last7Days.some((d) => d.seconds > 0) && (
+                <div className="mb-10 rounded-2xl border border-black/5 bg-white p-6">
+                  <div className="mb-4 flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-[#0F6E56]" />
+                    <h2 className="text-lg font-medium text-[#04342C]">最近 7 天学习时长</h2>
+                  </div>
+                  <div className="flex items-end gap-3 sm:gap-4">
+                    {timeStats.last7Days.map((day) => {
+                      const max = Math.max(...timeStats.last7Days.map((d) => d.seconds), 60);
+                      const height = day.seconds > 0 ? Math.max(8, (day.seconds / max) * 120) : 4;
+                      return (
+                        <div key={day.date} className="flex flex-1 flex-col items-center gap-2">
+                          <div
+                            className="w-full rounded-t-lg bg-[#0F6E56]/80 transition-all hover:bg-[#0F6E56]"
+                            style={{ height: `${height}px` }}
+                            title={`${day.date}: ${formatDuration(day.seconds)}`}
+                          />
+                          <div className="text-xs text-[#5F5E5A]">{day.date.slice(5)}</div>
+                          <div className="text-xs font-medium text-[#04342C]">{formatShortDuration(day.seconds)}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -152,6 +188,12 @@ export default function ParentClient() {
                     </div>
                     <h3 className="mb-1 text-base font-medium text-[#04342C]">{item.course.title}</h3>
                     <p className="mb-4 text-sm text-[#5F5E5A]">{item.course.description}</p>
+                    {timeStats && timeStats.byProject[item.course.slug] > 0 && (
+                      <div className="mb-3 flex items-center gap-1.5 text-xs text-[#5F5E5A]">
+                        <Clock className="h-3.5 w-3.5" />
+                        已学习 {formatDuration(timeStats.byProject[item.course.slug])}
+                      </div>
+                    )}
                     <Link
                       href={`/learn/${item.course.slug}`}
                       className="mt-auto rounded-xl border border-[#0F6E56]/20 px-4 py-2 text-center text-sm font-medium text-[#0F6E56] hover:bg-[#E1F5EE]"
@@ -187,6 +229,20 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
       <div className="mt-1 text-sm text-[#5F5E5A]">{label}</div>
     </div>
   );
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds} 秒`;
+  const m = Math.floor(seconds / 60);
+  if (m < 60) return `${m} 分钟`;
+  const h = Math.floor(m / 60);
+  const rm = m % 60;
+  return `${h} 小时 ${rm} 分钟`;
+}
+
+function formatShortDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}秒`;
+  return `${Math.floor(seconds / 60)}分`;
 }
 
 function formatDate(date: Date): string {

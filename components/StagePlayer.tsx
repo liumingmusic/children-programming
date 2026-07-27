@@ -5,11 +5,28 @@ import type { StageState } from "@/lib/runtime";
 
 interface StagePlayerProps {
   state: StageState;
+  onStageClick?: (x: number, y: number) => void;
 }
 
-export default function StagePlayer({ state }: StagePlayerProps) {
+export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const starsRef = useRef<{ x: number; y: number; r: number; alpha: number; twinkle: number }[]>([]);
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current || !onStageClick) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const scaleX = state.width / rect.width;
+    const scaleY = state.height / rect.height;
+    const px = (e.clientX - rect.left) * scaleX;
+    const py = (e.clientY - rect.top) * scaleY;
+    // Convert canvas px (origin at center) to runtime coordinates
+    const x = px - state.width / 2;
+    const y = state.height / 2 - py;
+    onStageClick(x, y);
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -232,11 +249,18 @@ export default function StagePlayer({ state }: StagePlayerProps) {
   }, [state]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="h-full w-full rounded-lg"
+    <div
+      ref={containerRef}
+      onClick={handleClick}
+      className={`relative h-full w-full rounded-lg ${onStageClick ? "cursor-pointer" : ""}`}
       aria-label="舞台预览区"
-    />
+    >
+      <canvas
+        ref={canvasRef}
+        className="h-full w-full rounded-lg"
+        aria-label="舞台预览区"
+      />
+    </div>
   );
 }
 

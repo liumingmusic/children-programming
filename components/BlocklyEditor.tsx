@@ -4,11 +4,12 @@ import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
+import type { Runtime } from "@/lib/runtime";
 
 export interface BlocklyEditorHandle {
   getXml: () => string;
   loadXml: (xml: string) => void;
-  run: (runtime: unknown) => Promise<void>;
+  run: (runtime: Runtime) => Promise<void>;
   resetWorkspace: () => void;
 }
 
@@ -84,22 +85,22 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
         if (!workspace) return;
         workspace.clear();
       },
-      run: async (runtime: unknown) => {
+      run: async (runtime: Runtime) => {
         const workspace = workspaceRef.current;
         if (!workspace) return;
-        const code = javascriptGenerator.workspaceToCode(workspace);
-        if (!code.trim()) {
-          // eslint-disable-next-line no-console
-          console.log("No code to run");
-          return;
+        const topBlocks = workspace.getTopBlocks(true);
+        let whenStart = "";
+        let whenStageClicked = "";
+        for (const block of topBlocks) {
+          const type = block.type;
+          if (type === "maker_when_start") {
+            whenStart = javascriptGenerator.blockToCode(block).toString();
+          } else if (type === "maker_when_stage_clicked") {
+            whenStageClicked = javascriptGenerator.blockToCode(block).toString();
+          }
         }
-        // Wrap user code to expose runtime as a global variable during execution.
-        // We also keep the real global clean by wrapping in a function.
-        const wrapped = `(function(__runtime) {\n${code}\n})(__runtimeArg);`;
-        (window as unknown as Record<string, unknown>).__runtimeArg = runtime;
-        // eslint-disable-next-line no-eval
-        eval(wrapped);
-        delete (window as unknown as Record<string, unknown>).__runtimeArg;
+        runtime.setScripts({ whenStart, whenStageClicked });
+        await runtime.handleRunStart();
       },
     }));
 

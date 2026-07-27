@@ -40,9 +40,15 @@ type Action =
   | { type: "move"; steps: number; duration: number }
   | { type: "turn"; degrees: number; duration: number }
   | { type: "goto"; x: number; y: number; duration: number }
+  | { type: "gotoMouse"; duration: number }
   | { type: "gotoStar"; index: number; duration: number }
   | { type: "say"; text: string; duration: number }
   | { type: "wait"; seconds: number };
+
+export type Script = {
+  whenStart: string;
+  whenStageClicked: string;
+};
 
 const DEFAULT_STARS: Star[] = [
   { id: 1, x: -120, y: 80, collected: false },
@@ -56,6 +62,9 @@ export class Runtime {
   private width: number;
   private height: number;
   private state: StageState;
+  private scripts: Script = { whenStart: "", whenStageClicked: "" };
+  private mouse: Point = { x: 0, y: 0 };
+  private runningType: "start" | "click" | null = null;
 
   constructor(
     width: number,
@@ -105,6 +114,7 @@ export class Runtime {
     this.state.stars = DEFAULT_STARS.map((s) => ({ ...s }));
     this.state.running = false;
     this.state.log = [];
+    this.runningType = null;
     this.emit();
   }
 
@@ -114,6 +124,10 @@ export class Runtime {
     this.state.width = width;
     this.state.height = height;
     this.emit();
+  }
+
+  setMouse(x: number, y: number) {
+    this.mouse = { x, y };
   }
 
   log(message: string) {
@@ -170,6 +184,10 @@ export class Runtime {
     this.actions.push({ type: "goto", x, y, duration: 500 });
   }
 
+  gotoMouse() {
+    this.actions.push({ type: "gotoMouse", duration: 600 });
+  }
+
   gotoStar(index: number) {
     this.actions.push({ type: "gotoStar", index, duration: 600 });
   }
@@ -182,6 +200,42 @@ export class Runtime {
     this.actions.push({ type: "wait", seconds: seconds * 1000 });
   }
 
+  // --- Touching detection used by generated scripts ---
+  touchingStar(): boolean {
+    return this.state.stars.some((star) => {
+      if (star.collected) return false;
+      const dx = this.state.actor.x - star.x;
+      const dy = this.state.actor.y - star.y;
+      return Math.sqrt(dx * dx + dy * dy) < 35;
+    });
+  }
+
+  collectNearbyStars() {
+    this.state.stars.forEach((star, index) => {
+      if (!star.collected) {
+        const dx = this.state.actor.x - star.x;
+        const dy = this.state.actor.y - star.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 35) {
+          this.collectStar(index);
+        }
+      }
+    });
+  }
+
+  private collectStar(index: number) {
+    const star = this.state.stars[index];
+    if (star && !star.collected) {
+      star.collected = true;
+      this.log(`[系统] 收集到星星 ${star.id} 号！`);
+      this.emit();
+    }
+  }
+
+  // --- Script registration ---
+  setScripts(scripts: Script) {
+    this.scripts = scripts;
+  }
+
   start() {
     this.actions = [];
     this.state.penPaths = [];
@@ -190,16 +244,37 @@ export class Runtime {
     this.state.stars = DEFAULT_STARS.map((s) => ({ ...s }));
   }
 
-  end() {
-    this.runActions();
+  async handleStageClick(x: number, y: number) {
+    if (this.state.running || !this.scripts.whenStageClicked) return;
+    this.setMouse(x, y);
+    this.runningType = "click";
+    await this.runScript(this.scripts.whenStageClicked, "click");
   }
 
-  async runActions() {
-    if (this.state.running) return;
-    this.state.running = true;
+  async handleRunStart() {
+    if (this.state.running || !this.scripts.whenStart) return;
+    this.runningType = "start";
+    await this.runScript(this.scripts.whenStart, "start");
+  }
+
+  private async runScript(code: string, type: "start" | "click") {
+    this.actions = [];
     this.state.log = [];
-    this.log("[系统] 开始执行程序");
+    this.state.running = true;
+    this.runningType = type;
+    this.log(type === "start" ? "[系统] 开始执行程序" : "[系统] 舞台被点击，执行事件");
     this.emit();
+
+    try {
+      const wrapped = `(function(__runtime) {\n${code}\n})(__runtimeArg);`;
+      (window as unknown as Record<string, unknown>).__runtimeArg = this;
+      // eslint-disable-next-line no-eval
+      eval(wrapped);
+    } catch (e) {
+      this.log(`[系统] 程序出错：${e}`);
+    } finally {
+      delete (window as unknown as Record<string, unknown>).__runtimeArg;
+    }
 
     for (const action of this.actions) {
       await this.performAction(action);
@@ -212,6 +287,7 @@ export class Runtime {
     }
     this.log("[系统] 程序执行完毕");
     this.state.running = false;
+    this.runningType = null;
     this.emit();
   }
 
@@ -237,15 +313,6 @@ export class Runtime {
     }
   }
 
-  private collectStar(index: number) {
-    const star = this.state.stars[index];
-    if (star && !star.collected) {
-      star.collected = true;
-      this.log(`[系统] 收集到星星 ${index + 1} 号！`);
-      this.emit();
-    }
-  }
-
   private performAction(action: Action): Promise<void> {
     return new Promise((resolve) => {
       switch (action.type) {
@@ -264,7 +331,10 @@ export class Runtime {
               this.recordPenPosition();
               this.emit();
             },
-            resolve
+            () => {
+              this.collectNearbyStars();
+              resolve();
+            }
           );
           break;
         }
@@ -288,6 +358,25 @@ export class Runtime {
           this.animateValue(
             { x: this.state.actor.x, y: this.state.actor.y },
             { x: action.x, y: action.y },
+            action.duration,
+            (v) => {
+              this.state.actor.x = v.x;
+              this.state.actor.y = v.y;
+              this.recordPenPosition();
+              this.emit();
+            },
+            () => {
+              this.collectNearbyStars();
+              resolve();
+            }
+          );
+          break;
+        }
+        case "gotoMouse": {
+          this.log("[系统] 二零飞向鼠标位置");
+          this.animateValue(
+            { x: this.state.actor.x, y: this.state.actor.y },
+            { x: this.mouse.x, y: this.mouse.y },
             action.duration,
             (v) => {
               this.state.actor.x = v.x;
@@ -341,18 +430,6 @@ export class Runtime {
         case "wait": {
           setTimeout(resolve, action.seconds);
           break;
-        }
-      }
-    });
-  }
-
-  private collectNearbyStars() {
-    this.state.stars.forEach((star, index) => {
-      if (!star.collected) {
-        const dx = this.state.actor.x - star.x;
-        const dy = this.state.actor.y - star.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 30) {
-          this.collectStar(index);
         }
       }
     });

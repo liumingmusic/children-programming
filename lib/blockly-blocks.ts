@@ -5,10 +5,13 @@ export const TOOLBOX = {
   kind: "flyoutToolbox" as const,
   contents: [
     { kind: "block" as const, type: "maker_when_start" },
+    { kind: "block" as const, type: "maker_when_stage_clicked" },
     { kind: "block" as const, type: "controls_repeat_ext", inputs: { TIMES: { shadow: { type: "math_number", fields: { NUM: 10 } } } } },
+    { kind: "block" as const, type: "controls_if" },
     { kind: "block" as const, type: "maker_move", inputs: { STEPS: { shadow: { type: "math_number", fields: { NUM: 100 } } } } },
     { kind: "block" as const, type: "maker_turn", inputs: { DEGREES: { shadow: { type: "math_number", fields: { NUM: 15 } } } } },
     { kind: "block" as const, type: "maker_goto", inputs: { X: { shadow: { type: "math_number", fields: { NUM: 0 } } }, Y: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
+    { kind: "block" as const, type: "maker_goto_mouse" },
     { kind: "block" as const, type: "maker_goto_star", inputs: { INDEX: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
     { kind: "block" as const, type: "maker_say", inputs: { TEXT: { shadow: { type: "text", fields: { TEXT: "你好！我是二零" } } }, SECONDS: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
     { kind: "block" as const, type: "maker_wait", inputs: { SECONDS: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
@@ -16,6 +19,7 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_pen_up" },
     { kind: "block" as const, type: "maker_pen_set_color", inputs: { HUE: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
     { kind: "block" as const, type: "maker_pen_change_color", inputs: { DELTA: { shadow: { type: "math_number", fields: { NUM: 10 } } } } },
+    { kind: "block" as const, type: "maker_touching_star" },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -27,6 +31,17 @@ export function registerCustomBlocks() {
         this.appendStatementInput("STACK").setCheck(null);
         this.setColour(160);
         this.setTooltip("程序开始运行时执行这里的积木");
+        this.setHelpUrl("");
+        this.setNextStatement(false);
+        this.setPreviousStatement(false);
+      },
+    },
+    maker_when_stage_clicked: {
+      init() {
+        this.appendDummyInput().appendField("当舞台被点击");
+        this.appendStatementInput("STACK").setCheck(null);
+        this.setColour(170);
+        this.setTooltip("点击舞台时执行这里的积木");
         this.setHelpUrl("");
         this.setNextStatement(false);
         this.setPreviousStatement(false);
@@ -65,6 +80,17 @@ export function registerCustomBlocks() {
         this.setNextStatement(true, null);
         this.setColour(230);
         this.setTooltip("让二零直接移动到指定位置");
+        this.setHelpUrl("");
+      },
+    },
+    maker_goto_mouse: {
+      init() {
+        this.appendDummyInput().appendField("移到鼠标位置");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("让二零飞到鼠标点击的位置");
         this.setHelpUrl("");
       },
     },
@@ -148,12 +174,26 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+    maker_touching_star: {
+      init() {
+        this.appendDummyInput().appendField("碰到星星");
+        this.setOutput(true, "Boolean");
+        this.setColour(210);
+        this.setTooltip("如果二零正在碰到星星，返回真");
+        this.setHelpUrl("");
+      },
+    },
   });
 
   // Hat block: when start runs the stack and then ends
   javascriptGenerator.forBlock["maker_when_start"] = (block, generator) => {
     const stack = generator.statementToCode(block, "STACK");
-    return `__runtime.start();\n${stack}__runtime.end();\n`;
+    return stack;
+  };
+
+  javascriptGenerator.forBlock["maker_when_stage_clicked"] = (block, generator) => {
+    const stack = generator.statementToCode(block, "STACK");
+    return stack;
   };
 
   javascriptGenerator.forBlock["maker_move"] = (block, generator) => {
@@ -170,6 +210,10 @@ export function registerCustomBlocks() {
     const x = generator.valueToCode(block, "X", Order.ATOMIC) || "0";
     const y = generator.valueToCode(block, "Y", Order.ATOMIC) || "0";
     return `__runtime.goto(${x}, ${y});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_goto_mouse"] = () => {
+    return `__runtime.gotoMouse();\n`;
   };
 
   javascriptGenerator.forBlock["maker_goto_star"] = (block, generator) => {
@@ -204,5 +248,9 @@ export function registerCustomBlocks() {
   javascriptGenerator.forBlock["maker_pen_change_color"] = (block, generator) => {
     const delta = generator.valueToCode(block, "DELTA", Order.ATOMIC) || "10";
     return `__runtime.changePenColor(${delta});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_touching_star"] = () => {
+    return ["__runtime.touchingStar()", Order.FUNCTION_CALL];
   };
 }

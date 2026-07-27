@@ -7,7 +7,7 @@ import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
 import StagePlayer from "@/components/StagePlayer";
 import { Runtime, StageState } from "@/lib/runtime";
 import type { CourseProject } from "@/courses";
-import { loadProject, saveProject, markProgress, getProgress } from "@/lib/db";
+import { loadProject, saveProject, markProgress, getProgress, recordSessionTime } from "@/lib/db";
 
 function ErLingAvatar({ className = "" }: { className?: string }) {
   return (
@@ -69,6 +69,29 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [toasts, setToasts] = useState<StepToast[]>([]);
   const [hint, setHint] = useState<string | null>(null);
   const prevStepsDone = useRef<boolean[]>(project.steps.map(() => false));
+  const sessionStartRef = useRef<number>(0);
+
+  useEffect(() => {
+    const flushTime = () => {
+      if (!sessionStartRef.current) return;
+      const elapsed = Math.floor((Date.now() - sessionStartRef.current) / 1000);
+      if (elapsed >= 10) {
+        recordSessionTime(project.slug, elapsed).catch(console.error);
+      }
+      sessionStartRef.current = Date.now();
+    };
+
+    sessionStartRef.current = Date.now();
+    const interval = setInterval(flushTime, 60000);
+
+    return () => {
+      clearInterval(interval);
+      const elapsed = Math.floor((Date.now() - (sessionStartRef.current || Date.now())) / 1000);
+      if (elapsed >= 10) {
+        recordSessionTime(project.slug, elapsed).catch(console.error);
+      }
+    };
+  }, [project.slug]);
 
   useEffect(() => {
     const runtime = new Runtime(STAGE_WIDTH, STAGE_HEIGHT, (state) => {
@@ -117,7 +140,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     if (!runtime || !editor) return;
 
     if (!generatedCode.trim()) {
-      setHint("二零还没收到指令呢～把积木拖到「当开始运行」下面，再点运行吧！");
+      setHint("二零还没收到指令呢～把积木拖到事件或「当开始运行」下面，再点运行吧！");
       setTimeout(() => setHint(null), 4000);
       return;
     }
@@ -127,6 +150,12 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     setShowCelebration(false);
     await editor.run(runtime);
   }, [generatedCode]);
+
+  const handleStageClick = useCallback(async (x: number, y: number) => {
+    const runtime = runtimeRef.current;
+    if (!runtime) return;
+    await runtime.handleStageClick(x, y);
+  }, []);
 
   const handleReset = useCallback(() => {
     runtimeRef.current?.reset();
@@ -158,8 +187,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       else if (id === 2) done = code.includes("controls_repeat_ext") && code.includes("maker_move") && code.includes("maker_turn");
       else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
     } else if (project.slug === "stars") {
-      if (id === 1) done = code.includes("maker_goto_star");
-      else if (id === 2) done = logs.some((log) => log.startsWith("[二零]") && log.includes("收集"));
+      if (id === 1) done = code.includes("__runtime.gotoMouse()");
+      else if (id === 2) done = code.includes("__runtime.touchingStar()");
       else if (id === 3) done = logs.some((log) => log.includes("所有星星都收集完了"));
     }
 
@@ -277,7 +306,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           <div className="flex flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
             <h2 className="mb-2 text-sm font-medium text-[#04342C]">舞台预览</h2>
             <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#E6F1FB]">
-              <StagePlayer state={stageState} />
+              <StagePlayer state={stageState} onStageClick={handleStageClick} />
             </div>
           </div>
 
