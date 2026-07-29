@@ -19,6 +19,7 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_pen_up" },
     { kind: "block" as const, type: "maker_pen_set_color", inputs: { HUE: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
     { kind: "block" as const, type: "maker_pen_change_color", inputs: { DELTA: { shadow: { type: "math_number", fields: { NUM: 10 } } } } },
+    { kind: "block" as const, type: "maker_pen_set_size", inputs: { SIZE: { shadow: { type: "math_number", fields: { NUM: 3 } } } } },
     { kind: "block" as const, type: "maker_touching_star" },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
@@ -174,6 +175,18 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+    maker_pen_set_size: {
+      init() {
+        this.appendValueInput("SIZE").setCheck("Number").appendField("设置画笔粗细为");
+        this.appendDummyInput().appendField("像素");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(120);
+        this.setTooltip("设置画笔线条的粗细，数字越大线条越粗（默认 3）");
+        this.setHelpUrl("");
+      },
+    },
     maker_touching_star: {
       init() {
         this.appendDummyInput().appendField("碰到星星");
@@ -248,6 +261,11 @@ export function registerCustomBlocks() {
   javascriptGenerator.forBlock["maker_pen_change_color"] = (block, generator) => {
     const delta = generator.valueToCode(block, "DELTA", Order.ATOMIC) || "10";
     return `__runtime.changePenColor(${delta});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_pen_set_size"] = (block, generator) => {
+    const size = generator.valueToCode(block, "SIZE", Order.ATOMIC) || "3";
+    return `__runtime.setPenSize(${size});\n`;
   };
 
   javascriptGenerator.forBlock["maker_touching_star"] = () => {

@@ -1,8 +1,26 @@
 import Link from "next/link";
-import { Sparkles, Gamepad2, Code2, Shield, Leaf, Trophy } from "lucide-react";
+import { Sparkles, Gamepad2, Code2, Shield, Leaf, Trophy, BookOpen, Blocks, Palette, HeartHandshake, ChevronRight, Star } from "lucide-react";
 import ErLingAvatar from "@/components/ErLingAvatar";
+import { getProject } from "@/courses";
 
 export default function Home() {
+  const featuredSlugs = ["hello", "rainbow", "snowflake", "pentagon", "star5", "house"];
+  const featured = featuredSlugs
+    .map((s) => getProject(s))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+
+  const steps = [
+    { icon: <BookOpen className="h-6 w-6 text-[#0F6E56]" />, title: "选一个任务", desc: "从「画一个正方形」到「给家人做电子贺卡」，每个任务都是一个小目标。" },
+    { icon: <Blocks className="h-6 w-6 text-[#7F77DD]" />, title: "拖一拖积木", desc: "像拼图一样把彩色积木拼起来，让二零动起来、画图案、做小游戏。" },
+    { icon: <Palette className="h-6 w-6 text-[#D85A30]" />, title: "看到作品", desc: "点一下运行，立刻看到自己做出来的东西——这才是最开心的时刻。" },
+  ];
+
+  const faqs = [
+    { q: "需要会打字吗？", a: "6-8 岁阶段全程用彩色积木，拖一拖就能编程，不需要键盘打字。" },
+    { q: "要花钱吗？", a: "完全免费、没有会员、没有广告，所有功能对孩子开放。" },
+    { q: "孩子不会做怎么办？", a: "每个任务都有「看示范」参考答案，可以照着学，关掉就回到自己的画布继续探索。" },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* 导航栏 */}
@@ -17,6 +35,12 @@ export default function Home() {
             <Link href="/gallery" className="hover:text-[#0F6E56]">作品花园</Link>
             <Link href="/parent" className="hover:text-[#0F6E56]">家长入口</Link>
           </nav>
+          <Link
+            href="/missions"
+            className="hidden rounded-full bg-[#0F6E56] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#085041] sm:inline-flex"
+          >
+            开始探索
+          </Link>
         </div>
       </header>
 
@@ -36,7 +60,7 @@ export default function Home() {
                   把想法种成作品
                 </h1>
                 <p className="max-w-lg text-lg leading-relaxed text-[#5F5E5A]">
-                  造物星球是一个安静的少儿编程工作室。没有充值、没有广告，只有一个个能跑起来的小项目。
+                  造物星球是一个安静的少儿编程工作室。没有充值、没有广告，只有一个个能跑起来的小项目——从画一条线，到做一张节日贺卡。
                 </p>
                 <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                   <Link
@@ -59,6 +83,69 @@ export default function Home() {
                   <ErLingAvatar className="relative h-64 w-64 sm:h-80 sm:w-80" />
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 三步上手 */}
+        <section className="px-4 py-16 sm:px-6 sm:py-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-10 text-center">
+              <h2 className="text-2xl font-medium text-[#04342C]">三步，就能做出第一个作品</h2>
+              <p className="mt-2 text-[#5F5E5A]">不需要基础，打开就能开始</p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-3">
+              {steps.map((s, i) => (
+                <div key={s.title} className="relative rounded-2xl border border-black/5 bg-white p-6">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F1EFE8]">
+                    {s.icon}
+                  </div>
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#0F6E56] text-xs font-medium text-white">
+                      {i + 1}
+                    </span>
+                    <h3 className="text-lg font-medium text-[#04342C]">{s.title}</h3>
+                  </div>
+                  <p className="text-sm leading-relaxed text-[#5F5E5A]">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 精选作品 */}
+        <section className="border-y border-black/5 bg-[#FBFCFD] px-4 py-16 sm:px-6 sm:py-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-10 flex items-end justify-between">
+              <div>
+                <h2 className="text-2xl font-medium text-[#04342C]">已经能做的小作品</h2>
+                <p className="mt-2 text-[#5F5E5A]">这些都是孩子一步步搭出来的，点开就能试</p>
+              </div>
+              <Link href="/missions" className="hidden items-center gap-1 text-sm font-medium text-[#0F6E56] hover:text-[#085041] sm:flex">
+                看全部任务 <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/learn/${p.slug}`}
+                  className="group flex flex-col rounded-2xl border border-black/5 bg-white p-5 transition-shadow hover:shadow-md"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="rounded-full bg-[#E1F5EE] px-3 py-1 text-xs font-medium text-[#0F6E56]">
+                      {p.ageGroup}
+                    </span>
+                    <Star className="h-4 w-4 text-[#EF9F27]" />
+                  </div>
+                  <h3 className="mb-1 text-base font-medium text-[#04342C]">{p.title}</h3>
+                  <p className="mb-4 flex-1 text-sm text-[#5F5E5A]">{p.description}</p>
+                  <span className="inline-flex items-center text-sm font-medium text-[#0F6E56]">
+                    去挑战
+                    <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
@@ -99,29 +186,72 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 特色介绍 */}
+        {/* 家长放心 */}
         <section className="border-t border-black/5 bg-white px-4 py-16 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-6xl">
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="mb-10 text-center">
+              <h2 className="text-2xl font-medium text-[#04342C]">为什么家长放心</h2>
+              <p className="mt-2 text-[#5F5E5A]">我们把「对孩子好」放在「好看」前面</p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <FeatureCard
                 icon={<Shield className="h-6 w-6 text-[#D85A30]" />}
                 title="完全免费，无套路"
-                desc="没有会员等级，没有隐藏付费。所有功能对每个孩子开放。"
+                desc="没有会员等级，没有隐藏付费。"
                 bg="coral"
               />
               <FeatureCard
                 icon={<Leaf className="h-6 w-6 text-[#EF9F27]" />}
-                title="无广告，沉浸式学习"
-                desc="打开就是创作。没有弹窗、没有游戏广告、没有推销。"
+                title="无广告，沉浸式"
+                desc="打开就是创作，没有弹窗和推销。"
                 bg="amber"
               />
               <FeatureCard
                 icon={<Sparkles className="h-6 w-6 text-[#0F6E56]" />}
                 title="每个项目都有作品"
-                desc="学完不是结束，而是产出一个可以运行、可以分享的小作品。"
+                desc="学完不是结束，而是产出可分享的小作品。"
                 bg="teal"
               />
+              <FeatureCard
+                icon={<HeartHandshake className="h-6 w-6 text-[#378ADD]" />}
+                title="成长看得见"
+                desc="家长入口记录作品、时长与足迹，没有分数排名。"
+                bg="blue"
+              />
             </div>
+          </div>
+        </section>
+
+        {/* 常见问题 */}
+        <section className="px-4 py-16 sm:px-6 sm:py-20">
+          <div className="mx-auto max-w-3xl">
+            <div className="mb-10 text-center">
+              <h2 className="text-2xl font-medium text-[#04342C]">常见问题</h2>
+            </div>
+            <div className="space-y-4">
+              {faqs.map((f) => (
+                <div key={f.q} className="rounded-2xl border border-black/5 bg-white p-5">
+                  <h3 className="mb-1.5 text-base font-medium text-[#04342C]">{f.q}</h3>
+                  <p className="text-sm leading-relaxed text-[#5F5E5A]">{f.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 行动号召 */}
+        <section className="px-4 pb-20 sm:px-6">
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F6E56] to-[#085041] px-6 py-12 text-center sm:px-12">
+            <h2 className="text-2xl font-medium text-white sm:text-3xl">现在就和二零一起，种下第一个作品</h2>
+            <p className="mx-auto mt-3 max-w-xl text-[#D7EFE7]">
+              第一个任务只要几分钟，画一条线、让二零走两步——成就感马上就来。
+            </p>
+            <Link
+              href="/learn/hello"
+              className="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-white px-8 text-base font-medium text-[#0F6E56] shadow-sm transition-colors hover:bg-[#E1F5EE]"
+            >
+              开始第一个任务
+            </Link>
           </div>
         </section>
       </main>
@@ -191,12 +321,13 @@ function FeatureCard({
   icon: React.ReactNode;
   title: string;
   desc: string;
-  bg: "coral" | "amber" | "teal";
+  bg: "coral" | "amber" | "teal" | "blue";
 }) {
   const bgMap = {
     coral: "bg-[#FAECE7]",
     amber: "bg-[#FAEEDA]",
     teal: "bg-[#E1F5EE]",
+    blue: "bg-[#E6F1FB]",
   };
 
   return (

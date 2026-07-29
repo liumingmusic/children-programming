@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles, Calendar } from "lucide-react";
+import { ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles, Calendar, Flag, PartyPopper, PencilLine } from "lucide-react";
 import type { Project, Progress } from "@/lib/db";
 import { getAllProjects, getAllProgress, getTimeStats, type TimeStats } from "@/lib/db";
-import { getProject, projects as allCourses } from "@/courses";
+import { projects as allCourses, stages, getStageProjects, type CourseProject } from "@/courses";
 
 function ErLingAvatar({ className = "" }: { className?: string }) {
   return (
@@ -30,10 +30,12 @@ interface ChildStats {
   recentProject: string | null;
 }
 
+type Item = { course: CourseProject; progress: Progress | null; saved: Project | null };
+
 export default function ParentClient() {
   const [stats, setStats] = useState<ChildStats | null>(null);
   const [timeStats, setTimeStats] = useState<TimeStats | null>(null);
-  const [items, setItems] = useState<{ course: typeof allCourses[0]; progress: Progress | null; saved: Project | null }[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function ParentClient() {
       const progressMap = new Map(progressList.map((p) => [p.slug, p]));
       const savedMap = new Map(savedProjects.map((p) => [p.slug, p]));
 
-      const merged = allCourses.map((course) => ({
+      const merged: Item[] = allCourses.map((course) => ({
         course,
         progress: progressMap.get(course.slug) || null,
         saved: savedMap.get(course.slug) || null,
@@ -64,7 +66,7 @@ export default function ParentClient() {
       const recentCompleted = progressList
         .filter((p) => p.completed && p.completedAt)
         .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())[0];
-      const recentProject = recentSaved || recentCompleted ? getProject(recentSaved?.slug || recentCompleted?.slug || "") : null;
+      const recentProject = recentSaved || recentCompleted ? allCourses.find((c) => c.slug === (recentSaved?.slug || recentCompleted?.slug)) : null;
 
       setStats({
         completed,
@@ -79,6 +81,8 @@ export default function ParentClient() {
     }
     load();
   }, []);
+
+  const bySlug = new Map(items.map((i) => [i.course.slug, i]));
 
   return (
     <div className="flex min-h-screen flex-col bg-[#fafbfc]">
@@ -115,9 +119,9 @@ export default function ParentClient() {
             </div>
           ) : stats ? (
             <>
-              <div className="mb-8 grid gap-4 md:grid-cols-4">
-                <StatCard icon={<CheckCircle className="h-5 w-5 text-[#0F6E56]" />} label="已完成项目" value={String(stats.completed)} />
-                <StatCard icon={<BookOpen className="h-5 w-5 text-[#378ADD]" />} label="进行中项目" value={String(stats.inProgress)} />
+              <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard icon={<CheckCircle className="h-5 w-5 text-[#0F6E56]" />} label="已完成项目" value={String(stats.completed)} hint={`共 ${stats.total} 个任务`} />
+                <StatCard icon={<BookOpen className="h-5 w-5 text-[#378ADD]" />} label="进行中项目" value={String(stats.inProgress)} hint="保存过但还没完成" />
                 <StatCard
                   icon={<Clock className="h-5 w-5 text-[#7F77DD]" />}
                   label="总学习时长"
@@ -131,9 +135,10 @@ export default function ParentClient() {
               </div>
 
               {stats.recentProject && (
-                <div className="mb-8 rounded-2xl border border-[#5DCAA5]/30 bg-[#E1F5EE] p-5">
+                <div className="mb-8 flex items-center gap-3 rounded-2xl border border-[#5DCAA5]/30 bg-[#E1F5EE] p-5">
+                  <PartyPopper className="h-6 w-6 shrink-0 text-[#0F6E56]" />
                   <p className="text-sm text-[#0F6E56]">
-                    二零告诉我：孩子最近创作了 <span className="font-medium text-[#04342C]">{stats.recentProject}</span>，记得夸夸TA！
+                    二零告诉我：孩子最近创作了 <span className="font-medium text-[#04342C]">{stats.recentProject}</span>，记得夸夸 TA！
                   </p>
                 </div>
               )}
@@ -164,44 +169,94 @@ export default function ParentClient() {
                 </div>
               )}
 
-              <h2 className="mb-4 text-lg font-medium text-[#04342C]">项目进展</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {items.map((item) => (
-                  <div
-                    key={item.course.slug}
-                    className="flex flex-col rounded-2xl border border-black/5 bg-white p-5"
-                  >
-                    <div className="mb-3 flex items-start justify-between">
-                      <span className="rounded-full bg-[#E1F5EE] px-3 py-1 text-xs font-medium text-[#0F6E56]">
-                        {item.course.ageGroup}
-                      </span>
-                      {item.progress?.completed ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#FAEEDA] px-2.5 py-1 text-xs font-medium text-[#412402]">
-                          <CheckCircle className="h-3 w-3" />
-                          已完成
-                        </span>
-                      ) : item.saved ? (
-                        <span className="rounded-full bg-[#E6F1FB] px-2.5 py-1 text-xs font-medium text-[#0C447C]">进行中</span>
-                      ) : (
-                        <span className="rounded-full bg-[#F1EFE8] px-2.5 py-1 text-xs font-medium text-[#5F5E5A]">未开始</span>
-                      )}
-                    </div>
-                    <h3 className="mb-1 text-base font-medium text-[#04342C]">{item.course.title}</h3>
-                    <p className="mb-4 text-sm text-[#5F5E5A]">{item.course.description}</p>
-                    {timeStats && timeStats.byProject[item.course.slug] > 0 && (
-                      <div className="mb-3 flex items-center gap-1.5 text-xs text-[#5F5E5A]">
-                        <Clock className="h-3.5 w-3.5" />
-                        已学习 {formatDuration(timeStats.byProject[item.course.slug])}
+              <h2 className="mb-5 text-lg font-medium text-[#04342C]">各阶段进展</h2>
+              <div className="space-y-10">
+                {stages.map((stage) => {
+                  const stageItems = getStageProjects(stage.id)
+                    .map((p) => bySlug.get(p.slug))
+                    .filter((i): i is Item => Boolean(i));
+                  const done = stageItems.filter((i) => i.progress?.completed).length;
+                  const pct = stageItems.length ? Math.round((done / stageItems.length) * 100) : 0;
+                  return (
+                    <section key={stage.id}>
+                      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-[#5F5E5A]">{stage.ageRange}</span>
+                            <h3 className="text-xl font-medium text-[#04342C]">{stage.name}</h3>
+                          </div>
+                          <p className="mt-1 text-sm text-[#5F5E5A]">{stage.tagline}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-[#0F6E56]">{done}/{stageItems.length} 完成</span>
+                          <div className="h-2 w-32 overflow-hidden rounded-full bg-[#E5E2D8]">
+                            <div className="h-full rounded-full bg-[#0F6E56] transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    <Link
-                      href={`/learn/${item.course.slug}`}
-                      className="mt-auto rounded-xl border border-[#0F6E56]/20 px-4 py-2 text-center text-sm font-medium text-[#0F6E56] hover:bg-[#E1F5EE]"
-                    >
-                      {item.progress?.completed ? "再看一次" : item.saved ? "继续创作" : "开始挑战"}
-                    </Link>
-                  </div>
-                ))}
+
+                      {stageItems.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-black/10 bg-white p-6 text-center text-sm text-[#5F5E5A]">
+                          这个阶段还在准备中，先带 TA 来 {stages[0]?.ageRange} 的任务探险吧～
+                        </div>
+                      ) : (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          {stageItems.map((item) => {
+                            const status = item.progress?.completed
+                              ? "done"
+                              : item.saved
+                              ? "doing"
+                              : "todo";
+                            const borderByStatus = {
+                              done: "border-l-[#0F6E56]",
+                              doing: "border-l-[#378ADD]",
+                              todo: "border-l-[#C9C5BC]",
+                            }[status];
+                            return (
+                              <div
+                                key={item.course.slug}
+                                className={`flex flex-col rounded-2xl border border-black/5 border-l-4 bg-white p-5 ${borderByStatus}`}
+                              >
+                                <div className="mb-3 flex items-start justify-between gap-2">
+                                  <span className="rounded-full bg-[#F1EFE8] px-3 py-1 text-xs font-medium text-[#5F5E5A]">
+                                    {item.course.ageGroup}
+                                  </span>
+                                  {status === "done" ? (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#FAEEDA] px-2.5 py-1 text-xs font-medium text-[#412402]">
+                                      <CheckCircle className="h-3 w-3" /> 已完成
+                                    </span>
+                                  ) : status === "doing" ? (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F1FB] px-2.5 py-1 text-xs font-medium text-[#0C447C]">
+                                      <PencilLine className="h-3 w-3" /> 进行中
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F1EFE8] px-2.5 py-1 text-xs font-medium text-[#5F5E5A]">
+                                      <Flag className="h-3 w-3" /> 未开始
+                                    </span>
+                                  )}
+                                </div>
+                                <h3 className="mb-1 text-base font-medium text-[#04342C]">{item.course.title}</h3>
+                                <p className="mb-4 flex-1 text-sm text-[#5F5E5A]">{item.course.description}</p>
+                                {timeStats && timeStats.byProject[item.course.slug] > 0 && (
+                                  <div className="mb-3 flex items-center gap-1.5 text-xs text-[#5F5E5A]">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    已学习 {formatDuration(timeStats.byProject[item.course.slug])}
+                                  </div>
+                                )}
+                                <Link
+                                  href={`/learn/${item.course.slug}`}
+                                  className="mt-auto rounded-xl border border-[#0F6E56]/20 px-4 py-2 text-center text-sm font-medium text-[#0F6E56] hover:bg-[#E1F5EE]"
+                                >
+                                  {status === "done" ? "再看一次" : status === "doing" ? "继续创作" : "开始挑战"}
+                                </Link>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </section>
+                  );
+                })}
               </div>
             </>
           ) : null}
@@ -221,12 +276,13 @@ export default function ParentClient() {
   );
 }
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function StatCard({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-2xl border border-black/5 bg-white p-5">
       <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#fafbfc]">{icon}</div>
       <div className="text-2xl font-medium text-[#04342C]">{value}</div>
       <div className="mt-1 text-sm text-[#5F5E5A]">{label}</div>
+      {hint && <div className="mt-0.5 text-xs text-[#9b988e]">{hint}</div>}
     </div>
   );
 }
@@ -243,15 +299,4 @@ function formatDuration(seconds: number): string {
 function formatShortDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}秒`;
   return `${Math.floor(seconds / 60)}分`;
-}
-
-function formatDate(date: Date): string {
-  try {
-    return new Intl.DateTimeFormat("zh-CN", {
-      month: "short",
-      day: "numeric",
-    }).format(new Date(date));
-  } catch {
-    return String(date);
-  }
 }

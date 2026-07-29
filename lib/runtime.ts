@@ -6,6 +6,7 @@ export interface Point {
 export interface PenPath {
   points: Point[];
   color: string;
+  width: number;
 }
 
 export interface Star {
@@ -30,11 +31,15 @@ export interface StageState {
   penPaths: PenPath[];
   currentPath: PenPath | null;
   penColor: number; // hue 0-360
+  penSize: number; // 画笔粗细（屏幕像素）
   penDown: boolean;
   stars: Star[];
   running: boolean;
   log: string[];
 }
+
+// 画笔默认粗细（屏幕像素）。项目里未放「设置画笔粗细」积木时使用此值。
+const DEFAULT_PEN_SIZE = 3;
 
 type Action =
   | { type: "move"; steps: number; duration: number }
@@ -47,7 +52,8 @@ type Action =
   | { type: "penDown" }
   | { type: "penUp" }
   | { type: "penSetColor"; hue: number }
-  | { type: "penChangeColor"; delta: number };
+  | { type: "penChangeColor"; delta: number }
+  | { type: "penSetSize"; size: number };
 
 export type Script = {
   whenStart: string;
@@ -96,6 +102,7 @@ export class Runtime {
       penPaths: [],
       currentPath: null,
       penColor: 0,
+      penSize: DEFAULT_PEN_SIZE,
       penDown: false,
       stars: this.initialStars.map((s) => ({ ...s })),
       running: false,
@@ -119,6 +126,7 @@ export class Runtime {
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.penColor = 0;
+    this.state.penSize = DEFAULT_PEN_SIZE;
     this.state.penDown = false;
     this.state.stars = this.initialStars.map((s) => ({ ...s }));
     this.state.running = false;
@@ -168,6 +176,12 @@ export class Runtime {
   changePenColor(delta: number) {
     this.actions.push({ type: "penChangeColor", delta });
     this.log("[系统] 画笔颜色改变");
+  }
+
+  setPenSize(size: number) {
+    const s = Math.max(1, Math.min(50, Math.round(size)));
+    this.actions.push({ type: "penSetSize", size: s });
+    this.log("[系统] 画笔粗细设置");
   }
 
   // --- Queued actions ---
@@ -307,6 +321,7 @@ export class Runtime {
       this.state.currentPath = {
         points: [{ x: this.state.actor.x, y: this.state.actor.y }],
         color: `hsl(${this.state.penColor % 360}, 80%, 60%)`,
+        width: this.state.penSize,
       };
     }
   }
@@ -440,6 +455,7 @@ export class Runtime {
           this.state.currentPath = {
             points: [{ x: this.state.actor.x, y: this.state.actor.y }],
             color: `hsl(${this.state.penColor % 360}, 80%, 60%)`,
+            width: this.state.penSize,
           };
           this.emit();
           resolve();
@@ -463,6 +479,14 @@ export class Runtime {
         case "penChangeColor": {
           this.commitCurrentPath();
           this.state.penColor = (this.state.penColor + action.delta) % 360;
+          this.startCurrentPath();
+          this.emit();
+          resolve();
+          break;
+        }
+        case "penSetSize": {
+          this.commitCurrentPath();
+          this.state.penSize = action.size;
           this.startCurrentPath();
           this.emit();
           resolve();

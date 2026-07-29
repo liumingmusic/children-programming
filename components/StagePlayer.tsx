@@ -165,11 +165,11 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
     ctx.restore();
 
     // 画笔轨迹（在变换后的位置绘制；线宽/光晕用固定屏幕像素，不随相机放大变粗）
-    const drawPath = (path: { points: { x: number; y: number }[]; color: string }) => {
+    const drawPath = (path: { points: { x: number; y: number }[]; color: string; width?: number }) => {
       if (path.points.length < 2) return;
       ctx.save();
       ctx.strokeStyle = path.color;
-      ctx.lineWidth = PEN_WIDTH;
+      ctx.lineWidth = path.width ?? PEN_WIDTH;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.shadowColor = path.color;

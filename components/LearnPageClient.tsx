@@ -36,6 +36,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     penPaths: [],
     currentPath: null,
     penColor: 0,
+    penSize: 3,
     penDown: false,
     stars: [
       { id: 1, x: -120, y: 80, collected: false },
@@ -59,6 +60,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const sessionStartRef = useRef<number>(0);
   // 标记本次会话是否已弹过完成庆祝，避免关闭后被 effect 立刻重新弹开
   const celebratedRef = useRef(false);
+
+  // 是否处于「参考答案（看示范）」模式：进入时记住学生自己的画布，关闭后还原，避免覆盖学生作业
+  const [showExample, setShowExample] = useState(false);
+  const studentXmlRef = useRef<string | null>(null);
+  const showExampleRef = useRef(false);
 
   useEffect(() => {
     const flushTime = () => {
@@ -86,7 +92,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     const runtime = new Runtime(STAGE_WIDTH, STAGE_HEIGHT, (state) => {
       setStageState(state);
       setLogs(state.log);
-      if (state.log.includes("[系统] 程序执行完毕") && !progressRef.current.completed) {
+      if (state.log.includes("[系统] 程序执行完毕") && !progressRef.current.completed && !showExampleRef.current) {
         progressRef.current = { completed: true, stars: 3 };
         setProgress(progressRef.current);
         markProgress(project.slug, true, 3).catch(console.error);
@@ -96,7 +102,9 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
 
     loadProject(project.slug).then((xml) => {
       if (editorRef.current) {
-        editorRef.current.loadXml(xml || project.defaultXml || "");
+        // 默认进入给「空画布」，让学生自己拖积木；不直接把参考答案（defaultXml）预载进去。
+        // 想参考时再点「看示范」按钮加载示范，关闭后回到学生自己的画布。
+        editorRef.current.loadXml(xml || "");
       }
     });
 
@@ -155,30 +163,45 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     setHint(null);
   }, [project]);
 
-  // 「看示范」：加载内置正确范例并自动运行，让孩子照着学
+  // 「看示范 / 参考答案」：进入时记住学生自己的画布，载入参考答案并运行；再点「关闭示范」则还原学生画布。
+  // 关键：示范模式下不把项目标记为「已完成」，避免看一眼答案就误判通关。
   const handleShowExample = useCallback(async () => {
     const editor = editorRef.current;
     const runtime = runtimeRef.current;
     if (!editor || !runtime) return;
-    editor.loadXml(project.defaultXml || "");
-    const code = editor.getCode();
-    setGeneratedCode(code);
-    runtime.reset();
-    setSaveStatus("idle");
-    setShowCelebration(false);
-    setShowBrief(false);
-    await editor.run(runtime);
 
-    const finalLogs = runtimeRef.current?.getState().log ?? [];
-    const st = computeSteps(project, code, finalLogs);
-    if (!st.every((s) => s.done)) {
-      const firstUndone = st.find((s) => !s.done);
-      if (firstUndone) setHint(coach(project.slug, firstUndone.id));
+    if (!showExample) {
+      studentXmlRef.current = editor.getXml();
+      editor.loadXml(project.defaultXml || "");
+      const code = editor.getCode();
+      setGeneratedCode(code);
+      runtime.reset();
+      setSaveStatus("idle");
+      setShowCelebration(false);
+      setShowBrief(false);
+      showExampleRef.current = true;
+      setShowExample(true);
+      await editor.run(runtime);
+
+      const finalLogs = runtimeRef.current?.getState().log ?? [];
+      const st = computeSteps(project, code, finalLogs);
+      if (!st.every((s) => s.done)) {
+        const firstUndone = st.find((s) => !s.done);
+        if (firstUndone) setHint(coach(project.slug, firstUndone.id));
+      } else {
+        setHint("这是参考答案～照着搭一遍，或改一改看看会怎样！");
+        setTimeout(() => setHint(null), 4000);
+      }
     } else {
-      setHint("这是示范效果～你可以照着搭，或改一改看看会怎样！");
-      setTimeout(() => setHint(null), 4000);
+      // 关闭示范：还原学生自己的画布（不运行、不覆盖存档）
+      editor.loadXml(studentXmlRef.current ?? "");
+      runtime.reset();
+      showExampleRef.current = false;
+      setShowExample(false);
+      setGeneratedCode(editor.getCode());
+      setHint(null);
     }
-  }, [project]);
+  }, [project, showExample]);
 
   const handleStageClick = useCallback(async (x: number, y: number) => {
     const runtime = runtimeRef.current;
@@ -257,10 +280,14 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
             </button>
             <button
               onClick={handleShowExample}
-              className="ml-2 inline-flex items-center gap-1 rounded-full bg-[#FAEEDA] px-2.5 py-1 text-xs font-medium text-[#412402] hover:bg-[#FAC775]"
+              className={`ml-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                showExample
+                  ? "bg-[#0F6E56] text-white hover:bg-[#085041]"
+                  : "bg-[#FAEEDA] text-[#412402] hover:bg-[#FAC775]"
+              }`}
             >
               <BookOpen className="h-3 w-3" />
-              看示范
+              {showExample ? "关闭示范" : "看示范"}
             </button>
         </div>
         <div className="flex items-center gap-3">
@@ -276,6 +303,20 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           <ErLingAvatar className="h-8 w-8" />
         </div>
       </header>
+
+      {/* 参考答案模式提示条：看示范时显示，关闭示范即回到学生自己的画布 */}
+      {showExample && (
+        <div className="flex items-center justify-center gap-3 border-b border-[#0F6E56]/20 bg-[#E1F5EE] px-4 py-2 text-center text-sm text-[#04342C]">
+          <BookOpen className="h-4 w-4 shrink-0 text-[#0F6E56]" />
+          <span>这是「参考答案」模式——可以照着学，但还没开始答题哦。点「关闭示范」就回到你自己的画布。</span>
+          <button
+            onClick={handleShowExample}
+            className="shrink-0 rounded-full bg-[#0F6E56] px-3 py-1 text-xs font-medium text-white hover:bg-[#085041]"
+          >
+            关闭示范
+          </button>
+        </div>
+      )}
 
       {/* 主内容区 */}
       <div className="flex flex-1 gap-3 overflow-hidden p-3">
@@ -357,7 +398,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           </button>
           <button
             onClick={handleSave}
-            disabled={stageState.running || saveStatus === "loading"}
+            disabled={stageState.running || saveStatus === "loading" || showExample}
+            title={showExample ? "查看示范时不可保存，关闭示范后再保存你的作品" : undefined}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#5DCAA5]/30 bg-[#E1F5EE] px-4 text-sm font-medium text-[#04342C] hover:bg-[#9FE1CB] disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
