@@ -90,6 +90,15 @@ export const CATEGORIES: Record<string, ProjectCategory[]> = {
 };
 
 /** 学龄段：按年龄把项目分成不同的探险阶段，每个阶段包含多个独立项目。 */
+/** 根据分类 id 返回展示用的短标签（跨学段查找）。找不到时回退为原始 id。供家长入口/作品花园按分类分组与筛选使用。 */
+export function getCategoryLabel(categoryCode: string): string {
+  for (const stageId of Object.keys(CATEGORIES)) {
+    const cat = CATEGORIES[stageId].find((c) => c.id === categoryCode);
+    if (cat) return cat.shortTag;
+  }
+  return categoryCode;
+}
+
 export interface Stage {
   /** 唯一 id，用于锚点与路由 */
   id: string;

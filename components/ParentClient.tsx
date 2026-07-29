@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles, Calendar, Flag, PartyPopper, PencilLine } from "lucide-react";
+import { ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles, Calendar, Flag, PartyPopper, PencilLine, Search, ChevronDown } from "lucide-react";
 import type { Project, Progress } from "@/lib/db";
 import { getAllProjects, getAllProgress, getTimeStats, type TimeStats } from "@/lib/db";
-import { projects as allCourses, stages, getStageProjects, type CourseProject } from "@/courses";
+import { projects as allCourses, stages, getStageProjects, CATEGORIES, type CourseProject } from "@/courses";
 
 function ErLingAvatar({ className = "" }: { className?: string }) {
   return (
@@ -37,6 +37,9 @@ export default function ParentClient() {
   const [timeStats, setTimeStats] = useState<TimeStats | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  // 默认展开「孩子已经开始」的分类；搜索时强制全部展开
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function load() {
@@ -77,12 +80,38 @@ export default function ParentClient() {
       });
       setTimeStats(times);
       setItems(merged);
+
+      // 默认展开包含「已开始项目」的分类
+      const defaultOpen = new Set<string>();
+      for (const stage of stages) {
+        const stageItems = getStageProjects(stage.id)
+          .map((p) => merged.find((m) => m.course.slug === p.slug))
+          .filter((i): i is Item => Boolean(i));
+        const cats = Array.from(new Set(stageItems.map((i) => i.course.category)));
+        for (const cat of cats) {
+          const started = stageItems.some(
+            (i) => i.course.category === cat && (i.progress?.completed || i.saved),
+          );
+          if (started) defaultOpen.add(`${stage.id}:${cat}`);
+        }
+      }
+      setExpanded(defaultOpen);
       setLoading(false);
     }
     load();
   }, []);
 
   const bySlug = new Map(items.map((i) => [i.course.slug, i]));
+  const kw = search.trim().toLowerCase();
+
+  const toggle = (key: string) => {
+    setExpanded((prev) => {
+      const n = new Set(prev);
+      if (n.has(key)) n.delete(key);
+      else n.add(key);
+      return n;
+    });
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#fafbfc]">
@@ -169,7 +198,19 @@ export default function ParentClient() {
                 </div>
               )}
 
-              <h2 className="mb-5 text-lg font-medium text-[#04342C]">各阶段进展</h2>
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-lg font-medium text-[#04342C]">各阶段进展</h2>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9b988e]" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="搜索某个项目"
+                    className="w-52 rounded-lg border border-black/10 bg-white py-2 pl-9 pr-3 text-sm text-[#04342C] outline-none focus:border-[#0F6E56]"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-10">
                 {stages.map((stage) => {
                   const stageItems = getStageProjects(stage.id)
@@ -177,6 +218,12 @@ export default function ParentClient() {
                     .filter((i): i is Item => Boolean(i));
                   const done = stageItems.filter((i) => i.progress?.completed).length;
                   const pct = stageItems.length ? Math.round((done / stageItems.length) * 100) : 0;
+
+                  // 该阶段下实际有项目的分类（按 CATEGORIES 顺序）
+                  const stageCats = (CATEGORIES[stage.id] || []).filter((cat) =>
+                    stageItems.some((i) => i.course.category === cat.id),
+                  );
+
                   return (
                     <section key={stage.id}>
                       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
@@ -200,55 +247,96 @@ export default function ParentClient() {
                           这个阶段还在准备中，先带 TA 来 {stages[0]?.ageRange} 的任务探险吧～
                         </div>
                       ) : (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                          {stageItems.map((item) => {
-                            const status = item.progress?.completed
-                              ? "done"
-                              : item.saved
-                              ? "doing"
-                              : "todo";
-                            const borderByStatus = {
-                              done: "border-l-[#0F6E56]",
-                              doing: "border-l-[#378ADD]",
-                              todo: "border-l-[#C9C5BC]",
-                            }[status];
+                        <div className="space-y-4">
+                          {stageCats.map((cat) => {
+                            let catItems = stageItems.filter((i) => i.course.category === cat.id);
+                            if (kw) catItems = catItems.filter((i) => i.course.title.toLowerCase().includes(kw));
+                            if (catItems.length === 0) return null; // 无匹配则隐藏该分类
+                            const catDone = catItems.filter((i) => i.progress?.completed).length;
+                            const catPct = Math.round((catDone / catItems.length) * 100);
+                            const key = `${stage.id}:${cat.id}`;
+                            const open = kw ? true : expanded.has(key);
+
                             return (
-                              <div
-                                key={item.course.slug}
-                                className={`flex flex-col rounded-2xl border border-black/5 border-l-4 bg-white p-5 ${borderByStatus}`}
-                              >
-                                <div className="mb-3 flex items-start justify-between gap-2">
-                                  <span className="rounded-full bg-[#F1EFE8] px-3 py-1 text-xs font-medium text-[#5F5E5A]">
-                                    {item.course.ageGroup}
-                                  </span>
-                                  {status === "done" ? (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#FAEEDA] px-2.5 py-1 text-xs font-medium text-[#412402]">
-                                      <CheckCircle className="h-3 w-3" /> 已完成
+                              <div key={cat.id} className="overflow-hidden rounded-2xl border border-black/5 bg-white">
+                                <button
+                                  onClick={() => toggle(key)}
+                                  className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-[#fafbfc]"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <span className="rounded-full bg-[#E1F5EE] px-2.5 py-1 text-xs font-medium text-[#0F6E56]">
+                                      {cat.shortTag}
                                     </span>
-                                  ) : status === "doing" ? (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F1FB] px-2.5 py-1 text-xs font-medium text-[#0C447C]">
-                                      <PencilLine className="h-3 w-3" /> 进行中
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F1EFE8] px-2.5 py-1 text-xs font-medium text-[#5F5E5A]">
-                                      <Flag className="h-3 w-3" /> 未开始
-                                    </span>
-                                  )}
-                                </div>
-                                <h3 className="mb-1 text-base font-medium text-[#04342C]">{item.course.title}</h3>
-                                <p className="mb-4 flex-1 text-sm text-[#5F5E5A]">{item.course.description}</p>
-                                {timeStats && timeStats.byProject[item.course.slug] > 0 && (
-                                  <div className="mb-3 flex items-center gap-1.5 text-xs text-[#5F5E5A]">
-                                    <Clock className="h-3.5 w-3.5" />
-                                    已学习 {formatDuration(timeStats.byProject[item.course.slug])}
+                                    <div>
+                                      <div className="text-base font-medium text-[#04342C]">{cat.name}</div>
+                                      <div className="text-xs text-[#9b988e]">{catDone}/{catItems.length} 完成</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <div className="hidden h-1.5 w-24 overflow-hidden rounded-full bg-[#E5E2D8] sm:block">
+                                      <div className="h-full rounded-full bg-[#0F6E56]" style={{ width: `${catPct}%` }} />
+                                    </div>
+                                    <ChevronDown
+                                      className={`h-4 w-4 text-[#9b988e] transition-transform ${open ? "rotate-180" : ""}`}
+                                    />
+                                  </div>
+                                </button>
+
+                                {open && (
+                                  <div className="grid gap-4 border-t border-black/5 p-5 sm:grid-cols-2 lg:grid-cols-3">
+                                    {catItems.map((item) => {
+                                      const status = item.progress?.completed
+                                        ? "done"
+                                        : item.saved
+                                        ? "doing"
+                                        : "todo";
+                                      const borderByStatus = {
+                                        done: "border-l-[#0F6E56]",
+                                        doing: "border-l-[#378ADD]",
+                                        todo: "border-l-[#C9C5BC]",
+                                      }[status];
+                                      return (
+                                        <div
+                                          key={item.course.slug}
+                                          className={`flex flex-col rounded-2xl border border-black/5 border-l-4 bg-white p-5 ${borderByStatus}`}
+                                        >
+                                          <div className="mb-3 flex items-start justify-between gap-2">
+                                            <span className="rounded-full bg-[#F1EFE8] px-3 py-1 text-xs font-medium text-[#5F5E5A]">
+                                              {item.course.ageGroup}
+                                            </span>
+                                            {status === "done" ? (
+                                              <span className="inline-flex items-center gap-1 rounded-full bg-[#FAEEDA] px-2.5 py-1 text-xs font-medium text-[#412402]">
+                                                <CheckCircle className="h-3 w-3" /> 已完成
+                                              </span>
+                                            ) : status === "doing" ? (
+                                              <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F1FB] px-2.5 py-1 text-xs font-medium text-[#0C447C]">
+                                                <PencilLine className="h-3 w-3" /> 进行中
+                                              </span>
+                                            ) : (
+                                              <span className="inline-flex items-center gap-1 rounded-full bg-[#F1EFE8] px-2.5 py-1 text-xs font-medium text-[#5F5E5A]">
+                                                <Flag className="h-3 w-3" /> 未开始
+                                              </span>
+                                            )}
+                                          </div>
+                                          <h3 className="mb-1 text-base font-medium text-[#04342C]">{item.course.title}</h3>
+                                          <p className="mb-4 flex-1 text-sm text-[#5F5E5A]">{item.course.description}</p>
+                                          {timeStats && timeStats.byProject[item.course.slug] > 0 && (
+                                            <div className="mb-3 flex items-center gap-1.5 text-xs text-[#5F5E5A]">
+                                              <Clock className="h-3.5 w-3.5" />
+                                              已学习 {formatDuration(timeStats.byProject[item.course.slug])}
+                                            </div>
+                                          )}
+                                          <Link
+                                            href={`/learn/${item.course.slug}`}
+                                            className="mt-auto rounded-xl border border-[#0F6E56]/20 px-4 py-2 text-center text-sm font-medium text-[#0F6E56] hover:bg-[#E1F5EE]"
+                                          >
+                                            {status === "done" ? "再看一次" : status === "doing" ? "继续创作" : "开始挑战"}
+                                          </Link>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 )}
-                                <Link
-                                  href={`/learn/${item.course.slug}`}
-                                  className="mt-auto rounded-xl border border-[#0F6E56]/20 px-4 py-2 text-center text-sm font-medium text-[#0F6E56] hover:bg-[#E1F5EE]"
-                                >
-                                  {status === "done" ? "再看一次" : status === "doing" ? "继续创作" : "开始挑战"}
-                                </Link>
                               </div>
                             );
                           })}
