@@ -32,7 +32,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [stageState, setStageState] = useState<StageState>({
     width: STAGE_WIDTH,
     height: STAGE_HEIGHT,
-    actor: { x: 0, y: 0, angle: 90, message: null, messageUntil: 0 },
+    actor: { x: 0, y: 0, angle: 90, message: null, messageUntil: 0, size: 1 },
     penPaths: [],
     currentPath: null,
     penColor: 0,
@@ -66,6 +66,24 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const studentXmlRef = useRef<string | null>(null);
   const showExampleRef = useRef(false);
 
+  // 键盘事件：把方向键转发给运行时，用于「按键前进」等键盘操控项目
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const map: Record<string, string> = {
+        ArrowUp: "up",
+        ArrowDown: "down",
+        ArrowLeft: "left",
+        ArrowRight: "right",
+      };
+      const key = map[e.key];
+      if (!key) return;
+      e.preventDefault();
+      runtimeRef.current?.handleKeyPressed(key);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   useEffect(() => {
     const flushTime = () => {
       if (!sessionStartRef.current) return;
@@ -97,7 +115,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
         setProgress(progressRef.current);
         markProgress(project.slug, true, 3).catch(console.error);
       }
-    }, project.slug === "stars" ? undefined : []);
+    }, project.stars
+      ? project.stars.map((s, i) => ({ id: i + 1, x: s.x, y: s.y, collected: false }))
+      : project.slug === "stars"
+        ? undefined
+        : []);
     runtimeRef.current = runtime;
 
     loadProject(project.slug).then((xml) => {

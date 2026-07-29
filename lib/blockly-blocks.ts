@@ -21,6 +21,13 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_pen_change_color", inputs: { DELTA: { shadow: { type: "math_number", fields: { NUM: 10 } } } } },
     { kind: "block" as const, type: "maker_pen_set_size", inputs: { SIZE: { shadow: { type: "math_number", fields: { NUM: 3 } } } } },
     { kind: "block" as const, type: "maker_touching_star" },
+    { kind: "block" as const, type: "maker_when_key_pressed" },
+    { kind: "block" as const, type: "maker_touching_edge" },
+    { kind: "block" as const, type: "maker_set_size", inputs: { SIZE: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
+    { kind: "block" as const, type: "maker_change_size", inputs: { DELTA: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
+    { kind: "block" as const, type: "maker_pen_is_red" },
+    { kind: "block" as const, type: "maker_mouse_x" },
+    { kind: "block" as const, type: "maker_mouse_left" },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -196,6 +203,86 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+    maker_when_key_pressed: {
+      init() {
+        this.appendDummyInput()
+          .appendField("当按下")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["↑ 上", "up"],
+              ["↓ 下", "down"],
+              ["← 左", "left"],
+              ["→ 右", "right"],
+            ]),
+            "KEY"
+          );
+        this.appendStatementInput("STACK").setCheck(null);
+        this.setColour(160);
+        this.setTooltip("当按下指定方向键时，执行这里的积木");
+        this.setHelpUrl("");
+        this.setNextStatement(false);
+        this.setPreviousStatement(false);
+      },
+    },
+    maker_touching_edge: {
+      init() {
+        this.appendDummyInput().appendField("碰到边缘");
+        this.setOutput(true, "Boolean");
+        this.setColour(210);
+        this.setTooltip("如果二零正在碰到舞台边缘，返回真");
+        this.setHelpUrl("");
+      },
+    },
+    maker_set_size: {
+      init() {
+        this.appendValueInput("SIZE").setCheck("Number").appendField("将二零大小设为");
+        this.appendDummyInput().appendField("倍");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("把二零整体放大或缩小到指定倍数（0.2~5）");
+        this.setHelpUrl("");
+      },
+    },
+    maker_change_size: {
+      init() {
+        this.appendValueInput("DELTA").setCheck("Number").appendField("二零大小增加");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("让二零变大或变小（正数变大，负数变小）");
+        this.setHelpUrl("");
+      },
+    },
+    maker_pen_is_red: {
+      init() {
+        this.appendDummyInput().appendField("画笔是红色");
+        this.setOutput(true, "Boolean");
+        this.setColour(120);
+        this.setTooltip("如果当前画笔颜色是红色，返回真");
+        this.setHelpUrl("");
+      },
+    },
+    maker_mouse_x: {
+      init() {
+        this.appendDummyInput().appendField("鼠标 x 坐标");
+        this.setOutput(true, "Number");
+        this.setColour(210);
+        this.setTooltip("返回最近一次点击鼠标位置的 x 坐标（用于判断点了左半边还是右半边）");
+        this.setHelpUrl("");
+      },
+    },
+    maker_mouse_left: {
+      init() {
+        this.appendDummyInput().appendField("点击在左半边");
+        this.setOutput(true, "Boolean");
+        this.setColour(210);
+        this.setTooltip("如果最近一次点击在舞台左半边（x < 0）返回真，否则返回假。常放进「如果…那么…否则」里做左右分支。");
+        this.setHelpUrl("");
+      },
+    },
   });
 
   // Hat block: when start runs the stack and then ends
@@ -270,5 +357,36 @@ export function registerCustomBlocks() {
 
   javascriptGenerator.forBlock["maker_touching_star"] = () => {
     return ["__runtime.touchingStar()", Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_when_key_pressed"] = (block, generator) => {
+    const stack = generator.statementToCode(block, "STACK");
+    return stack;
+  };
+
+  javascriptGenerator.forBlock["maker_touching_edge"] = () => {
+    return ["__runtime.touchingEdge()", Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_set_size"] = (block, generator) => {
+    const size = generator.valueToCode(block, "SIZE", Order.ATOMIC) || "1";
+    return `__runtime.setSize(${size});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_change_size"] = (block, generator) => {
+    const delta = generator.valueToCode(block, "DELTA", Order.ATOMIC) || "1";
+    return `__runtime.changeSize(${delta});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_pen_is_red"] = () => {
+    return ["__runtime.penIsRed()", Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_mouse_x"] = () => {
+    return ["__runtime.mouseX()", Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_mouse_left"] = () => {
+    return ["__runtime.mouseX() < 0", Order.RELATIONAL];
   };
 }

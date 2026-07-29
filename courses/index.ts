@@ -16,6 +16,8 @@ export interface CourseProject {
   defaultXml?: string;
   /** 舞台场景装饰（纯展示）：目标点 emoji、障碍、迷宫墙等。不参与运行逻辑与步骤判定。 */
   scene?: ProjectScene;
+  /** 舞台上需要收集的「星星/物品」坐标。传给 Runtime 作为可收集目标（碰触即收集），用于条件与游戏类收集项目。 */
+  stars?: { x: number; y: number }[];
 }
 
 /** 舞台上的装饰标记（纯展示用，例如小旗子、宝藏箱、石头、箭头）。 */
@@ -121,7 +123,7 @@ export const stages: Stage[] = [
     name: "图形化积木启蒙",
     tagline: "拖拽彩色积木，让二零动起来、画图案、做小游戏。",
     status: "open",
-    projectSlugs: ["hello", "flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag", "treasure", "dance", "frame", "square", "triangle", "star5", "flower", "rainbow", "stars", "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit", "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard"],
+    projectSlugs: ["hello", "flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag", "treasure", "dance", "frame", "square", "triangle", "star5", "flower", "rainbow", "stars", "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit", "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard", "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog", "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3", "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow", "treasure_map", "escort", "traffic_police"],
   },
   {
     id: "stage-9-12",
@@ -1677,6 +1679,715 @@ export const projects: CourseProject[] = [
       </block>
     </xml>`,
   },
+
+// === 分类 4 · 事件与互动（9 项） ===
+{
+  slug: "click_jump",
+  category: "event",
+  title: "点一下，二零跳一跳",
+  ageGroup: "6-8 岁",
+  description: "点击舞台，让二零向上跳一下再落回来。",
+  missionBrief: "造物星球上有一只爱蹦跳的二零。写一个程序：当舞台被点击时，二零先向上跳一下，停一小会儿，再落回原处。",
+  erLingHint: "① 拖一个蓝色「当舞台被点击」事件；② 里面放「移动 -30 步」（向上跳），接「等待 0.3 秒」，再接「移动 30 步」（落回来）；③ 点「运行」后在舞台上点一下，二零就蹦起来啦！",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "让二零向上跳起" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_move">
+          <value name="STEPS"><shadow type="math_number"><field name="NUM">-30</field></shadow></value>
+          <next><block type="maker_wait">
+            <value name="SECONDS"><shadow type="math_number"><field name="NUM">0.3</field></shadow></value>
+            <next><block type="maker_move">
+              <value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "click_color",
+  category: "event",
+  title: "点一下换颜色",
+  ageGroup: "6-8 岁",
+  description: "每次点击舞台，让二零画出不同颜色的线。",
+  missionBrief: "二零有一支会变色的画笔。写一个程序：当舞台被点击时，它落下笔、换个颜色、向前画一小段，再抬笔。每点一次颜色都不一样！",
+  erLingHint: "① 蓝色「当舞台被点击」里面放「落笔」；② 接「画笔颜色增加 60」（每次换色）；③ 接「移动 40 步」和「抬笔」；④ 点「运行」后多戳几下舞台，看线条变色。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "使用换画笔颜色积木" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_pen_down">
+          <next><block type="maker_pen_change_color">
+            <value name="DELTA"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+            <next><block type="maker_move">
+              <value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+              <next><block type="maker_pen_up"></block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "click_dialog",
+  category: "event",
+  title: "连续点击对话",
+  ageGroup: "6-8 岁",
+  description: "每点一次舞台，二零说出不同的话。",
+  missionBrief: "二零是个小话痨。写一个程序：每次点击舞台，它先说一句「你好呀！」，再说一句「今天天气真好！」，像在跟你聊天。",
+  erLingHint: "① 蓝色「当舞台被点击」里放第一个紫色「说 你好呀！ 1 秒」；② 接第二个「说 今天天气真好！ 1 秒」；③ 点「运行」后多点几下舞台，听听二零聊天。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "让二零说出两句话" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">你好呀！</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          <next><block type="maker_say">
+            <value name="TEXT"><shadow type="text"><field name="TEXT">今天天气真好！</field></shadow></value>
+            <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "two_events",
+  category: "event",
+  title: "两个事件一起用",
+  ageGroup: "6-8 岁",
+  description: "把「当开始运行」和「当舞台被点击」两个事件组合到一起。",
+  missionBrief: "一个程序可以有好几个事件！写一个程序：点「运行」时二零说「开始啦」，点击舞台时它又说「你点我啦」。",
+  erLingHint: "① 拖一个绿色「当开始运行」，里面放「说 开始啦！ 1 秒」；② 再拖一个蓝色「当舞台被点击」，里面放「说 你点我啦！ 1 秒」；③ 点「运行」看看开始的效果，再点舞台听听另一句。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "使用「当舞台被点击」事件" },
+    { id: 3, title: "两个事件都能触发" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="40">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">开始啦！</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_when_stage_clicked" x="60" y="200">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">你点我啦！</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "click_play_dialog",
+  category: "event",
+  title: "点我讲故事",
+  ageGroup: "6-8 岁",
+  description: "点击舞台，让二零讲出三段小故事。",
+  missionBrief: "二零想当小小讲故事员。写一个程序：点击舞台时，它连着说出三句话，像一个迷你小故事。",
+  erLingHint: "① 蓝色「当舞台被点击」里依次接三个紫色「说」积木；② 分别输入「从前有只二零」「它最爱编程」「你也来吗？」每段 1 秒；③ 点「运行」后点舞台，听二零讲故事。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "让二零连说三句话" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">从前有只二零</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          <next><block type="maker_say">
+            <value name="TEXT"><shadow type="text"><field name="TEXT">它最爱编程</field></shadow></value>
+            <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+            <next><block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">你也来吗？</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "auto_patrol",
+  category: "event",
+  title: "自动巡逻一圈",
+  ageGroup: "6-8 岁",
+  description: "点「运行」就让二零自己转圈巡逻。",
+  missionBrief: "哨兵二零要绕场巡逻一圈。写一个程序：当开始运行时，它落下笔，重复转着圈走，画出一圈巡逻路线。",
+  erLingHint: "① 绿色「当开始运行」里放「落笔」；② 接「重复执行 12 次」，里面放「移动 30 步」和「右转 30 度」；③ 最后接「抬笔」；④ 点「运行」，二零会转出一圈。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用循环让二零边走边转" },
+    { id: 3, title: "运行看到巡逻路线" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_pen_down"><next>
+          <block type="controls_repeat_ext">
+            <value name="TIMES"><shadow type="math_number"><field name="NUM">12</field></shadow></value>
+            <statement name="DO">
+              <block type="maker_move">
+                <value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+                <next><block type="maker_turn">
+                  <value name="DEGREES"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+                </block></next>
+              </block>
+            </statement>
+            <next><block type="maker_pen_up"></block></next>
+          </block>
+        </next></block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "key_forward",
+  category: "event",
+  title: "按键前进",
+  ageGroup: "6-8 岁",
+  description: "用键盘方向键让二零前进，像操控小游戏。",
+  missionBrief: "写一个小操控程序：按下「↑ 上」方向键，二零就向前走 50 步。在键盘上戳戳看！",
+  erLingHint: "① 拖一个「当按下 ↑ 上」事件；② 里面放「移动 50 步」；③ 点「运行」后，用键盘的方向键 ↑ 控制二零前进（看示范会自动按一下演示）。",
+  steps: [
+    { id: 1, title: "使用「当按下方向键」事件" },
+    { id: 2, title: "让二零向前移动" },
+    { id: 3, title: "按方向键看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_key_pressed" x="60" y="60">
+      <field name="KEY">up</field>
+      <statement name="STACK">
+        <block type="maker_move">
+          <value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "edge_bounce",
+  category: "event",
+  title: "碰壁就转弯",
+  ageGroup: "6-8 岁",
+  description: "让二零边走边判断，碰到边缘就转弯。",
+  missionBrief: "聪明的二零会看路。写一个程序：它一直向前走，一旦「碰到边缘」就转个弯，继续探索。",
+  erLingHint: "① 绿色「当开始运行」里放「重复执行 60 次」；② 里面放「移动 20 步」，再放「如果…那么」，条件放「碰到边缘」、那么里放「右转 120 度」；③ 点「运行」看二零闯关。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「如果碰到边缘」做判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+          <statement name="DO">
+            <block type="maker_move">
+              <value name="STEPS"><shadow type="math_number"><field name="NUM">20</field></shadow></value>
+              <next><block type="controls_if">
+                <value name="IF0"><block type="maker_touching_edge"></block></value>
+                <statement name="DO0"><block type="maker_turn">
+                  <value name="DEGREES"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
+                </block></statement>
+              </block></next>
+            </block>
+          </statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "size_toggle",
+  category: "event",
+  title: "点一下变大",
+  ageGroup: "6-8 岁",
+  description: "每次点击舞台，让二零变大一点。",
+  missionBrief: "点一下舞台，二零就长大一点，像充气一样！再试试把它变小。",
+  erLingHint: "① 蓝色「当舞台被点击」里放「二零大小增加 1」（每点一次变大）；② 想让它变小，就把数字改成 -1；③ 点「运行」后多点几下舞台看二零变大变小。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "改变二零的大小" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_change_size">
+          <value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+
+// === 分类 5 · 条件判断（5 项） ===
+{
+  slug: "if_touch_star",
+  category: "cond",
+  title: "碰到星星就说话",
+  ageGroup: "6-8 岁",
+  description: "用「如果…那么」判断碰到星星时说话。",
+  missionBrief: "舞台上有几颗星星。写一个程序：点击舞台让二零飞过去，如果碰到了星星，就大声说「找到星星啦！」。",
+  erLingHint: "① 蓝色「当舞台被点击」里放「移到鼠标位置」；② 接「如果…那么」，条件放「碰到星星」，那么里放「说 找到星星啦！」；③ 点「运行」后点击那颗在中间的星星试试。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "用「如果碰到星星」做判断" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  stars: [{ x: 0, y: 0 }, { x: 130, y: -70 }, { x: -130, y: -70 }],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_goto_mouse"><next>
+          <block type="controls_if">
+            <value name="IF0"><block type="maker_touching_star"></block></value>
+            <statement name="DO0"><block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">找到星星啦！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+            </block></statement>
+          </block>
+        </next></block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "if_edge_turn",
+  category: "cond",
+  title: "到边缘就拐弯",
+  ageGroup: "6-8 岁",
+  description: "用条件判断「如果碰到边缘就拐弯」。",
+  missionBrief: "二零在星球上探险。写一个程序：它一直往前走，一旦「碰到边缘」就拐个弯，换方向继续走。",
+  erLingHint: "① 绿色「当开始运行」里放「重复执行 80 次」；② 里面放「移动 15 步」，再放「如果…那么」，条件放「碰到边缘」、那么里放「右转 135 度」；③ 点「运行」看二零绕场。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「如果碰到边缘」做判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+          <statement name="DO">
+            <block type="maker_move">
+              <value name="STEPS"><shadow type="math_number"><field name="NUM">15</field></shadow></value>
+              <next><block type="controls_if">
+                <value name="IF0"><block type="maker_touching_edge"></block></value>
+                <statement name="DO0"><block type="maker_turn">
+                  <value name="DEGREES"><shadow type="math_number"><field name="NUM">135</field></shadow></value>
+                </block></statement>
+              </block></next>
+            </block>
+          </statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "if_red_stop",
+  category: "cond",
+  title: "红色就停下",
+  ageGroup: "6-8 岁",
+  description: "用「如果画笔是红色就停下」做判断。",
+  missionBrief: "二月学会了看信号灯。写一个程序：先把画笔设成红色，如果「画笔是红色」就大声说「红色，停下！」。",
+  erLingHint: "① 绿色「当开始运行」里放「设置画笔颜色为 0」（红色）；② 接「如果…那么」，条件放「画笔是红色」，那么里放「说 红色，停下！ 2 秒」；③ 点「运行」看二零的反应。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「如果画笔是红色」做判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_pen_set_color">
+          <value name="HUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+          <next><block type="controls_if">
+            <value name="IF0"><block type="maker_pen_is_red"></block></value>
+            <statement name="DO0"><block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">红色，停下！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+            </block></statement>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "click_left_right",
+  category: "cond",
+  title: "点左点右走不同路",
+  ageGroup: "6-8 岁",
+  description: "用「如果…否则」根据点击位置走不同方向。",
+  missionBrief: "点舞台左边，二零向左走；点右边，它向右走。写一个程序：用「点击在左半边」判断，走不同的路。",
+  erLingHint: "① 蓝色「当舞台被点击」里放「如果…那么…否则」（点积木上的齿轮加「否则」）；② 条件放「点击在左半边」，那么里放「移动 -60 步」，否则里放「移动 60 步」；③ 点「运行」后分别点左边和右边试试。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "用「点击在左半边」做判断" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_if">
+          <mutation else="1"></mutation>
+          <value name="IF0"><block type="maker_mouse_left"></block></value>
+          <statement name="DO0"><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">-60</field></shadow></value>
+          </block></statement>
+          <statement name="ELSE"><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "collect3",
+  category: "cond",
+  title: "集齐三颗星",
+  ageGroup: "6-8 岁",
+  description: "飞向三颗星星全部收集，再庆祝。",
+  missionBrief: "星球上散落着 3 颗星星。写一个程序：让二零依次飞向 1、2、3 号星星把它们都收集起来，最后说「全部收集完成，庆祝！」。",
+  erLingHint: "① 绿色「当开始运行」里依次放三个「飞向星星 1 号 / 2 号 / 3 号」；② 最后放「说 全部收集完成，庆祝！ 1 秒」；③ 点「运行」，二零会自己飞去集齐三颗星。",
+  steps: [
+    { id: 1, title: "让二零飞向星星" },
+    { id: 2, title: "收集到星星" },
+    { id: 3, title: "集齐所有星星" },
+  ],
+  stars: [{ x: -100, y: 80 }, { x: 100, y: 0 }, { x: 0, y: -100 }],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_goto_star">
+          <value name="INDEX"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          <next><block type="maker_goto_star">
+            <value name="INDEX"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+            <next><block type="maker_goto_star">
+              <value name="INDEX"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+              <next><block type="maker_say">
+                <value name="TEXT"><shadow type="text"><field name="TEXT">全部收集完成，庆祝！</field></shadow></value>
+                <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+
+// === 分类 6 · 收集与闯关游戏（7 项） ===
+{
+  slug: "maze_exit",
+  category: "game",
+  title: "走迷宫到出口",
+  ageGroup: "6-8 岁",
+  description: "用前进和转向，带二零穿过迷宫走到出口。",
+  missionBrief: "迷宫的墙挡住了去路。写一个程序：用「移动」和「右转 / 左转」带二零绕过墙，走到插着小旗子的出口。",
+  erLingHint: "① 绿色「当开始运行」里用「移动」和「右转 90 度 / 左转 -90 度」拼出一条路线；② 让二零先往上、再拐弯、最后到出口；③ 点「运行」看它走到小旗子。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用前进和转向走出路线" },
+    { id: 3, title: "运行走到出口" },
+  ],
+  scene: {
+    walls: [
+      { x1: -150, y1: -150, x2: -150, y2: 30 },
+      { x1: -150, y1: 30, x2: -30, y2: 30 },
+      { x1: 40, y1: 150, x2: 40, y2: -30 },
+      { x1: 40, y1: -30, x2: 150, y2: -30 },
+    ],
+    marks: [{ x: -60, y: 120, emoji: "🏁", label: "出口" }],
+  },
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_move">
+          <value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+          <next><block type="maker_turn">
+            <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+            <next><block type="maker_move">
+              <value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+              <next><block type="maker_turn">
+                <value name="DEGREES"><shadow type="math_number"><field name="NUM">-90</field></shadow></value>
+                <next><block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                </block></next>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "collect_apples",
+  category: "game",
+  title: "摘完所有苹果",
+  ageGroup: "6-8 岁",
+  description: "飞向每颗苹果树，把苹果都摘回家。",
+  missionBrief: "果园里有 3 棵苹果树。写一个程序：让二零依次飞向 1、2、3 号苹果把它们都摘下来，最后说「苹果都摘完啦！」。",
+  erLingHint: "① 绿色「当开始运行」里放三个「飞向星星 1 / 2 / 3 号」（每颗苹果就是一颗星星）；② 最后放「说 苹果都摘完啦！ 1 秒」；③ 点「运行」看二零摘光苹果。",
+  steps: [
+    { id: 1, title: "让二零飞向苹果" },
+    { id: 2, title: "收集到苹果" },
+    { id: 3, title: "摘完所有苹果" },
+  ],
+  stars: [{ x: -110, y: 70 }, { x: 110, y: 50 }, { x: 0, y: -100 }],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_goto_star">
+          <value name="INDEX"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          <next><block type="maker_goto_star">
+            <value name="INDEX"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+            <next><block type="maker_goto_star">
+              <value name="INDEX"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+              <next><block type="maker_say">
+                <value name="TEXT"><shadow type="text"><field name="TEXT">苹果都摘完啦！</field></shadow></value>
+                <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "light_lanterns",
+  category: "game",
+  title: "按顺序点灯笼",
+  ageGroup: "6-8 岁",
+  description: "依次飞到三盏灯笼前，把它们依次点亮。",
+  missionBrief: "节日到了，三盏灯笼还没亮。写一个程序：让二零依次飞到 1、2、3 号灯笼前，每到一个就换个颜色、说一句「第几盏亮了」。",
+  erLingHint: "① 绿色「当开始运行」里用「移到 x: y:」依次飞到三个位置；② 每到一个就「设置画笔颜色」换色、再「说 第几盏亮了」；③ 点「运行」看灯笼依次亮起。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "依次点亮多盏灯笼" },
+    { id: 3, title: "运行看到点亮效果" },
+  ],
+  scene: {
+    marks: [
+      { x: -100, y: 80, emoji: "🏮", label: "灯1" },
+      { x: 0, y: 0, emoji: "🏮", label: "灯2" },
+      { x: 100, y: -80, emoji: "🏮", label: "灯3" },
+    ],
+  },
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_goto">
+          <value name="X"><shadow type="math_number"><field name="NUM">-100</field></shadow></value>
+          <value name="Y"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+          <next><block type="maker_pen_set_color">
+            <value name="HUE"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+            <next><block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">第一盏亮了</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              <next><block type="maker_goto">
+                <value name="X"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                <value name="Y"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                <next><block type="maker_pen_set_color">
+                  <value name="HUE"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
+                  <next><block type="maker_say">
+                    <value name="TEXT"><shadow type="text"><field name="TEXT">第二盏亮了</field></shadow></value>
+                    <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                    <next><block type="maker_goto">
+                      <value name="X"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
+                      <value name="Y"><shadow type="math_number"><field name="NUM">-80</field></shadow></value>
+                      <next><block type="maker_pen_set_color">
+                        <value name="HUE"><shadow type="math_number"><field name="NUM">240</field></shadow></value>
+                        <next><block type="maker_say">
+                          <value name="TEXT"><shadow type="text"><field name="TEXT">第三盏亮了</field></shadow></value>
+                          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                        </block></next>
+                      </block></next>
+                    </block></next>
+                  </block></next>
+                </block></next>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block></next>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "collect_rainbow",
+  category: "game",
+  title: "收集彩虹碎片",
+  ageGroup: "6-8 岁",
+  description: "飞向四块彩虹碎片，把它们都收集齐。",
+  missionBrief: "彩虹碎成了 4 块散落各地。写一个程序：让二零依次飞向 1、2、3、4 号碎片，把它们都找回来，最后说「彩虹拼好啦！」。",
+  erLingHint: "① 绿色「当开始运行」里放四个「飞向星星 1 / 2 / 3 / 4 号」；② 最后放「说 彩虹拼好啦！ 1 秒」；③ 点「运行」看二零拼好彩虹。",
+  steps: [
+    { id: 1, title: "让二零飞向彩虹碎片" },
+    { id: 2, title: "收集到碎片" },
+    { id: 3, title: "集齐所有碎片" },
+  ],
+  stars: [{ x: -130, y: 60 }, { x: -50, y: -90 }, { x: 50, y: -90 }, { x: 130, y: 60 }],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_goto_star">
+          <value name="INDEX"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          <next><block type="maker_goto_star">
+            <value name="INDEX"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+            <next><block type="maker_goto_star">
+              <value name="INDEX"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+              <next><block type="maker_goto_star">
+                <value name="INDEX"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                <next><block type="maker_say">
+                  <value name="TEXT"><shadow type="text"><field name="TEXT">彩虹拼好啦！</field></shadow></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                </block></next>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "treasure_map",
+  category: "game",
+  title: "跟着地图找宝藏",
+  ageGroup: "6-8 岁",
+  description: "按地图标记飞到宝藏箱的位置。",
+  missionBrief: "你有一张藏宝图，宝藏箱在右下角。写一个程序：让二零直接飞到宝藏的位置，然后说「找到宝藏啦！」。",
+  erLingHint: "① 绿色「当开始运行」里放「移到 x: 120 y: -60」（宝藏箱的位置）；② 接「说 找到宝藏啦！ 1 秒」；③ 点「运行」看二零挖到宝。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "飞到宝藏的位置" },
+    { id: 3, title: "运行找到宝藏" },
+  ],
+  scene: {
+    marks: [{ x: 120, y: -60, emoji: "📦", label: "宝藏" }],
+  },
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_goto">
+          <value name="X"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
+          <value name="Y"><shadow type="math_number"><field name="NUM">-60</field></shadow></value>
+          <next><block type="maker_say">
+            <value name="TEXT"><shadow type="text"><field name="TEXT">找到宝藏啦！</field></shadow></value>
+            <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "escort",
+  category: "game",
+  title: "护送小动物回家",
+  ageGroup: "6-8 岁",
+  description: "飞到小动物身边接它，再送它回小屋。",
+  missionBrief: "一只小动物在左上角迷路了，家在舞台中间。写一个程序：让二零先飞到小动物身边说「我来接你啦」，再飞回家说「回家咯」。",
+  erLingHint: "① 绿色「当开始运行」里放「移到 小动物坐标」，接「说 我来接你啦 1 秒」；② 再放「移到 0,0（家）」，接「说 回家咯 1 秒」；③ 点「运行」看护送成功。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "飞到小动物并接它" },
+    { id: 3, title: "运行护送它回家" },
+  ],
+  scene: {
+    marks: [
+      { x: -100, y: 80, emoji: "🐰", label: "小动物" },
+      { x: 0, y: 0, emoji: "🏠", label: "家" },
+    ],
+  },
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_goto">
+          <value name="X"><shadow type="math_number"><field name="NUM">-100</field></shadow></value>
+          <value name="Y"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+          <next><block type="maker_say">
+            <value name="TEXT"><shadow type="text"><field name="TEXT">我来接你啦</field></shadow></value>
+            <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+            <next><block type="maker_goto">
+              <value name="X"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+              <value name="Y"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+              <next><block type="maker_say">
+                <value name="TEXT"><shadow type="text"><field name="TEXT">回家咯</field></shadow></value>
+                <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "traffic_police",
+  category: "game",
+  title: "交通警察指挥",
+  ageGroup: "6-8 岁",
+  description: "根据点击位置，指挥红绿灯：左半边停，右半边走。",
+  missionBrief: "二月当上了小交警。写一个程序：点击舞台左半边，它说「红灯，停！」；点击右半边，它说「绿灯，走！」。",
+  erLingHint: "① 蓝色「当舞台被点击」里放「如果…那么…否则」；② 条件放「点击在左半边」，那么里放「说 红灯，停！ 1 秒」，否则里放「说 绿灯，走！ 1 秒」；③ 点「运行」后分别点左边和右边。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "用「点击在左半边」做判断" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_if">
+          <mutation else="1"></mutation>
+          <value name="IF0"><block type="maker_mouse_left"></block></value>
+          <statement name="DO0"><block type="maker_say">
+            <value name="TEXT"><shadow type="text"><field name="TEXT">红灯，停！</field></shadow></value>
+            <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          </block></statement>
+          <statement name="ELSE"><block type="maker_say">
+            <value name="TEXT"><shadow type="text"><field name="TEXT">绿灯，走！</field></shadow></value>
+            <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
 ];
 
 export function getProject(slug: string): CourseProject | undefined {

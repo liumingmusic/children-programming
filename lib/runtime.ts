@@ -22,6 +22,8 @@ export interface ActorState {
   angle: number; // degrees, 0 points right
   message: string | null;
   messageUntil: number;
+  /** 角色大小倍数，默认 1。点击变大/变小时改变，渲染时乘到角色尺寸上。 */
+  size: number;
 }
 
 export interface StageState {
@@ -53,11 +55,14 @@ type Action =
   | { type: "penUp" }
   | { type: "penSetColor"; hue: number }
   | { type: "penChangeColor"; delta: number }
-  | { type: "penSetSize"; size: number };
+  | { type: "penSetSize"; size: number }
+  | { type: "setSize"; size: number }
+  | { type: "changeSize"; delta: number };
 
 export type Script = {
   whenStart: string;
   whenStageClicked: string;
+  whenKeyPressed: { key: string; code: string }[];
 };
 
 const DEFAULT_STARS: Star[] = [
@@ -72,9 +77,9 @@ export class Runtime {
   private width: number;
   private height: number;
   private state: StageState;
-  private scripts: Script = { whenStart: "", whenStageClicked: "" };
+  private scripts: Script = { whenStart: "", whenStageClicked: "", whenKeyPressed: [] };
   private mouse: Point = { x: 0, y: 0 };
-  private runningType: "start" | "click" | null = null;
+  private runningType: "start" | "click" | "key" | null = null;
   private initialStars: Star[];
 
   constructor(
@@ -98,6 +103,7 @@ export class Runtime {
         angle: 90,
         message: null,
         messageUntil: 0,
+        size: 1,
       },
       penPaths: [],
       currentPath: null,
@@ -122,6 +128,7 @@ export class Runtime {
       angle: 90,
       message: null,
       messageUntil: 0,
+      size: 1,
     };
     this.state.penPaths = [];
     this.state.currentPath = null;
@@ -182,6 +189,38 @@ export class Runtime {
     const s = Math.max(1, Math.min(50, Math.round(size)));
     this.actions.push({ type: "penSetSize", size: s });
     this.log("[系统] 画笔粗细设置");
+  }
+
+  // --- Size (actor scale) ---
+  setSize(size: number) {
+    const s = Math.max(0.2, Math.min(5, size));
+    this.actions.push({ type: "setSize", size: s });
+    this.log("[系统] 二零大小设置");
+  }
+
+  changeSize(delta: number) {
+    this.actions.push({ type: "changeSize", delta });
+    this.log("[系统] 二零大小改变");
+  }
+
+  // --- Queries used by generated scripts ---
+  /** 角色是否碰到舞台边缘（距边界 30 单位内即视为碰到）。 */
+  touchingEdge(): boolean {
+    const margin = 30;
+    return (
+      Math.abs(this.state.actor.x) > this.width / 2 - margin ||
+      Math.abs(this.state.actor.y) > this.height / 2 - margin
+    );
+  }
+
+  /** 当前画笔是否为红色（色相 0 / 360 即红）。 */
+  penIsRed(): boolean {
+    return this.state.penColor % 360 === 0;
+  }
+
+  /** 最近一次（点击）的鼠标 x 坐标，用于判断点了左半边还是右半边。 */
+  mouseX(): number {
+    return this.mouse.x;
   }
 
   // --- Queued actions ---
@@ -254,6 +293,7 @@ export class Runtime {
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.penDown = false;
+    this.state.actor.size = 1;
     this.state.stars = this.initialStars.map((s) => ({ ...s }));
   }
 
@@ -270,7 +310,15 @@ export class Runtime {
     await this.runScript(this.scripts.whenStart, "start");
   }
 
-  private async runScript(code: string, type: "start" | "click") {
+  async handleKeyPressed(key: string) {
+    if (this.state.running) return;
+    const match = this.scripts.whenKeyPressed.find((k) => k.key === key);
+    if (!match || !match.code) return;
+    this.runningType = "key";
+    await this.runScript(match.code, "key");
+  }
+
+  private async runScript(code: string, type: "start" | "click" | "key") {
     this.actions = [];
     this.state.log = [];
     this.state.penPaths = [];
@@ -278,7 +326,13 @@ export class Runtime {
     this.state.penDown = false;
     this.state.running = true;
     this.runningType = type;
-    this.log(type === "start" ? "[系统] 开始执行程序" : "[系统] 舞台被点击，执行事件");
+    this.log(
+      type === "start"
+        ? "[系统] 开始执行程序"
+        : type === "click"
+        ? "[系统] 舞台被点击，执行事件"
+        : "[系统] 按下按键，执行事件"
+    );
     this.emit();
 
     try {
@@ -488,6 +542,18 @@ export class Runtime {
           this.commitCurrentPath();
           this.state.penSize = action.size;
           this.startCurrentPath();
+          this.emit();
+          resolve();
+          break;
+        }
+        case "setSize": {
+          this.state.actor.size = action.size;
+          this.emit();
+          resolve();
+          break;
+        }
+        case "changeSize": {
+          this.state.actor.size = Math.max(0.2, Math.min(5, this.state.actor.size + action.delta));
           this.emit();
           resolve();
           break;

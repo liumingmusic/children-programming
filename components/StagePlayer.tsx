@@ -245,7 +245,7 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
     const angleRad = ((state.actor.angle - 90) * Math.PI) / 180;
     ctx.save();
     ctx.translate(actor.x, actor.y);
-    ctx.scale(ACTOR_SCALE, ACTOR_SCALE);
+    ctx.scale(ACTOR_SCALE * (state.actor.size ?? 1), ACTOR_SCALE * (state.actor.size ?? 1));
     ctx.rotate(angleRad);
 
     // 尾羽

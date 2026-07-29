@@ -56,6 +56,74 @@ export async function runDemo(slug: string, initialStars: [] | undefined = []) {
   return { code, logs, finalState, steps };
 }
 
+// 按「帽子积木类型」把 defaultXml 拆成各事件脚本（与线上 BlocklyEditor.run 同逻辑），
+// 用于把 click / key 类项目的「看示范」也真正跑起来（runDemo 只跑 whenStart）。
+export function genScripts(xml: string): {
+  whenStart: string;
+  whenStageClicked: string;
+  whenKeyPressed: { key: string; code: string }[];
+} {
+  registerCustomBlocks();
+  const div = document.createElement("div");
+  document.body.appendChild(div);
+  const ws = Blockly.inject(div, {
+    toolbox: TOOLBOX,
+    grid: { spacing: 20, length: 3, colour: "#eee", snap: true },
+    zoom: { controls: true, wheel: true, startScale: 0.85 },
+    trashcan: true,
+    theme: Blockly.Themes.Classic,
+  });
+  ws.clear();
+  const dom = Blockly.utils.xml.textToDom(xml);
+  Blockly.Xml.domToWorkspace(dom, ws);
+  // 单块 blockToCode 不会自动初始化生成器的变量表（variableDB_），
+  // 而「重复执行」这类循环积木在生成时需要它，否则会抛 getDistinctName 错误。
+  // 这里手动 init / finish，与 workspaceToCode 内部一致。
+  javascriptGenerator.init(ws);
+  const topBlocks = ws.getTopBlocks(true);
+  let whenStart = "";
+  let whenStageClicked = "";
+  const whenKeyPressed: { key: string; code: string }[] = [];
+  for (const block of topBlocks) {
+    const type = block.type;
+    if (type === "maker_when_start") {
+      whenStart = javascriptGenerator.blockToCode(block).toString();
+    } else if (type === "maker_when_stage_clicked") {
+      whenStageClicked = javascriptGenerator.blockToCode(block).toString();
+    } else if (type === "maker_when_key_pressed") {
+      const key = block.getFieldValue("KEY") || "up";
+      whenKeyPressed.push({ key, code: javascriptGenerator.blockToCode(block).toString() });
+    }
+  }
+  javascriptGenerator.finish();
+  ws.dispose();
+  return { whenStart, whenStageClicked, whenKeyPressed };
+}
+
+// 把某项目（含 click / key / 收集类）的「看示范」真实跑一遍：
+// 用 project.stars 作为可收集目标，并自动触发一次「点击 / 按键」以模拟演示。
+export async function runDemoFull(slug: string) {
+  const project = getProject(slug)!;
+  const { whenStart, whenStageClicked, whenKeyPressed } = genScripts(project.defaultXml!);
+  const code =
+    whenStart + "\n" + whenStageClicked + "\n" + whenKeyPressed.map((k) => k.code).join("\n");
+  const logs: string[] = [];
+  const initialStars = project.stars
+    ? project.stars.map((s, i) => ({ id: i + 1, x: s.x, y: s.y, collected: false }))
+    : undefined;
+  const rt = new Runtime(480, 360, (s: StageState) => {
+    logs.push(...s.log);
+  }, initialStars);
+  rt.setScripts({ whenStart, whenStageClicked, whenKeyPressed });
+  await rt.handleRunStart();
+  // 与线上 BlocklyEditor.run 一致：有点击脚本就自动点一下，否则有按键脚本就自动按一下
+  if (whenStageClicked) await rt.handleStageClick(0, 0);
+  else if (whenKeyPressed.length) await rt.handleKeyPressed(whenKeyPressed[0].key);
+  const finalState = rt.getState();
+  const steps = computeSteps(project, code, logs);
+  return { code, logs, finalState, steps };
+}
+
 // 画布上所有笔画的总点数（判断「到底画了没有」）
 export function totalPoints(finalState: StageState): number {
   return finalState.penPaths.reduce((n, p) => n + p.points.length, 0);
