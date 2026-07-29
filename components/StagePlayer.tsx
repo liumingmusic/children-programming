@@ -15,6 +15,12 @@ interface StagePlayerProps {
 // 二零本体在世界坐标下约 108×74 单位，乘此系数即屏幕上像素尺寸（0.4 ≈ 高 43px / 宽 30px）。
 const ACTOR_SCALE = 0.4;
 
+// 画笔迹的固定屏幕尺寸（不再乘相机 scale，避免小图形时线被放大到 9px+ 显得很粗）。
+// 全局统一开关：调小=更细，调大=更粗。建议范围 2 ~ 4。
+const PEN_WIDTH = 3;
+// 笔迹发光光晕半径（像素）。过大也会让线显得粗，收一点更清爽。
+const PEN_GLOW = 4;
+
 interface View {
   scale: number;
   /** 内容包围盒中心（世界坐标） */
@@ -158,16 +164,16 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
     ctx.fillText("舞台中心", o.x + 8, o.y - 8);
     ctx.restore();
 
-    // 画笔轨迹（在变换后的位置绘制）
-    const drawPath = (path: { points: { x: number; y: number }[]; color: string }, lineWidth = 3) => {
+    // 画笔轨迹（在变换后的位置绘制；线宽/光晕用固定屏幕像素，不随相机放大变粗）
+    const drawPath = (path: { points: { x: number; y: number }[]; color: string }) => {
       if (path.points.length < 2) return;
       ctx.save();
       ctx.strokeStyle = path.color;
-      ctx.lineWidth = lineWidth * scale;
+      ctx.lineWidth = PEN_WIDTH;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.shadowColor = path.color;
-      ctx.shadowBlur = 6;
+      ctx.shadowBlur = PEN_GLOW;
       ctx.beginPath();
       const start = toScreen(path.points[0].x, path.points[0].y);
       ctx.moveTo(start.x, start.y);
