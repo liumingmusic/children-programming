@@ -10,6 +10,11 @@ interface StagePlayerProps {
   onStageClick?: (x: number, y: number) => void;
 }
 
+// 二零在画布中的固定屏幕尺寸（不再跟随相机自适应缩放 scale，避免小图形时被放大到 300px+ 盖住笔迹）。
+// 这是「全局统一」的二零大小开关：调小此值可全局缩小二零，调大则放大。建议范围 0.3 ~ 0.55。
+// 二零本体在世界坐标下约 108×74 单位，乘此系数即屏幕上像素尺寸（0.4 ≈ 高 43px / 宽 30px）。
+const ACTOR_SCALE = 0.4;
+
 interface View {
   scale: number;
   /** 内容包围盒中心（世界坐标） */
@@ -229,12 +234,12 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
       drawSpeechBubble(ctx, a.x, a.y, state.actor.message, cw, ch);
     }
 
-    // 角色「二零」（位置用变换，整体按 scale 缩放，始终与画面协调）
+    // 角色「二零」（位置用变换 + 自身旋转；尺寸用固定 ACTOR_SCALE，不随相机缩放，避免盖住笔迹）
     const actor = toScreen(state.actor.x, state.actor.y);
     const angleRad = ((state.actor.angle - 90) * Math.PI) / 180;
     ctx.save();
     ctx.translate(actor.x, actor.y);
-    ctx.scale(scale, scale);
+    ctx.scale(ACTOR_SCALE, ACTOR_SCALE);
     ctx.rotate(angleRad);
 
     // 尾羽
