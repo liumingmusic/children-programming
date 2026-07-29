@@ -1,31 +1,43 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { StageState } from "@/lib/runtime";
+import type { ProjectScene } from "@/courses";
 
 interface StagePlayerProps {
   state: StageState;
+  scene?: ProjectScene;
   onStageClick?: (x: number, y: number) => void;
 }
 
-export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
+interface View {
+  scale: number;
+  /** 内容包围盒中心（世界坐标） */
+  cx: number;
+  cy: number;
+}
+
+export default function StagePlayer({ state, scene, onStageClick }: StagePlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const starsRef = useRef<{ x: number; y: number; r: number; alpha: number; twinkle: number }[]>([]);
+  const sizeRef = useRef({ w: 480, h: 360 });
+  const viewRef = useRef<View>({ scale: 1, cx: 0, cy: 0 });
+  // 用户缩放系数（在自动适配的基础上再放大/缩小）
+  const [zoom, setZoom] = useState(1);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || !onStageClick) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const scaleX = state.width / rect.width;
-    const scaleY = state.height / rect.height;
-    const px = (e.clientX - rect.left) * scaleX;
-    const py = (e.clientY - rect.top) * scaleY;
-    // Convert canvas px (origin at center) to runtime coordinates
-    const x = px - state.width / 2;
-    const y = state.height / 2 - py;
-    onStageClick(x, y);
+    const cw = rect.width;
+    const ch = rect.height;
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    const { scale, cx, cy } = viewRef.current;
+    // 屏幕坐标 -> 世界坐标（反向变换）
+    const wx = (px - cw / 2) / scale + cx;
+    const wy = (ch / 2 - py) / scale + cy;
+    onStageClick(wx, wy);
   };
 
   useEffect(() => {
@@ -36,21 +48,19 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
 
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.floor(rect.width * dpr);
-    canvas.height = Math.floor(rect.height * dpr);
-    ctx.scale(dpr, dpr);
+    const cw = rect.width;
+    const ch = rect.height;
+    canvas.width = Math.floor(cw * dpr);
+    canvas.height = Math.floor(ch * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    sizeRef.current = { w: cw, h: ch };
 
-    const width = rect.width;
-    const height = rect.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    // Lazy-init twinkling stars background
+    // Lazy-init twinkling stars background (screen space)
     if (starsRef.current.length === 0) {
       const count = 40;
       starsRef.current = Array.from({ length: count }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
+        x: Math.random() * cw,
+        y: Math.random() * ch,
         r: Math.random() * 1.5 + 0.5,
         alpha: Math.random() * 0.5 + 0.3,
         twinkle: Math.random() * Math.PI * 2,
@@ -58,11 +68,11 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
     }
 
     // Background gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    const gradient = ctx.createLinearGradient(0, 0, 0, ch);
     gradient.addColorStop(0, "#0B1C3F");
     gradient.addColorStop(1, "#162B55");
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 0, cw, ch);
 
     // Draw stars
     starsRef.current.forEach((star) => {
@@ -73,79 +83,138 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
       ctx.fill();
     });
 
-    // Draw subtle grid
+    // Draw subtle grid (screen space, decorative)
     ctx.save();
     ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
     ctx.lineWidth = 1;
     const gridSize = 40;
-    for (let x = 0; x <= width; x += gridSize) {
+    for (let x = 0; x <= cw; x += gridSize) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
+      ctx.lineTo(x, ch);
       ctx.stroke();
     }
-    for (let y = 0; y <= height; y += gridSize) {
+    for (let y = 0; y <= ch; y += gridSize) {
       ctx.beginPath();
       ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
+      ctx.lineTo(cw, y);
       ctx.stroke();
     }
     ctx.restore();
 
-    // Draw crosshair at origin
+    // ---- 计算自适应镜头：让所有内容（画笔轨迹/角色/星星）都落在画面内 ----
+    const pad = 36;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const add = (x: number, y: number) => {
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    };
+    add(state.actor.x, state.actor.y);
+    state.stars.forEach((s) => add(s.x, s.y));
+    if (scene?.marks) scene.marks.forEach((m) => add(m.x, m.y));
+    if (scene?.walls) scene.walls.forEach((w) => { add(w.x1, w.y1); add(w.x2, w.y2); });
+    state.penPaths.forEach((p) => p.points.forEach((pt) => add(pt.x, pt.y)));
+    if (state.currentPath) state.currentPath.points.forEach((pt) => add(pt.x, pt.y));
+    if (!isFinite(minX)) {
+      minX = -10;
+      minY = -10;
+      maxX = 10;
+      maxY = 10;
+    }
+    const contentW = Math.max(maxX - minX, 1);
+    const contentH = Math.max(maxY - minY, 1);
+    const fit = Math.min((cw - pad * 2) / contentW, (ch - pad * 2) / contentH);
+    const scale = Math.max(0.12, Math.min(fit * zoom, 3));
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    viewRef.current = { scale, cx, cy };
+    const toScreen = (wx: number, wy: number) => ({
+      x: cw / 2 + (wx - cx) * scale,
+      y: ch / 2 - (wy - cy) * scale,
+    });
+
+    // 舞台中心（世界原点）标记
+    const o = toScreen(0, 0);
     ctx.save();
-    ctx.strokeStyle = "rgba(93, 202, 165, 0.25)";
+    ctx.strokeStyle = "rgba(93, 202, 165, 0.5)";
     ctx.setLineDash([4, 4]);
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(centerX, 0);
-    ctx.lineTo(centerX, height);
-    ctx.moveTo(0, centerY);
-    ctx.lineTo(width, centerY);
+    ctx.arc(o.x, o.y, 5, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.font = '12px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
+    ctx.fillText("舞台中心", o.x + 8, o.y - 8);
     ctx.restore();
 
-    // Draw stage label
-    ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
-    ctx.font = '12px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
-    ctx.fillText("舞台中心", centerX + 6, centerY - 6);
-
-    // Draw pen paths (under actor)
-    const toCanvasPoint = (p: { x: number; y: number }) => ({
-      x: centerX + p.x,
-      y: centerY - p.y,
-    });
-
+    // 画笔轨迹（在变换后的位置绘制）
     const drawPath = (path: { points: { x: number; y: number }[]; color: string }, lineWidth = 3) => {
       if (path.points.length < 2) return;
       ctx.save();
       ctx.strokeStyle = path.color;
-      ctx.lineWidth = lineWidth;
+      ctx.lineWidth = lineWidth * scale;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.shadowColor = path.color;
       ctx.shadowBlur = 6;
       ctx.beginPath();
-      const start = toCanvasPoint(path.points[0]);
+      const start = toScreen(path.points[0].x, path.points[0].y);
       ctx.moveTo(start.x, start.y);
       for (let i = 1; i < path.points.length; i++) {
-        const pt = toCanvasPoint(path.points[i]);
+        const pt = toScreen(path.points[i].x, path.points[i].y);
         ctx.lineTo(pt.x, pt.y);
       }
       ctx.stroke();
       ctx.restore();
     };
-
     state.penPaths.forEach((path) => drawPath(path));
     if (state.currentPath) drawPath(state.currentPath);
 
-    // Draw stars
+    // 场景装饰：目标点 emoji / 障碍 / 迷宫墙（纯展示，位于画笔轨迹之上、角色之下）
+    if (scene?.walls) {
+      scene.walls.forEach((w) => {
+        const a = toScreen(w.x1, w.y1);
+        const b = toScreen(w.x2, w.y2);
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.32)";
+        ctx.lineWidth = Math.max(2, 3 * scale);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+        ctx.restore();
+      });
+    }
+    if (scene?.marks) {
+      scene.marks.forEach((m) => {
+        const p = toScreen(m.x, m.y);
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = '30px -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI Emoji", sans-serif';
+        ctx.fillText(m.emoji, p.x, p.y);
+        if (m.label) {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+          ctx.font = '12px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
+          ctx.fillText(m.label, p.x, p.y + 22);
+        }
+        ctx.restore();
+      });
+    }
+
+    // 星星（按 scale 缩放大小，位置用变换）
     state.stars.forEach((star) => {
       if (star.collected) return;
-      const sx = centerX + star.x;
-      const sy = centerY - star.y;
+      const s = toScreen(star.x, star.y);
       ctx.save();
-      ctx.translate(sx, sy);
+      ctx.translate(s.x, s.y);
+      ctx.scale(scale, scale);
       ctx.fillStyle = "#FFD93D";
       ctx.shadowColor = "#FFD93D";
       ctx.shadowBlur = 12;
@@ -154,22 +223,21 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
       ctx.restore();
     });
 
-    // Actor coordinates
-    const actorX = centerX + state.actor.x;
-    const actorY = centerY - state.actor.y;
-    const angleRad = ((state.actor.angle - 90) * Math.PI) / 180;
-
-    // Draw speech bubble first so it can be above actor
+    // 说话气泡（先画，位于角色之上）
     if (state.actor.message) {
-      drawSpeechBubble(ctx, actorX, actorY, state.actor.message, width, height);
+      const a = toScreen(state.actor.x, state.actor.y);
+      drawSpeechBubble(ctx, a.x, a.y, state.actor.message, cw, ch);
     }
 
-    // Draw actor (ErLing the parrot)
+    // 角色「二零」（位置用变换，整体按 scale 缩放，始终与画面协调）
+    const actor = toScreen(state.actor.x, state.actor.y);
+    const angleRad = ((state.actor.angle - 90) * Math.PI) / 180;
     ctx.save();
-    ctx.translate(actorX, actorY);
+    ctx.translate(actor.x, actor.y);
+    ctx.scale(scale, scale);
     ctx.rotate(angleRad);
 
-    // Tail feathers
+    // 尾羽
     ctx.fillStyle = "#0F6E56";
     ctx.beginPath();
     ctx.moveTo(0, 28);
@@ -179,32 +247,32 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
     ctx.closePath();
     ctx.fill();
 
-    // Wings
+    // 翅膀
     ctx.fillStyle = "#EF9F27";
     ctx.beginPath();
     ctx.ellipse(24, 4, 13, 9, -0.3, 0, Math.PI * 2);
     ctx.ellipse(-24, 4, 13, 9, 0.3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Body
+    // 身体
     ctx.fillStyle = "#F5C4B3";
     ctx.beginPath();
     ctx.ellipse(0, 0, 26, 32, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Belly highlight
+    // 肚皮
     ctx.fillStyle = "#FADBD1";
     ctx.beginPath();
     ctx.ellipse(0, 8, 16, 20, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Head
+    // 头
     ctx.fillStyle = "#F5C4B3";
     ctx.beginPath();
     ctx.arc(0, -28, 20, 0, Math.PI * 2);
     ctx.fill();
 
-    // Head crest (parrot tuft)
+    // 头冠
     ctx.fillStyle = "#EF9F27";
     ctx.beginPath();
     ctx.moveTo(-6, -44);
@@ -214,21 +282,21 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
     ctx.closePath();
     ctx.fill();
 
-    // Eyes
+    // 眼睛
     ctx.fillStyle = "#1a1a2e";
     ctx.beginPath();
     ctx.arc(-8, -32, 5, 0, Math.PI * 2);
     ctx.arc(8, -32, 5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Eye shine
+    // 眼神光
     ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.arc(-6, -34, 1.8, 0, Math.PI * 2);
     ctx.arc(10, -34, 1.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // Beak
+    // 嘴
     ctx.fillStyle = "#D85A30";
     ctx.beginPath();
     ctx.moveTo(0, -26);
@@ -237,7 +305,7 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
     ctx.closePath();
     ctx.fill();
 
-    // Smile
+    // 微笑
     ctx.strokeStyle = "#D85A30";
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
@@ -246,7 +314,7 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
     ctx.stroke();
 
     ctx.restore();
-  }, [state]);
+  }, [state, zoom, scene]);
 
   return (
     <div
@@ -255,11 +323,41 @@ export default function StagePlayer({ state, onStageClick }: StagePlayerProps) {
       className={`relative h-full w-full rounded-lg ${onStageClick ? "cursor-pointer" : ""}`}
       aria-label="舞台预览区"
     >
-      <canvas
-        ref={canvasRef}
-        className="h-full w-full rounded-lg"
-        aria-label="舞台预览区"
-      />
+      <canvas ref={canvasRef} className="h-full w-full rounded-lg" aria-label="舞台预览区" />
+
+      {/* 缩放控件 */}
+      <div className="absolute bottom-2 right-2 flex items-center gap-1">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setZoom((z) => Math.max(0.25, +(z - 0.25).toFixed(2)));
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/85 text-lg font-medium text-[#04342C] shadow-sm hover:bg-white"
+          aria-label="缩小"
+        >
+          －
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)));
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/85 text-lg font-medium text-[#04342C] shadow-sm hover:bg-white"
+          aria-label="放大"
+        >
+          ＋
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setZoom(1);
+          }}
+          className="h-8 rounded-lg bg-white/85 px-2 text-xs font-medium text-[#04342C] shadow-sm hover:bg-white"
+          aria-label="适应画面"
+        >
+          适应
+        </button>
+      </div>
     </div>
   );
 }
@@ -343,7 +441,14 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   return lines.length ? lines : [text];
 }
 
-function drawStarShape(ctx: CanvasRenderingContext2D, cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number) {
+function drawStarShape(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  spikes: number,
+  outerRadius: number,
+  innerRadius: number
+) {
   let rot = (Math.PI / 2) * 3;
   let x = cx;
   let y = cy;

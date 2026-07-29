@@ -1,40 +1,6 @@
 import Link from "next/link";
 import { Sparkles, Gamepad2, Code2, Shield, Leaf, Trophy } from "lucide-react";
-
-function ErLingAvatar({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`relative flex items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-orange-400 shadow-sm ${className}`}
-    >
-      <svg viewBox="0 0 100 100" className="h-full w-full p-2">
-        <circle cx="50" cy="45" r="32" fill="#F5C4B3" />
-        <circle cx="38" cy="40" r="4" fill="#1a1a2e" />
-        <circle cx="62" cy="40" r="4" fill="#1a1a2e" />
-        <path
-          d="M38 58 Q50 68 62 58"
-          fill="none"
-          stroke="#D85A30"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        <path
-          d="M22 30 Q30 10 42 22"
-          fill="none"
-          stroke="#D85A30"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <path
-          d="M78 30 Q70 10 58 22"
-          fill="none"
-          stroke="#D85A30"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
-  );
-}
+import ErLingAvatar from "@/components/ErLingAvatar";
 
 export default function Home() {
   return (
@@ -47,7 +13,7 @@ export default function Home() {
             <span className="text-lg font-medium text-[#04342C]">造物星球</span>
           </Link>
           <nav className="hidden items-center gap-8 text-sm font-medium text-[#085041] sm:flex">
-            <Link href="#missions" className="hover:text-[#0F6E56]">星球任务</Link>
+            <Link href="/missions" className="hover:text-[#0F6E56]">星球任务</Link>
             <Link href="/gallery" className="hover:text-[#0F6E56]">作品花园</Link>
             <Link href="/parent" className="hover:text-[#0F6E56]">家长入口</Link>
           </nav>
@@ -80,7 +46,7 @@ export default function Home() {
                     开始第一个任务
                   </Link>
                   <Link
-                    href="#missions"
+                    href="/missions"
                     className="inline-flex h-12 items-center justify-center rounded-xl border border-[#0F6E56]/20 bg-white px-8 text-base font-medium text-[#0F6E56] transition-colors hover:bg-[#E1F5EE]"
                   >
                     看看有哪些任务
@@ -110,7 +76,7 @@ export default function Home() {
                 title="图形化积木"
                 desc="拖拽积木，让角色动起来、画图案、做小游戏。"
                 icon={<Gamepad2 className="h-6 w-6 text-[#7F77DD]" />}
-                href="/learn/hello"
+                href="/missions/stage-6-8"
                 color="purple"
               />
               <AgeCard
@@ -118,7 +84,7 @@ export default function Home() {
                 title="代码初探"
                 desc="从积木过渡到 JavaScript，做工具和小游戏。"
                 icon={<Code2 className="h-6 w-6 text-[#378ADD]" />}
-                href="#"
+                href="/missions/stage-9-12"
                 color="blue"
               />
               <AgeCard
@@ -126,7 +92,7 @@ export default function Home() {
                 title="进阶工坊"
                 desc="用 Python 和网页技术做完整的独立项目。"
                 icon={<Trophy className="h-6 w-6 text-[#0F6E56]" />}
-                href="#"
+                href="/missions/stage-13-16"
                 color="teal"
               />
             </div>

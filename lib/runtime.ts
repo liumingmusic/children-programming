@@ -43,7 +43,11 @@ type Action =
   | { type: "gotoMouse"; duration: number }
   | { type: "gotoStar"; index: number; duration: number }
   | { type: "say"; text: string; duration: number }
-  | { type: "wait"; seconds: number };
+  | { type: "wait"; seconds: number }
+  | { type: "penDown" }
+  | { type: "penUp" }
+  | { type: "penSetColor"; hue: number }
+  | { type: "penChangeColor"; delta: number };
 
 export type Script = {
   whenStart: string;
@@ -65,15 +69,20 @@ export class Runtime {
   private scripts: Script = { whenStart: "", whenStageClicked: "" };
   private mouse: Point = { x: 0, y: 0 };
   private runningType: "start" | "click" | null = null;
+  private initialStars: Star[];
 
   constructor(
     width: number,
     height: number,
-    onChange: (state: StageState) => void
+    onChange: (state: StageState) => void,
+    initialStars?: Star[]
   ) {
     this.width = width;
     this.height = height;
     this.onChange = onChange;
+    this.initialStars = initialStars
+      ? initialStars.map((s) => ({ ...s }))
+      : DEFAULT_STARS.map((s) => ({ ...s }));
     this.state = {
       width,
       height,
@@ -88,7 +97,7 @@ export class Runtime {
       currentPath: null,
       penColor: 0,
       penDown: false,
-      stars: DEFAULT_STARS.map((s) => ({ ...s })),
+      stars: this.initialStars.map((s) => ({ ...s })),
       running: false,
       log: [],
     };
@@ -111,7 +120,7 @@ export class Runtime {
     this.state.currentPath = null;
     this.state.penColor = 0;
     this.state.penDown = false;
-    this.state.stars = DEFAULT_STARS.map((s) => ({ ...s }));
+    this.state.stars = this.initialStars.map((s) => ({ ...s }));
     this.state.running = false;
     this.state.log = [];
     this.runningType = null;
@@ -132,42 +141,32 @@ export class Runtime {
 
   log(message: string) {
     this.state.log.push(message);
-    if (this.state.log.length > 50) {
+    if (this.state.log.length > 200) {
       this.state.log.shift();
     }
     this.emit();
   }
 
-  // --- Pen state (immediate, not queued) ---
+  // --- Pen state: queued as actions, executed in order during playback ---
+  // 关键：不能在执行生成代码（eval）时立刻改状态，否则 penUp 会在 move
+  // 真正播放前把笔画提交、抬起画笔，导致一条线都画不出来。
   penDown() {
-    this.state.penDown = true;
-    this.state.currentPath = {
-      points: [{ x: this.state.actor.x, y: this.state.actor.y }],
-      color: `hsl(${this.state.penColor % 360}, 80%, 60%)`,
-    };
+    this.actions.push({ type: "penDown" });
     this.log("[系统] 画笔落下");
   }
 
   penUp() {
-    this.state.penDown = false;
-    if (this.state.currentPath) {
-      this.state.penPaths.push(this.state.currentPath);
-      this.state.currentPath = null;
-    }
-    this.emit();
+    this.actions.push({ type: "penUp" });
+    this.log("[系统] 抬笔");
   }
 
   setPenColor(hue: number) {
-    this.commitCurrentPath();
-    this.state.penColor = hue % 360;
-    this.startCurrentPath();
+    this.actions.push({ type: "penSetColor", hue: hue % 360 });
     this.log("[系统] 画笔颜色设置");
   }
 
   changePenColor(delta: number) {
-    this.commitCurrentPath();
-    this.state.penColor = (this.state.penColor + delta) % 360;
-    this.startCurrentPath();
+    this.actions.push({ type: "penChangeColor", delta });
     this.log("[系统] 画笔颜色改变");
   }
 
@@ -241,7 +240,7 @@ export class Runtime {
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.penDown = false;
-    this.state.stars = DEFAULT_STARS.map((s) => ({ ...s }));
+    this.state.stars = this.initialStars.map((s) => ({ ...s }));
   }
 
   async handleStageClick(x: number, y: number) {
@@ -260,6 +259,9 @@ export class Runtime {
   private async runScript(code: string, type: "start" | "click") {
     this.actions = [];
     this.state.log = [];
+    this.state.penPaths = [];
+    this.state.currentPath = null;
+    this.state.penDown = false;
     this.state.running = true;
     this.runningType = type;
     this.log(type === "start" ? "[系统] 开始执行程序" : "[系统] 舞台被点击，执行事件");
@@ -292,10 +294,12 @@ export class Runtime {
   }
 
   private commitCurrentPath() {
-    if (this.state.currentPath) {
+    // 跳过不足 2 个点的退化笔画（如「落笔后未移动就改色」产生的单点段），
+    // 避免画布上出现无意义空路径，也保证 penPaths 里都是可绘制的线段。
+    if (this.state.currentPath && this.state.currentPath.points.length >= 2) {
       this.state.penPaths.push(this.state.currentPath);
-      this.state.currentPath = null;
     }
+    this.state.currentPath = null;
   }
 
   private startCurrentPath() {
@@ -429,6 +433,39 @@ export class Runtime {
         }
         case "wait": {
           setTimeout(resolve, action.seconds);
+          break;
+        }
+        case "penDown": {
+          this.state.penDown = true;
+          this.state.currentPath = {
+            points: [{ x: this.state.actor.x, y: this.state.actor.y }],
+            color: `hsl(${this.state.penColor % 360}, 80%, 60%)`,
+          };
+          this.emit();
+          resolve();
+          break;
+        }
+        case "penUp": {
+          this.commitCurrentPath();
+          this.state.penDown = false;
+          this.emit();
+          resolve();
+          break;
+        }
+        case "penSetColor": {
+          this.commitCurrentPath();
+          this.state.penColor = action.hue % 360;
+          this.startCurrentPath();
+          this.emit();
+          resolve();
+          break;
+        }
+        case "penChangeColor": {
+          this.commitCurrentPath();
+          this.state.penColor = (this.state.penColor + action.delta) % 360;
+          this.startCurrentPath();
+          this.emit();
+          resolve();
           break;
         }
       }

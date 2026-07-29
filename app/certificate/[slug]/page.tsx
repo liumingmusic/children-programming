@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import CertificateClient from "@/components/CertificateClient";
-import { getProject } from "@/courses";
+import { getProject, projects } from "@/courses";
 
 export function generateStaticParams() {
-  return [{ slug: "hello" }, { slug: "rainbow" }, { slug: "stars" }];
+  return projects.map((p) => ({ slug: p.slug }));
 }
 
 interface CertificatePageProps {

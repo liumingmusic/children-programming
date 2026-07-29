@@ -9,6 +9,7 @@ import type { Runtime } from "@/lib/runtime";
 export interface BlocklyEditorHandle {
   getXml: () => string;
   loadXml: (xml: string) => void;
+  getCode: () => string;
   run: (runtime: Runtime) => Promise<void>;
   resetWorkspace: () => void;
 }
@@ -67,6 +68,11 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
         if (!workspace) return "";
         const xml = Blockly.utils.xml.domToText(Blockly.Xml.workspaceToDom(workspace));
         return xml;
+      },
+      getCode: () => {
+        const workspace = workspaceRef.current;
+        if (!workspace) return "";
+        return javascriptGenerator.workspaceToCode(workspace).toString();
       },
       loadXml: (xml: string) => {
         const workspace = workspaceRef.current;

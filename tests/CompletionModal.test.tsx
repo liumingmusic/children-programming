@@ -1,0 +1,64 @@
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import CompletionModal from "@/components/CompletionModal";
+import { getProject } from "@/courses";
+
+describe("CompletionModal 完成弹窗", () => {
+  it("open=false 时不渲染任何内容", () => {
+    const { container } = render(
+      <CompletionModal open={false} onClose={() => {}} project={getProject("hello")!} />
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("open=true 时显示标题与「任务完成」", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("hello")!} />);
+    expect(screen.getByText("任务完成！")).toBeInTheDocument();
+  });
+
+  it("点击 ✕ 关闭按钮会调用 onClose", () => {
+    const onClose = vi.fn();
+    render(<CompletionModal open onClose={onClose} project={getProject("hello")!} />);
+    fireEvent.click(screen.getByLabelText("关闭"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("「查看证书」链接指向 /certificate/{slug}", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("hello")!} />);
+    const link = screen.getByRole("link", { name: /查看证书/ }) as HTMLAnchorElement;
+    expect(link.getAttribute("href")).toContain("/certificate/hello");
+  });
+
+  it("「返回任务列表」链接指向所属项目集合 /missions/{stage}", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("hello")!} />);
+    const link = screen.getByRole("link", { name: /返回任务列表/ }) as HTMLAnchorElement;
+    // hello 属于 stage-6-8，所以返回应回到该学段的项目集合，而非首页
+    expect(link.getAttribute("href")).toBe("/missions/stage-6-8");
+  });
+
+  it("hello 项目显示「挑战下一个：走到小旗子」并指向 /learn/flag", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("hello")!} />);
+    const btn = screen.getByRole("link", { name: /挑战下一个/ }) as HTMLAnchorElement;
+    expect(btn).toHaveTextContent("走到小旗子");
+    expect(btn.getAttribute("href")).toContain("/learn/flag");
+  });
+
+  it("square 项目显示「挑战下一个：二零画三角形」并指向 /learn/triangle", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("square")!} />);
+    const btn = screen.getByRole("link", { name: /挑战下一个/ }) as HTMLAnchorElement;
+    expect(btn).toHaveTextContent("二零画三角形");
+    expect(btn.getAttribute("href")).toContain("/learn/triangle");
+  });
+
+  it("checkerboard 是阶段最后一个项目，不显示「挑战下一个」", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("checkerboard")!} />);
+    expect(screen.queryByRole("link", { name: /挑战下一个/ })).toBeNull();
+  });
+
+  it("stars 不再是最后一个项目，显示「挑战下一个：画正五边形」并指向 /learn/pentagon", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("stars")!} />);
+    const btn = screen.getByRole("link", { name: /挑战下一个/ }) as HTMLAnchorElement;
+    expect(btn).toHaveTextContent("画正五边形");
+    expect(btn.getAttribute("href")).toContain("/learn/pentagon");
+  });
+});

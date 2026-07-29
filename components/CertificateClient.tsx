@@ -30,25 +30,36 @@ export default function CertificateClient({ slug }: CertificateClientProps) {
   const [title, setTitle] = useState<string>("");
   const [completedAt, setCompletedAt] = useState<Date | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
-      const course = getProject(slug);
-      if (!course) {
-        setNotFound(true);
-        return;
+      try {
+        const course = getProject(slug);
+        if (!course) {
+          setNotFound(true);
+          return;
+        }
+        const progress = await getAllProgress();
+        const prog = progress.find((p) => p.slug === slug && p.completed);
+        if (!prog) {
+          setNotFound(true);
+          return;
+        }
+        if (cancelled) return;
+        setTitle(course.title);
+        setCompletedAt(prog.completedAt || new Date());
+      } catch (e) {
+        console.error("加载证书失败", e);
+        if (!cancelled) setError(true);
       }
-      const progress = await getAllProgress();
-      const prog = progress.find((p) => p.slug === slug && p.completed);
-      if (!prog) {
-        setNotFound(true);
-        return;
-      }
-      setTitle(course.title);
-      setCompletedAt(prog.completedAt || new Date());
     }
     load();
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   const handleDownload = () => {
@@ -59,6 +70,19 @@ export default function CertificateClient({ slug }: CertificateClientProps) {
     // Fallback: print the page which will show the certificate card nicely.
     window.print();
   };
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#fafbfc] px-4 text-center">
+        <ErLingAvatar className="mx-auto mb-4 h-16 w-16" />
+        <h1 className="mb-2 text-xl font-medium text-[#04342C]">证书加载失败</h1>
+        <p className="mb-6 text-[#5F5E5A]">读取本地进度时出错了，你可以重新进入任务再试一次。</p>
+        <Link href={`/learn/${slug}`} className="rounded-xl bg-[#0F6E56] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#085041]">
+          重新完成任务
+        </Link>
+      </div>
+    );
+  }
 
   if (notFound) {
     return (
@@ -85,9 +109,9 @@ export default function CertificateClient({ slug }: CertificateClientProps) {
     <div className="flex min-h-screen flex-col bg-[#fafbfc]">
       <header className="border-b border-black/5 bg-white px-4 py-4 shadow-sm print:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <Link href="/gallery" className="flex items-center gap-1 text-sm font-medium text-[#5F5E5A] hover:text-[#0F6E56]">
+          <Link href={`/learn/${slug}`} className="flex items-center gap-1 text-sm font-medium text-[#5F5E5A] hover:text-[#0F6E56]">
             <ArrowLeft className="h-4 w-4" />
-            返回作品花园
+            返回项目
           </Link>
           <div className="flex items-center gap-2">
             <button

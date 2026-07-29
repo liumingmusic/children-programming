@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import LearnPageClient from "@/components/LearnPageClient";
-import { getProject } from "@/courses";
+import { getProject, projects } from "@/courses";
 
 export function generateStaticParams() {
-  return [{ id: "hello" }, { id: "rainbow" }, { id: "stars" }];
+  return projects.map((p) => ({ id: p.slug }));
 }
 
 interface LearnPageProps {

@@ -2,29 +2,16 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Play, RotateCcw, Save, CheckCircle, X, BookOpen, Info } from "lucide-react";
+import { ArrowLeft, Play, RotateCcw, Save, CheckCircle, BookOpen, Info, X } from "lucide-react";
 import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
 import StagePlayer from "@/components/StagePlayer";
+import CompletionModal from "@/components/CompletionModal";
+import ErLingAvatar from "@/components/ErLingAvatar";
 import { Runtime, StageState } from "@/lib/runtime";
 import type { CourseProject } from "@/courses";
+import { getNextProject, getStageOfProject } from "@/courses";
 import { loadProject, saveProject, markProgress, getProgress, recordSessionTime } from "@/lib/db";
-
-function ErLingAvatar({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`relative flex items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-orange-400 shadow-sm ${className}`}
-    >
-      <svg viewBox="0 0 100 100" className="h-full w-full p-2">
-        <circle cx="50" cy="45" r="32" fill="#F5C4B3" />
-        <circle cx="38" cy="40" r="4" fill="#1a1a2e" />
-        <circle cx="62" cy="40" r="4" fill="#1a1a2e" />
-        <path d="M38 58 Q50 68 62 58" fill="none" stroke="#D85A30" strokeWidth="3" strokeLinecap="round" />
-        <path d="M22 30 Q30 10 42 22" fill="none" stroke="#D85A30" strokeWidth="4" strokeLinecap="round" />
-        <path d="M78 30 Q70 10 58 22" fill="none" stroke="#D85A30" strokeWidth="4" strokeLinecap="round" />
-      </svg>
-    </div>
-  );
-}
+import { computeSteps, coach } from "@/lib/steps";
 
 const STAGE_WIDTH = 480;
 const STAGE_HEIGHT = 360;
@@ -70,6 +57,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [hint, setHint] = useState<string | null>(null);
   const prevStepsDone = useRef<boolean[]>(project.steps.map(() => false));
   const sessionStartRef = useRef<number>(0);
+  // 标记本次会话是否已弹过完成庆祝，避免关闭后被 effect 立刻重新弹开
+  const celebratedRef = useRef(false);
 
   useEffect(() => {
     const flushTime = () => {
@@ -102,7 +91,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
         setProgress(progressRef.current);
         markProgress(project.slug, true, 3).catch(console.error);
       }
-    });
+    }, project.slug === "stars" ? undefined : []);
     runtimeRef.current = runtime;
 
     loadProject(project.slug).then((xml) => {
@@ -139,8 +128,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     const editor = editorRef.current;
     if (!runtime || !editor) return;
 
-    if (!generatedCode.trim()) {
-      setHint("二零还没收到指令呢～把积木拖到事件或「当开始运行」下面，再点运行吧！");
+    const code = editor.getCode();
+    setGeneratedCode(code);
+
+    if (!code.trim()) {
+      setHint("二零还没收到指令呢～先拖一个「当开始运行」绿色事件，把积木放进去，再点运行吧！");
       setTimeout(() => setHint(null), 4000);
       return;
     }
@@ -149,7 +141,44 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     setSaveStatus("idle");
     setShowCelebration(false);
     await editor.run(runtime);
-  }, [generatedCode]);
+
+    // 运行后给出针对性辅导：聚焦第一个未完成的步骤
+    const finalLogs = runtimeRef.current?.getState().log ?? [];
+    const st = computeSteps(project, code, finalLogs);
+    if (!st.every((s) => s.done)) {
+      const firstUndone = st.find((s) => !s.done);
+      if (firstUndone) {
+        setHint(coach(project.slug, firstUndone.id));
+        return;
+      }
+    }
+    setHint(null);
+  }, [project]);
+
+  // 「看示范」：加载内置正确范例并自动运行，让孩子照着学
+  const handleShowExample = useCallback(async () => {
+    const editor = editorRef.current;
+    const runtime = runtimeRef.current;
+    if (!editor || !runtime) return;
+    editor.loadXml(project.defaultXml || "");
+    const code = editor.getCode();
+    setGeneratedCode(code);
+    runtime.reset();
+    setSaveStatus("idle");
+    setShowCelebration(false);
+    setShowBrief(false);
+    await editor.run(runtime);
+
+    const finalLogs = runtimeRef.current?.getState().log ?? [];
+    const st = computeSteps(project, code, finalLogs);
+    if (!st.every((s) => s.done)) {
+      const firstUndone = st.find((s) => !s.done);
+      if (firstUndone) setHint(coach(project.slug, firstUndone.id));
+    } else {
+      setHint("这是示范效果～你可以照着搭，或改一改看看会怎样！");
+      setTimeout(() => setHint(null), 4000);
+    }
+  }, [project]);
 
   const handleStageClick = useCallback(async (x: number, y: number) => {
     const runtime = runtimeRef.current;
@@ -161,6 +190,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     runtimeRef.current?.reset();
     setSaveStatus("idle");
     setShowCelebration(false);
+    celebratedRef.current = false;
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -173,27 +203,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     setTimeout(() => setSaveStatus("idle"), 2000);
   }, [project]);
 
-  const stepStatus = project.steps.map((step) => {
-    const id = step.id;
-    let done = false;
-    const code = generatedCode;
+  const stepStatus = computeSteps(project, generatedCode, logs);
 
-    if (project.slug === "hello") {
-      if (id === 1) done = logs.some((log) => log.includes("二零开始移动"));
-      else if (id === 2) done = logs.some((log) => log.startsWith("[二零]"));
-      else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
-    } else if (project.slug === "rainbow") {
-      if (id === 1) done = code.includes("penDown") && (code.includes("setPenColor") || code.includes("changePenColor"));
-      else if (id === 2) done = code.includes("controls_repeat_ext") && code.includes("maker_move") && code.includes("maker_turn");
-      else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
-    } else if (project.slug === "stars") {
-      if (id === 1) done = code.includes("__runtime.gotoMouse()");
-      else if (id === 2) done = code.includes("__runtime.touchingStar()");
-      else if (id === 3) done = logs.some((log) => log.includes("所有星星都收集完了"));
-    }
-
-    return { ...step, done };
-  });
+  // 项目页「返回」应回到它所属的项目集合（学龄段页），而非首页
+  const stage = getStageOfProject(project.slug);
+  const backHref = stage ? `/missions/${stage.id}` : "/missions";
 
   // Trigger toasts when steps newly complete
   useEffect(() => {
@@ -214,12 +228,13 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     }
   }, [stepStatus]);
 
-  // Trigger celebration when all steps complete
+  // Trigger celebration when all steps complete（用 ref 保证只弹一次，关闭后不会立刻重开）
   useEffect(() => {
-    if (stepStatus.every((s) => s.done) && !showCelebration && progress.completed) {
+    if (stepStatus.every((s) => s.done) && progress.completed && !celebratedRef.current) {
+      celebratedRef.current = true;
       setShowCelebration(true);
     }
-  }, [stepStatus, progress.completed, showCelebration]);
+  }, [stepStatus, progress.completed]);
 
   const completedSteps = stepStatus.filter((s) => s.done).length;
 
@@ -228,18 +243,25 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       {/* 顶部栏 */}
       <header className="flex h-14 items-center justify-between border-b border-black/5 bg-white px-4 shadow-sm">
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-1 text-sm font-medium text-[#5F5E5A] hover:text-[#0F6E56]">
+          <Link href={backHref} className="flex items-center gap-1 text-sm font-medium text-[#5F5E5A] hover:text-[#0F6E56]">
             <ArrowLeft className="h-4 w-4" />
-            返回星球
+            返回任务列表
           </Link>
           <h1 className="text-base font-medium text-[#04342C]">{project.title}</h1>
-          <button
-            onClick={() => setShowBrief(true)}
-            className="ml-2 inline-flex items-center gap-1 rounded-full bg-[#E6F1FB] px-2.5 py-1 text-xs font-medium text-[#0C447C] hover:bg-[#CDE4F9]"
-          >
-            <Info className="h-3 w-3" />
-            任务简报
-          </button>
+            <button
+              onClick={() => setShowBrief(true)}
+              className="ml-2 inline-flex items-center gap-1 rounded-full bg-[#E6F1FB] px-2.5 py-1 text-xs font-medium text-[#0C447C] hover:bg-[#CDE4F9]"
+            >
+              <Info className="h-3 w-3" />
+              任务简报
+            </button>
+            <button
+              onClick={handleShowExample}
+              className="ml-2 inline-flex items-center gap-1 rounded-full bg-[#FAEEDA] px-2.5 py-1 text-xs font-medium text-[#412402] hover:bg-[#FAC775]"
+            >
+              <BookOpen className="h-3 w-3" />
+              看示范
+            </button>
         </div>
         <div className="flex items-center gap-3">
           <span className="rounded-full bg-[#E1F5EE] px-3 py-1 text-xs font-medium text-[#04342C]">
@@ -302,11 +324,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
         </section>
 
         {/* 右侧预览区 */}
-        <aside className="flex w-96 flex-col gap-3">
+        <aside className="flex w-[30rem] flex-col gap-3">
           <div className="flex flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
             <h2 className="mb-2 text-sm font-medium text-[#04342C]">舞台预览</h2>
             <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#E6F1FB]">
-              <StagePlayer state={stageState} onStageClick={handleStageClick} />
+              <StagePlayer state={stageState} scene={project.scene} onStageClick={handleStageClick} />
             </div>
           </div>
 
@@ -417,39 +439,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       )}
 
       {/* Completion celebration */}
-      {showCelebration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-2xl">
-            <button
-              onClick={() => setShowCelebration(false)}
-              className="absolute right-4 top-4 rounded-full p-1 text-[#5F5E5A] hover:bg-[#F1EFE8]"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#FAEEDA]">
-              <ErLingAvatar className="h-14 w-14" />
-            </div>
-            <h3 className="mb-2 text-xl font-medium text-[#04342C]">任务完成！</h3>
-            <p className="mb-6 text-sm text-[#5F5E5A]">
-              太棒了！你帮二零完成了第一个任务，获得了一颗「创意种子」！
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowCelebration(false)}
-                className="flex-1 rounded-xl border border-[#0F6E56]/20 bg-white px-4 py-2.5 text-sm font-medium text-[#0F6E56] hover:bg-[#E1F5EE]"
-              >
-                继续探索
-              </button>
-              <Link
-                href={`/certificate/${project.slug}`}
-                className="flex-1 rounded-xl bg-[#0F6E56] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#085041]"
-              >
-                查看证书
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+      <CompletionModal
+        open={showCelebration}
+        onClose={() => setShowCelebration(false)}
+        project={project}
+      />
     </div>
   );
 }
