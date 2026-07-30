@@ -27,8 +27,8 @@ describe("闯关路径（lib/path）", () => {
     expect(path.linearOrder.slice(0, 3)).toEqual(["hello", "flag", "stone"]);
     expect(path.linearOrder).toContain("square"); // loop 在 seq 之后
     expect(path.linearOrder.indexOf("square")).toBeGreaterThan(path.linearOrder.indexOf("frame"));
-    // 总数 = 53
-    expect(path.linearOrder.length).toBe(53);
+    // 总数 = 61（含本次新增的 8 个项目）
+    expect(path.linearOrder.length).toBe(61);
   });
 
   it("getUnlockedSet：空进度时只有第一关解锁", () => {
@@ -51,7 +51,7 @@ describe("闯关路径（lib/path）", () => {
     const path = getStagePath(STAGE);
     const all = new Set(path.linearOrder);
     const unlocked = getUnlockedSet(path.linearOrder, all);
-    expect(unlocked.size).toBe(53);
+    expect(unlocked.size).toBe(61);
   });
 
   it("getUnlockedSet：已完成的关卡永远解锁（兼容乱序完成造成的空洞）", () => {

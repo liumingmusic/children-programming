@@ -17,21 +17,22 @@ const DRAW_LOOP_SLUGS = [
   "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard",
 ];
 
-/** 分类 4 · 事件与互动（9 项） */
+/** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
-  "auto_patrol", "key_forward", "edge_bounce", "size_toggle",
+  "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "expression_shake",
 ];
 
-/** 分类 5 · 条件判断（5 项） */
+/** 分类 5 · 条件判断 */
 const COND_SLUGS = [
   "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3",
+  "random_branch", "odd_even", "size_threshold", "avoid_obstacle", "escape_badguy",
 ];
 
-/** 分类 6 · 收集与闯关游戏（7 项） */
+/** 分类 6 · 收集与闯关游戏 */
 const GAME_SLUGS = [
   "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow",
-  "treasure_map", "escort", "traffic_police",
+  "treasure_map", "escort", "traffic_police", "dodge_clouds", "memory_match",
 ];
 
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
@@ -150,6 +151,10 @@ export function computeSteps(
         if (id === 1) done = clickFired;
         else if (id === 2) done = code.includes("__runtime.changeSize") || code.includes("__runtime.setSize");
         else if (id === 3) done = finished;
+      } else if (project.slug === "expression_shake") {
+        if (id === 1) done = clickFired;
+        else if (id === 2) done = code.includes("__runtime.setExpression(");
+        else if (id === 3) done = finished;
       }
     } else if (COND_SLUGS.includes(project.slug)) {
       // 条件类（分类 5）：基于真实 JS 标记 / 日志判定「用了哪个判断、收集是否完成」
@@ -179,6 +184,26 @@ export function computeSteps(
         if (id === 1) done = code.includes("__runtime.gotoStar");
         else if (id === 2) done = logs.some((log) => log.includes("收集到星星"));
         else if (id === 3) done = logs.some((log) => log.includes("所有星星都收集完了"));
+      } else if (project.slug === "random_branch") {
+        if (id === 1) done = startFired;
+        else if (id === 2) done = /Math\.random/.test(code);
+        else if (id === 3) done = finished;
+      } else if (project.slug === "odd_even") {
+        if (id === 1) done = code.includes("__runtime.setVar") || code.includes("__runtime.getVar");
+        else if (id === 2) done = code.includes("__runtime.getVar") && code.includes("%");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "size_threshold") {
+        if (id === 1) done = startFired;
+        else if (id === 2) done = code.includes("__runtime.getSize()");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "avoid_obstacle") {
+        if (id === 1) done = startFired;
+        else if (id === 2) done = code.includes("__runtime.touchingMark(\"obstacle\")");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "escape_badguy") {
+        if (id === 1) done = startFired;
+        else if (id === 2) done = code.includes("__runtime.touchingMark(\"badguy\")");
+        else if (id === 3) done = finished;
       }
     } else if (GAME_SLUGS.includes(project.slug)) {
       // 游戏类（分类 6）：基于真实 JS 标记 / 日志判定「移动路线、收集、点亮等」
@@ -209,6 +234,13 @@ export function computeSteps(
         if (id === 1) done = clickFired;
         else if (id === 2) done = /__runtime\.mouseX\(\)\s*<\s*0/.test(code);
         else if (id === 3) done = finished;
+      } else if (project.slug === "dodge_clouds") {
+        if (id === 1) done = startFired;
+        else if (id === 2) done = code.includes("__runtime.touchingCloud()");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "memory_match") {
+        // 记忆翻牌由独立组件驱动完成，步骤清单作为静态引导，不在代码层判定。
+        done = false;
       }
     }
     return { ...step, done };

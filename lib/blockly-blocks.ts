@@ -28,6 +28,16 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_pen_is_red" },
     { kind: "block" as const, type: "maker_mouse_x" },
     { kind: "block" as const, type: "maker_mouse_left" },
+    { kind: "block" as const, type: "maker_random_int", inputs: { MIN: { shadow: { type: "math_number", fields: { NUM: 1 } } }, MAX: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
+    { kind: "block" as const, type: "maker_set_var" },
+    { kind: "block" as const, type: "maker_change_var" },
+    { kind: "block" as const, type: "maker_get_var" },
+    { kind: "block" as const, type: "maker_mod", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 7 } } }, B: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
+    { kind: "block" as const, type: "maker_compare", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 0 } } }, B: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
+    { kind: "block" as const, type: "maker_get_size" },
+    { kind: "block" as const, type: "maker_set_expression" },
+    { kind: "block" as const, type: "maker_touching_mark" },
+    { kind: "block" as const, type: "maker_touching_cloud" },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -283,6 +293,147 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+    maker_random_int: {
+      init() {
+        this.appendValueInput("MIN").setCheck("Number").appendField("随机整数，从");
+        this.appendValueInput("MAX").setCheck("Number").appendField("到");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setColour(60);
+        this.setTooltip("随机生成一个在 MIN 到 MAX 之间的整数（含两端）。常放进「如果…那么」做随机选择。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_set_var: {
+      init() {
+        this.appendDummyInput()
+          .appendField("把变量")
+          .appendField(new Blockly.FieldTextInput("n"), "NAME")
+          .appendField("设为");
+        this.appendValueInput("VALUE").setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("给一个变量赋值为某个数（变量名默认 n，可改成任意字母）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_change_var: {
+      init() {
+        this.appendDummyInput()
+          .appendField("变量")
+          .appendField(new Blockly.FieldTextInput("n"), "NAME")
+          .appendField("增加");
+        this.appendValueInput("DELTA").setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("让变量的值增加指定数量（负数就是减少）。常放在「重复执行」里做计数。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_get_var: {
+      init() {
+        this.appendDummyInput()
+          .appendField("变量")
+          .appendField(new Blockly.FieldTextInput("n"), "NAME");
+        this.setOutput(true, "Number");
+        this.setColour(330);
+        this.setTooltip("读取某个变量当前的值，可放进「如果…那么」或算式里。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_mod: {
+      init() {
+        this.appendValueInput("A").setCheck("Number").appendField("取余数：");
+        this.appendValueInput("B").setCheck("Number").appendField("÷");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setColour(230);
+        this.setTooltip("求 A 除以 B 的余数（取模）。例如 7 ÷ 2 的余数是 1。常用来判断奇偶（余数是否等于 0）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_compare: {
+      init() {
+        this.appendValueInput("A").setCheck("Number").appendField("比较");
+        this.appendDummyInput().appendField(
+          new Blockly.FieldDropdown([
+            ["等于", "=="],
+            ["小于", "<"],
+            ["大于", ">"],
+            ["不大于", "<="],
+            ["不小于", ">="],
+            ["不等于", "!="],
+          ]),
+          "OP"
+        );
+        this.appendValueInput("B").setCheck("Number").appendField("与");
+        this.setInputsInline(true);
+        this.setOutput(true, "Boolean");
+        this.setColour(210);
+        this.setTooltip("比较两个数字的大小关系，成立时返回真。常放进「如果…那么」的条件里。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_get_size: {
+      init() {
+        this.appendDummyInput().appendField("二零当前大小");
+        this.setOutput(true, "Number");
+        this.setColour(230);
+        this.setTooltip("返回二零当前的大小倍数，可放进「如果…那么」做阈值判断（如：如果大小 > 3 就停下）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_set_expression: {
+      init() {
+        this.appendDummyInput()
+          .appendField("让二零表情变成")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["普通", "normal"],
+              ["开心", "happy"],
+              ["生气", "angry"],
+              ["惊讶", "surprised"],
+              ["睡觉", "sleepy"],
+            ]),
+            "EXPR"
+          );
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(290);
+        this.setTooltip("让二零换上不同的表情（普通 / 开心 / 生气 / 惊讶 / 睡觉）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_touching_mark: {
+      init() {
+        this.appendDummyInput()
+          .appendField("碰到")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["障碍", "obstacle"],
+              ["坏人", "badguy"],
+            ]),
+            "KIND"
+          );
+        this.setOutput(true, "Boolean");
+        this.setColour(210);
+        this.setTooltip("如果二零碰到了对应种类的标记（障碍 / 坏人）返回真。常放进「如果…那么」做躲避。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_touching_cloud: {
+      init() {
+        this.appendDummyInput().appendField("碰到乌云");
+        this.setOutput(true, "Boolean");
+        this.setColour(210);
+        this.setTooltip("如果二零碰到了飘动的乌云返回真。常放进「如果…那么」做躲避。");
+        this.setHelpUrl("");
+      },
+    },
   });
 
   // Hat block: when start runs the stack and then ends
@@ -388,5 +539,59 @@ export function registerCustomBlocks() {
 
   javascriptGenerator.forBlock["maker_mouse_left"] = () => {
     return ["__runtime.mouseX() < 0", Order.RELATIONAL];
+  };
+
+  javascriptGenerator.forBlock["maker_random_int"] = (block, generator) => {
+    const min = generator.valueToCode(block, "MIN", Order.ATOMIC) || "1";
+    const max = generator.valueToCode(block, "MAX", Order.ATOMIC) || "1";
+    return [`(Math.floor(Math.random() * (${max} - ${min} + 1)) + ${min})`, Order.ATOMIC];
+  };
+
+  javascriptGenerator.forBlock["maker_set_var"] = (block, generator) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    const value = generator.valueToCode(block, "VALUE", Order.ATOMIC) || "0";
+    return `__runtime.setVar(${name}, ${value});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_change_var"] = (block, generator) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    const delta = generator.valueToCode(block, "DELTA", Order.ATOMIC) || "1";
+    return `__runtime.changeVar(${name}, ${delta});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_get_var"] = (block) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    return [`__runtime.getVar(${name})`, Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_mod"] = (block, generator) => {
+    const a = generator.valueToCode(block, "A", Order.ATOMIC) || "0";
+    const b = generator.valueToCode(block, "B", Order.ATOMIC) || "1";
+    return [`(${a} % ${b})`, Order.ATOMIC];
+  };
+
+  javascriptGenerator.forBlock["maker_compare"] = (block, generator) => {
+    const a = generator.valueToCode(block, "A", Order.ATOMIC) || "0";
+    const b = generator.valueToCode(block, "B", Order.ATOMIC) || "0";
+    const op = block.getFieldValue("OP");
+    return [`(${a} ${op} ${b})`, Order.RELATIONAL];
+  };
+
+  javascriptGenerator.forBlock["maker_get_size"] = () => {
+    return ["__runtime.getSize()", Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_set_expression"] = (block) => {
+    const expr = JSON.stringify(block.getFieldValue("EXPR"));
+    return `__runtime.setExpression(${expr});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_touching_mark"] = (block) => {
+    const kind = JSON.stringify(block.getFieldValue("KIND"));
+    return [`__runtime.touchingMark(${kind})`, Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_touching_cloud"] = () => {
+    return ["__runtime.touchingCloud()", Order.FUNCTION_CALL];
   };
 }

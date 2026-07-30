@@ -7,8 +7,9 @@ import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
 import StagePlayer from "@/components/StagePlayer";
 import CompletionModal from "@/components/CompletionModal";
 import ErLingAvatar from "@/components/ErLingAvatar";
-import { Runtime, StageState } from "@/lib/runtime";
+import { Runtime, StageState, type Hazard, type Cloud } from "@/lib/runtime";
 import type { CourseProject } from "@/courses";
+import MemoryGame from "@/components/MemoryGame";
 import { getNextProject, getStageOfProject, getProject } from "@/courses";
 import { loadProject, saveProject, markProgress, getProgress, getAllProgress, recordSessionTime } from "@/lib/db";
 import { computeSteps, coach } from "@/lib/steps";
@@ -124,7 +125,18 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       ? project.stars.map((s, i) => ({ id: i + 1, x: s.x, y: s.y, collected: false }))
       : project.slug === "stars"
         ? undefined
-        : []);
+        : [],
+    {
+      hazards: project.scene?.marks
+        ?.filter((m) => m.kind === "obstacle" || m.kind === "badguy")
+        .map((m) => ({
+          x: m.x,
+          y: m.y,
+          r: 32,
+          kind: m.kind as "obstacle" | "badguy",
+        })) as Hazard[],
+      clouds: (project.scene?.clouds ?? []) as Cloud[],
+    });
     runtimeRef.current = runtime;
 
     loadProject(project.slug).then((xml) => {
@@ -257,6 +269,16 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     setShowCelebration(false);
     celebratedRef.current = false;
   }, []);
+
+  // 记忆翻牌等独立组件类项目：由组件自己判定完成，胜利时回调这里
+  const handleMemoryWin = useCallback(() => {
+    if (!progressRef.current.completed) {
+      progressRef.current = { completed: true, stars: 3 };
+      setProgress(progressRef.current);
+      markProgress(project.slug, true, 3).catch(console.error);
+      setShowCelebration(true);
+    }
+  }, [project.slug]);
 
   const handleSave = useCallback(async () => {
     const editor = editorRef.current;
@@ -444,36 +466,48 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           </div>
         </aside>
 
-        {/* 中间积木编辑区 */}
-        <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
-          <h2 className="mb-2 text-sm font-medium text-[#04342C]">积木工作区</h2>
-          <div className="min-h-0 flex-1">
-            <BlocklyEditor ref={editorRef} onChange={setGeneratedCode} />
-          </div>
-        </section>
-
-        {/* 右侧预览区 */}
-        <aside className="flex w-[30rem] flex-col gap-3">
-          <div className="flex flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
-            <h2 className="mb-2 text-sm font-medium text-[#04342C]">舞台预览</h2>
-            <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#E6F1FB]">
-              <StagePlayer state={stageState} scene={project.scene} onStageClick={handleStageClick} />
+        {/* 中间积木编辑区 / 记忆翻牌等特殊组件区 */}
+        {project.component === "memory" ? (
+          <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
+            <h2 className="mb-2 text-sm font-medium text-[#04342C]">记忆翻牌</h2>
+            <div className="min-h-0 flex-1">
+              <MemoryGame onWin={handleMemoryWin} />
             </div>
-          </div>
+          </section>
+        ) : (
+          <>
+            <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
+              <h2 className="mb-2 text-sm font-medium text-[#04342C]">积木工作区</h2>
+              <div className="min-h-0 flex-1">
+                <BlocklyEditor ref={editorRef} onChange={setGeneratedCode} />
+              </div>
+            </section>
 
-          <div className="h-48 rounded-xl border border-black/10 bg-[#F1EFE8] p-3">
-            <h3 className="mb-2 text-xs font-medium text-[#444441]">运行日志</h3>
-            <div className="scrollbar-hide h-36 space-y-1 overflow-y-auto text-xs text-[#5F5E5A]">
-              {logs.length === 0 && <div className="text-[#999]">点击「运行」开始...</div>}
-              {logs.map((log, i) => (
-                <div key={i}>{log}</div>
-              ))}
-            </div>
-          </div>
-        </aside>
+            {/* 右侧预览区 */}
+            <aside className="flex w-[30rem] flex-col gap-3">
+              <div className="flex flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
+                <h2 className="mb-2 text-sm font-medium text-[#04342C]">舞台预览</h2>
+                <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#E6F1FB]">
+                  <StagePlayer state={stageState} scene={project.scene} onStageClick={handleStageClick} />
+                </div>
+              </div>
+
+              <div className="h-48 rounded-xl border border-black/10 bg-[#F1EFE8] p-3">
+                <h3 className="mb-2 text-xs font-medium text-[#444441]">运行日志</h3>
+                <div className="scrollbar-hide h-36 space-y-1 overflow-y-auto text-xs text-[#5F5E5A]">
+                  {logs.length === 0 && <div className="text-[#999]">点击「运行」开始...</div>}
+                  {logs.map((log, i) => (
+                    <div key={i}>{log}</div>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </>
+        )}
       </div>
 
-      {/* 底部操作栏 */}
+      {/* 底部操作栏（记忆翻牌等独立组件类项目不显示积木操作按钮） */}
+      {project.component !== "memory" && (
       <footer className="flex h-14 items-center justify-between border-t border-black/5 bg-white px-4">
         <div className="flex items-center gap-3">
           <button
@@ -503,6 +537,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           {stageState.running ? "运行中..." : "运行"}
         </button>
       </footer>
+      )}
 
       {/* 生成的代码预览（调试用） */}
       {generatedCode && (

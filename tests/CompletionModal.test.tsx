@@ -50,8 +50,8 @@ describe("CompletionModal 完成弹窗", () => {
     expect(btn.getAttribute("href")).toContain("/learn/triangle");
   });
 
-  it("traffic_police 是阶段最后一个项目，不显示「挑战下一个」", () => {
-    render(<CompletionModal open onClose={() => {}} project={getProject("traffic_police")!} />);
+  it("memory_match 是阶段最后一个项目，不显示「挑战下一个」", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("memory_match")!} />);
     expect(screen.queryByRole("link", { name: /挑战下一个/ })).toBeNull();
   });
 

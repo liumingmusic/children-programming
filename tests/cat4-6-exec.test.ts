@@ -1,19 +1,22 @@
 import { describe, it, expect } from "vitest";
 import { runDemoFull, withInstantRaf } from "./exec-helpers";
 
-// 分类 4（事件）9 项、分类 5（条件）5 项、分类 6（游戏）7 项，共 21 个「看示范」项目。
+// 分类 4（事件）10 项、分类 5（条件）10 项、分类 6（游戏）10 项，共 30 个「看示范」项目。
 // 用真实 Blockly 把 defaultXml 转成 JS，再用真实 Runtime 真跑一遍，
 // 断言：代码能解析、运行无报错、三步进度全部点亮；收集类项目确实收集到所有星星。
 // （覆盖 AGENTS.md §4 的「看示范必须真能跑」「步骤判定用真实 JS 标记」红线）
 
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
-  "auto_patrol", "key_forward", "edge_bounce", "size_toggle",
+  "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "expression_shake",
 ];
-const COND_SLUGS = ["if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3"];
+const COND_SLUGS = [
+  "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3",
+  "random_branch", "odd_even", "size_threshold", "avoid_obstacle", "escape_badguy",
+];
 const GAME_SLUGS = [
   "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow",
-  "treasure_map", "escort", "traffic_police",
+  "treasure_map", "escort", "traffic_police", "dodge_clouds",
 ];
 const ALL_SLUGS = [...EVENT_SLUGS, ...COND_SLUGS, ...GAME_SLUGS];
 const COLLECT_SLUGS = ["collect3", "collect_apples", "collect_rainbow"];

@@ -111,9 +111,19 @@ export async function runDemoFull(slug: string) {
   const initialStars = project.stars
     ? project.stars.map((s, i) => ({ id: i + 1, x: s.x, y: s.y, collected: false }))
     : undefined;
-  const rt = new Runtime(480, 360, (s: StageState) => {
-    logs.push(...s.log);
-  }, initialStars);
+  const hazards = project.scene?.marks
+    ?.filter((m) => m.kind === "obstacle" || m.kind === "badguy")
+    .map((m) => ({ x: m.x, y: m.y, r: 32, kind: m.kind as "obstacle" | "badguy" })) ?? [];
+  const clouds = project.scene?.clouds ?? [];
+  const rt = new Runtime(
+    480,
+    360,
+    (s: StageState) => {
+      logs.push(...s.log);
+    },
+    initialStars,
+    { hazards, clouds }
+  );
   rt.setScripts({ whenStart, whenStageClicked, whenKeyPressed });
   await rt.handleRunStart();
   // 与线上 BlocklyEditor.run 一致：有点击脚本就自动点一下，否则有按键脚本就自动按一下

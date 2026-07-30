@@ -18,6 +18,8 @@ export interface CourseProject {
   scene?: ProjectScene;
   /** 舞台上需要收集的「星星/物品」坐标。传给 Runtime 作为可收集目标（碰触即收集），用于条件与游戏类收集项目。 */
   stars?: { x: number; y: number }[];
+  /** 特殊项目类型：memory=独立翻牌小游戏（不走 Blockly 积木，由专门组件实现）。 */
+  component?: "memory";
 }
 
 /** 舞台上的装饰标记（纯展示用，例如小旗子、宝藏箱、石头、箭头）。 */
@@ -26,6 +28,8 @@ export interface SceneMark {
   y: number;
   emoji: string;
   label?: string;
+  /** 交互种类：decor=纯装饰；obstacle=障碍（运行时参与碰撞判定）；badguy=坏人（运行时参与碰撞判定）。 */
+  kind?: "decor" | "obstacle" | "badguy";
 }
 /** 舞台上的线段障碍（纯展示，例如迷宫的墙）。 */
 export interface SceneWall {
@@ -34,10 +38,20 @@ export interface SceneWall {
   x2: number;
   y2: number;
 }
+/** 会缓慢飘动的乌云（躲避类游戏用），由运行时按 vx/vy 持续移动并反弹于边界。 */
+export interface SceneCloud {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  r: number;
+}
 /** 项目的舞台场景配置（纯展示，不参与运行逻辑判定）。 */
 export interface ProjectScene {
   marks?: SceneMark[];
   walls?: SceneWall[];
+  /** 会动的乌云列表（躲避类项目用）。 */
+  clouds?: SceneCloud[];
 }
 
 /** 项目分类：每个学龄段下，把项目进一步按「概念 / 题材」分组，便于在 /missions/[stage] 页分层展示。 */
@@ -123,7 +137,7 @@ export const stages: Stage[] = [
     name: "图形化积木启蒙",
     tagline: "拖拽彩色积木，让二零动起来、画图案、做小游戏。",
     status: "open",
-    projectSlugs: ["hello", "flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag", "treasure", "dance", "frame", "square", "triangle", "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit", "star5", "flower", "rainbow", "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard", "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog", "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3", "stars", "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow", "treasure_map", "escort", "traffic_police"],
+    projectSlugs: ["hello", "flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag", "treasure", "dance", "frame", "square", "triangle", "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit", "star5", "flower", "rainbow", "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard", "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog", "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "expression_shake", "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3", "random_branch", "odd_even", "size_threshold", "avoid_obstacle", "escape_badguy", "stars", "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow", "treasure_map", "escort", "traffic_police", "dodge_clouds", "memory_match"],
   },
   {
     id: "stage-9-12",
@@ -2387,6 +2401,291 @@ export const projects: CourseProject[] = [
       </statement>
     </block>
   </xml>`,
+},
+{
+  slug: "expression_shake",
+  category: "event",
+  title: "摇晃变表情",
+  ageGroup: "6-8 岁",
+  description: "点击舞台让二零摇晃一下，并换上开心的表情。",
+  missionBrief: "二零想用表情表达心情。写一个程序：点击舞台，二零先左右摇晃一下，然后换上「开心」的表情说一句话。",
+  erLingHint: "① 蓝色「当舞台被点击」里先放两个「移动」（一个 -15、一个 15）让二零晃一晃；② 接「让二零表情变成 开心」；③ 最后接「说 我变开心啦！ 1 秒」；④ 点「运行」后点击舞台试试。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "用「让二零表情变成」换表情" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_move">
+          <value name="STEPS"><shadow type="math_number"><field name="NUM">-15</field></shadow></value>
+          <next><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">15</field></shadow></value>
+            <next><block type="maker_set_expression">
+              <field name="EXPR">happy</field>
+              <next><block type="maker_say">
+                <value name="TEXT"><shadow type="text"><field name="TEXT">我变开心啦！</field></shadow></value>
+                <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "random_branch",
+  category: "cond",
+  title: "随机走不同路",
+  ageGroup: "6-8 岁",
+  description: "用「随机整数」让二零走不同的方向。",
+  missionBrief: "让二零每次都有点不一样：用「随机整数」决定它向左还是向右走。",
+  erLingHint: "① 绿色「当开始运行」里放「如果…那么…否则」（点齿轮加「否则」）；② 条件放「比较：随机整数 1 到 2 等于 1」；③ 那么里放「移动 -60 步」，否则里放「移动 60 步」；④ 点「运行」多试几次，看二零每次方向是否不同。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「随机整数」做判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_if">
+          <mutation else="1"></mutation>
+          <value name="IF0"><block type="maker_compare">
+            <value name="A"><block type="maker_random_int">
+              <value name="MIN"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              <value name="MAX"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+            </block></value>
+            <field name="OP">==</field>
+            <value name="B"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          </block></value>
+          <statement name="DO0"><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">-60</field></shadow></value>
+          </block></statement>
+          <statement name="ELSE"><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "odd_even",
+  category: "cond",
+  title: "奇偶步数走不同路",
+  ageGroup: "6-8 岁",
+  description: "用「变量 + 取余数」判断奇偶，让二零走锯齿路线。",
+  missionBrief: "数数小游戏：让二零重复走 6 步，第「偶数」步走左边、第「奇数」步走右边，走出一条锯齿小路。",
+  erLingHint: "① 绿色「当开始运行」里先放「把变量 n 设为 0」；② 接「重复执行 6 次」，里面放「如果…那么…否则」：条件放「比较：变量 n 取余数 2 等于 0」，那么里放「右转 30 度」、否则里放「右转 -30 度」；③ 接着放「变量 n 增加 1」和「移动 40 步」；④ 点「运行」看锯齿形。",
+  steps: [
+    { id: 1, title: "设置并使用变量" },
+    { id: 2, title: "用「取余数」判断奇偶" },
+    { id: 3, title: "运行看到锯齿路线" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_set_var">
+          <field name="NAME">n</field>
+          <value name="VALUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+          <next><block type="controls_repeat_ext">
+            <value name="TIMES"><shadow type="math_number"><field name="NUM">6</field></shadow></value>
+            <statement name="DO"><block type="controls_if">
+              <mutation else="1"></mutation>
+              <value name="IF0"><block type="maker_compare">
+                <value name="A"><block type="maker_mod">
+                  <value name="A"><block type="maker_get_var"><field name="NAME">n</field></block></value>
+                  <value name="B"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                </block></value>
+                <field name="OP">==</field>
+                <value name="B"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+              </block></value>
+              <statement name="DO0"><block type="maker_turn">
+                <value name="DEGREES"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+              </block></statement>
+              <statement name="ELSE"><block type="maker_turn">
+                <value name="DEGREES"><shadow type="math_number"><field name="NUM">-30</field></shadow></value>
+              </block></statement>
+            </block><next>
+              <block type="maker_change_var">
+                <field name="NAME">n</field>
+                <value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                <next><block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                </block></next>
+              </block>
+            </next></block></statement>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "size_threshold",
+  category: "cond",
+  title: "长到一定大小就停",
+  ageGroup: "6-8 岁",
+  description: "用「比较 + 二零当前大小」做阈值判断。",
+  missionBrief: "二零一点点变大。写一个程序：它不断变大，一旦「大小超过 2」就大声说「够大啦！」停下来。",
+  erLingHint: "① 绿色「当开始运行」里放「重复执行 8 次」；② 里面先放「二零大小增加 0.4」；③ 接「如果…那么」，条件放「比较：二零当前大小 大于 2」，那么里放「说 够大啦！ 1 秒」；④ 点「运行」，看二零变大到阈值就喊停。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「比较 + 二零当前大小」做阈值判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+          <statement name="DO"><block type="maker_change_size">
+            <value name="DELTA"><shadow type="math_number"><field name="NUM">0.4</field></shadow></value>
+            <next><block type="controls_if">
+              <value name="IF0"><block type="maker_compare">
+                <value name="A"><block type="maker_get_size"></block></value>
+                <field name="OP">></field>
+                <value name="B"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+              </block></value>
+              <statement name="DO0"><block type="maker_say">
+                <value name="TEXT"><shadow type="text"><field name="TEXT">够大啦！</field></shadow></value>
+                <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              </block></statement>
+            </block></next>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "avoid_obstacle",
+  category: "cond",
+  title: "遇到石头绕过去",
+  ageGroup: "6-8 岁",
+  description: "用「碰到障碍」判断，让二零绕开石头。",
+  missionBrief: "舞台上有块石头 🪨。写一个程序：二零一直往前走，一「碰到障碍」就拐个弯继续走。",
+  erLingHint: "① 绿色「当开始运行」里放「重复执行 40 次」；② 里面放「移动 15 步」，再放「如果…那么」，条件放「碰到 障碍」、那么里放「右转 90 度」；③ 点「运行」看二零绕开石头。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「碰到障碍」做判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  scene: {
+    marks: [{ x: 60, y: 0, emoji: "🪨", label: "石头", kind: "obstacle" }],
+  },
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+          <statement name="DO"><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">15</field></shadow></value>
+            <next><block type="controls_if">
+              <value name="IF0"><block type="maker_touching_mark"><field name="KIND">obstacle</field></block></value>
+              <statement name="DO0"><block type="maker_turn">
+                <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+              </block></statement>
+            </block></next>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "escape_badguy",
+  category: "cond",
+  title: "碰到坏人就快跑",
+  ageGroup: "6-8 岁",
+  description: "用「碰到坏人」判断，让二零遇到坏猫咪就掉头逃跑。",
+  missionBrief: "星球上有只坏猫咪 🐱。写一个程序：二零往前走，一旦「碰到坏人」就立刻掉头跑开。",
+  erLingHint: "① 绿色「当开始运行」里放「重复执行 60 次」；② 里面放「移动 10 步」，再放「如果…那么」，条件放「碰到 坏人」、那么里放「右转 180 度」+「移动 30 步」；③ 点「运行」看二零遇到坏猫咪就掉头。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「碰到坏人」做判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  scene: {
+    marks: [{ x: 40, y: 40, emoji: "🐱", label: "坏猫咪", kind: "badguy" }],
+  },
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+          <statement name="DO"><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+            <next><block type="controls_if">
+              <value name="IF0"><block type="maker_touching_mark"><field name="KIND">badguy</field></block></value>
+              <statement name="DO0"><block type="maker_turn">
+                <value name="DEGREES"><shadow type="math_number"><field name="NUM">180</field></shadow></value>
+                <next><block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+                </block></next>
+              </block></statement>
+            </block></next>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "dodge_clouds",
+  category: "game",
+  title: "躲避乌云",
+  ageGroup: "6-8 岁",
+  description: "乌云会飘动，让二零躲开它们。",
+  missionBrief: "天上有几朵会飘的乌云 ☁，碰到就糟糕啦。写一个程序：二零一直往前走，一「碰到乌云」就拐弯躲开。",
+  erLingHint: "① 绿色「当开始运行」里放「重复执行 100 次」；② 里面放「移动 12 步」，再放「如果…那么」，条件放「碰到乌云」、那么里放「右转 120 度」；③ 点「运行」，看乌云慢慢飘、二零一路躲。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「碰到乌云」做判断" },
+    { id: 3, title: "运行看到乌云飘动与躲避" },
+  ],
+  scene: {
+    clouds: [
+      { x: 0, y: 0, vx: 1.2, vy: 0.8, r: 35 },
+      { x: -110, y: 70, vx: -1, vy: 1, r: 30 },
+    ],
+  },
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
+          <statement name="DO"><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">12</field></shadow></value>
+            <next><block type="controls_if">
+              <value name="IF0"><block type="maker_touching_cloud"></block></value>
+              <statement name="DO0"><block type="maker_turn">
+                <value name="DEGREES"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
+              </block></statement>
+            </block></next>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+},
+{
+  slug: "memory_match",
+  category: "game",
+  title: "记忆翻牌",
+  ageGroup: "6-8 岁",
+  description: "独立的翻牌配对小游戏：记住卡片位置，找出相同的两张。",
+  missionBrief: "桌面上有几对图案卡片，全部背面朝上。翻开两张，如果一样就消除，不一样就盖回去——靠记忆力把全部卡片配对成功吧！",
+  erLingHint: "这是一个记忆小游戏：点一张卡片翻开，再点另一张。两张图案相同就留在桌面，不同会自动盖回去。把全部配对成功就通关啦！",
+  steps: [
+    { id: 1, title: "翻开两张卡片" },
+    { id: 2, title: "记住并找出相同的两张" },
+    { id: 3, title: "把全部卡片配对成功" },
+  ],
+  component: "memory",
 },
 ];
 

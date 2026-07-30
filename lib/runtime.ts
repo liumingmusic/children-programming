@@ -16,6 +16,25 @@ export interface Star {
   collected: boolean;
 }
 
+/** 舞台上的危险/交互标记（障碍 / 坏人），参与运行时碰撞判定。 */
+export interface Hazard {
+  x: number;
+  y: number;
+  /** 判定半径（舞台坐标单位），角色中心进入此半径即视为碰到。 */
+  r: number;
+  /** 种类，用于区分不同检测，如 "obstacle" / "badguy"。 */
+  kind: string;
+}
+
+/** 会缓慢飘动的乌云（躲避类游戏用），由运行时按 vx/vy 持续移动并反弹于边界。 */
+export interface Cloud {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  r: number;
+}
+
 export interface ActorState {
   x: number;
   y: number;
@@ -24,6 +43,8 @@ export interface ActorState {
   messageUntil: number;
   /** 角色大小倍数，默认 1。点击变大/变小时改变，渲染时乘到角色尺寸上。 */
   size: number;
+  /** 角色表情，用于「变表情」类项目；渲染时切换脸型。 */
+  expression?: "normal" | "happy" | "angry" | "surprised" | "sleepy";
 }
 
 export interface StageState {
@@ -36,6 +57,8 @@ export interface StageState {
   penSize: number; // 画笔粗细（屏幕像素）
   penDown: boolean;
   stars: Star[];
+  /** 当前乌云位置（会动），用于躲避类项目渲染与碰撞判定。 */
+  clouds?: { x: number; y: number; r: number }[];
   running: boolean;
   log: string[];
 }
@@ -81,12 +104,18 @@ export class Runtime {
   private mouse: Point = { x: 0, y: 0 };
   private runningType: "start" | "click" | "key" | null = null;
   private initialStars: Star[];
+  private hazards: Hazard[];
+  private clouds: Cloud[];
+  private initialClouds: Cloud[];
+  private vars: Record<string, number> = {};
+  private cloudRaf: number | null = null;
 
   constructor(
     width: number,
     height: number,
     onChange: (state: StageState) => void,
-    initialStars?: Star[]
+    initialStars?: Star[],
+    opts?: { hazards?: Hazard[]; clouds?: Cloud[] }
   ) {
     this.width = width;
     this.height = height;
@@ -94,6 +123,9 @@ export class Runtime {
     this.initialStars = initialStars
       ? initialStars.map((s) => ({ ...s }))
       : DEFAULT_STARS.map((s) => ({ ...s }));
+    this.hazards = opts?.hazards ? opts.hazards.map((h) => ({ ...h })) : [];
+    this.initialClouds = opts?.clouds ? opts.clouds.map((c) => ({ ...c })) : [];
+    this.clouds = this.initialClouds.map((c) => ({ ...c }));
     this.state = {
       width,
       height,
@@ -104,6 +136,7 @@ export class Runtime {
         message: null,
         messageUntil: 0,
         size: 1,
+        expression: "normal",
       },
       penPaths: [],
       currentPath: null,
@@ -111,6 +144,7 @@ export class Runtime {
       penSize: DEFAULT_PEN_SIZE,
       penDown: false,
       stars: this.initialStars.map((s) => ({ ...s })),
+      clouds: this.initialClouds.map((c) => ({ x: c.x, y: c.y, r: c.r })),
       running: false,
       log: [],
     };
@@ -129,13 +163,17 @@ export class Runtime {
       message: null,
       messageUntil: 0,
       size: 1,
+      expression: "normal",
     };
+    this.vars = {};
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.penColor = 0;
     this.state.penSize = DEFAULT_PEN_SIZE;
     this.state.penDown = false;
     this.state.stars = this.initialStars.map((s) => ({ ...s }));
+    this.clouds = this.initialClouds.map((c) => ({ ...c }));
+    this.state.clouds = this.initialClouds.map((c) => ({ x: c.x, y: c.y, r: c.r }));
     this.state.running = false;
     this.state.log = [];
     this.runningType = null;
@@ -221,6 +259,79 @@ export class Runtime {
   /** 最近一次（点击）的鼠标 x 坐标，用于判断点了左半边还是右半边。 */
   mouseX(): number {
     return this.mouse.x;
+  }
+
+  /** 当前角色大小倍数（用于「阈值 / 大小」类条件判断）。 */
+  getSize(): number {
+    return this.state.actor.size;
+  }
+
+  /** 设置角色表情（用于「变表情」类项目）。 */
+  setExpression(name: "normal" | "happy" | "angry" | "surprised" | "sleepy") {
+    this.state.actor.expression = name;
+    this.log("[系统] 二零换上了新表情");
+    this.emit();
+  }
+
+  /** 设置变量（用于奇偶 / 计数类逻辑）。 */
+  setVar(name: string, value: number) {
+    this.vars[name] = value;
+    this.log(`[系统] 变量 ${name} = ${value}`);
+  }
+
+  /** 修改变量（按 delta 增减）。 */
+  changeVar(name: string, delta: number) {
+    this.vars[name] = (this.vars[name] ?? 0) + delta;
+  }
+
+  /** 读取变量当前值（默认 0）。 */
+  getVar(name: string): number {
+    return this.vars[name] ?? 0;
+  }
+
+  /** 角色是否碰到指定种类的危险标记（障碍 / 坏人）。 */
+  touchingMark(kind: string): boolean {
+    return this.hazards.some((h) => {
+      if (h.kind !== kind) return false;
+      const dx = this.state.actor.x - h.x;
+      const dy = this.state.actor.y - h.y;
+      return Math.sqrt(dx * dx + dy * dy) < h.r + 30;
+    });
+  }
+
+  /** 角色是否碰到任意一朵乌云。 */
+  touchingCloud(): boolean {
+    return this.clouds.some((c) => {
+      const dx = this.state.actor.x - c.x;
+      const dy = this.state.actor.y - c.y;
+      return Math.sqrt(dx * dx + dy * dy) < c.r + 25;
+    });
+  }
+
+  /** 启动乌云飘移动画（仅在存在乌云时）。 */
+  private startClouds() {
+    if (this.cloudRaf !== null || this.clouds.length === 0) return;
+    const step = () => {
+      const margin = 40;
+      for (const c of this.clouds) {
+        c.x += c.vx;
+        c.y += c.vy;
+        if (c.x < -this.width / 2 + margin || c.x > this.width / 2 - margin) c.vx = -c.vx;
+        if (c.y < -this.height / 2 + margin || c.y > this.height / 2 - margin) c.vy = -c.vy;
+      }
+      this.state.clouds = this.clouds.map((c) => ({ x: c.x, y: c.y, r: c.r }));
+      this.emit();
+      this.cloudRaf = requestAnimationFrame(step);
+    };
+    this.cloudRaf = requestAnimationFrame(step);
+  }
+
+  /** 停止乌云飘移动画。 */
+  private stopClouds() {
+    if (this.cloudRaf !== null) {
+      cancelAnimationFrame(this.cloudRaf);
+      this.cloudRaf = null;
+    }
   }
 
   // --- Queued actions ---
@@ -326,6 +437,7 @@ export class Runtime {
     this.state.penDown = false;
     this.state.running = true;
     this.runningType = type;
+    this.startClouds();
     this.log(
       type === "start"
         ? "[系统] 开始执行程序"
@@ -343,6 +455,7 @@ export class Runtime {
     } catch (e) {
       this.log(`[系统] 程序出错：${e}`);
     } finally {
+      this.stopClouds();
       delete (window as unknown as Record<string, unknown>).__runtimeArg;
     }
 

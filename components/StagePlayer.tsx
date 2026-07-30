@@ -21,6 +21,92 @@ const PEN_WIDTH = 3;
 // 笔迹发光光晕半径（像素）。过大也会让线显得粗，收一点更清爽。
 const PEN_GLOW = 4;
 
+/** 根据角色表情绘制不同的脸（在已 translate/rotate 到角色本体的局部坐标系内调用）。 */
+function drawFace(ctx: CanvasRenderingContext2D, expr: string | undefined) {
+  const eyeY = -32;
+  ctx.lineCap = "round";
+  if (expr === "happy") {
+    ctx.strokeStyle = "#1a1a2e";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(-8, eyeY + 2, 5, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.arc(8, eyeY + 2, 5, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+    ctx.fillStyle = "#D85A30";
+    ctx.beginPath();
+    ctx.arc(0, -19, 9, 0.1, Math.PI - 0.1);
+    ctx.fill();
+    ctx.fillStyle = "rgba(216,90,48,0.35)";
+    ctx.beginPath();
+    ctx.arc(-14, -20, 4, 0, Math.PI * 2);
+    ctx.arc(14, -20, 4, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (expr === "angry") {
+    ctx.strokeStyle = "#1a1a2e";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(-13, eyeY - 4); ctx.lineTo(-3, eyeY + 1);
+    ctx.moveTo(13, eyeY - 4); ctx.lineTo(3, eyeY + 1);
+    ctx.stroke();
+    ctx.fillStyle = "#1a1a2e";
+    ctx.beginPath();
+    ctx.arc(-8, eyeY + 3, 4, 0, Math.PI * 2);
+    ctx.arc(8, eyeY + 3, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, -13, 7, Math.PI + 0.2, -0.2);
+    ctx.stroke();
+  } else if (expr === "surprised") {
+    ctx.fillStyle = "#1a1a2e";
+    ctx.beginPath();
+    ctx.arc(-8, eyeY, 6, 0, Math.PI * 2);
+    ctx.arc(8, eyeY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(-6, eyeY - 2, 2, 0, Math.PI * 2);
+    ctx.arc(10, eyeY - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#D85A30";
+    ctx.beginPath();
+    ctx.ellipse(0, -17, 4, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (expr === "sleepy") {
+    ctx.strokeStyle = "#1a1a2e";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(-13, eyeY); ctx.lineTo(-3, eyeY);
+    ctx.moveTo(3, eyeY); ctx.lineTo(13, eyeY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, -17, 4, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = "#1a1a2e";
+    ctx.beginPath();
+    ctx.arc(-8, eyeY, 5, 0, Math.PI * 2);
+    ctx.arc(8, eyeY, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(-6, eyeY - 2, 1.8, 0, Math.PI * 2);
+    ctx.arc(10, eyeY - 2, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#D85A30";
+    ctx.beginPath();
+    ctx.moveTo(0, -26);
+    ctx.lineTo(-9, -16);
+    ctx.lineTo(9, -16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#D85A30";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, -20, 7, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+  }
+}
+
 interface View {
   scale: number;
   /** 内容包围盒中心（世界坐标） */
@@ -234,6 +320,27 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
       ctx.restore();
     });
 
+    // 乌云（会动，躲避类项目）：半透明灰色云团，随运行时飘移实时重绘
+    if (state.clouds && state.clouds.length) {
+      state.clouds.forEach((c) => {
+        const p = toScreen(c.x, c.y);
+        const r = Math.max(14, c.r * scale);
+        ctx.save();
+        ctx.fillStyle = "rgba(120, 130, 145, 0.5)";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.arc(p.x - r * 0.7, p.y + 4 * scale, r * 0.7, 0, Math.PI * 2);
+        ctx.arc(p.x + r * 0.7, p.y + 4 * scale, r * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.font = `${Math.max(12, 16 * scale)}px -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI Emoji", sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("☁", p.x, p.y);
+        ctx.restore();
+      });
+    }
+
     // 说话气泡（先画，位于角色之上）
     if (state.actor.message) {
       const a = toScreen(state.actor.x, state.actor.y);
@@ -293,36 +400,7 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
     ctx.closePath();
     ctx.fill();
 
-    // 眼睛
-    ctx.fillStyle = "#1a1a2e";
-    ctx.beginPath();
-    ctx.arc(-8, -32, 5, 0, Math.PI * 2);
-    ctx.arc(8, -32, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 眼神光
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(-6, -34, 1.8, 0, Math.PI * 2);
-    ctx.arc(10, -34, 1.8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 嘴
-    ctx.fillStyle = "#D85A30";
-    ctx.beginPath();
-    ctx.moveTo(0, -26);
-    ctx.lineTo(-9, -16);
-    ctx.lineTo(9, -16);
-    ctx.closePath();
-    ctx.fill();
-
-    // 微笑
-    ctx.strokeStyle = "#D85A30";
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.arc(0, -20, 7, 0.2, Math.PI - 0.2);
-    ctx.stroke();
+    drawFace(ctx, state.actor.expression);
 
     ctx.restore();
   }, [state, zoom, scene]);
