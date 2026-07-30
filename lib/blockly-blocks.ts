@@ -10,6 +10,7 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "controls_if" },
     { kind: "block" as const, type: "maker_move", inputs: { STEPS: { shadow: { type: "math_number", fields: { NUM: 100 } } } } },
     { kind: "block" as const, type: "maker_turn", inputs: { DEGREES: { shadow: { type: "math_number", fields: { NUM: 15 } } } } },
+    { kind: "block" as const, type: "maker_turn_left", inputs: { DEGREES: { shadow: { type: "math_number", fields: { NUM: 15 } } } } },
     { kind: "block" as const, type: "maker_goto", inputs: { X: { shadow: { type: "math_number", fields: { NUM: 0 } } }, Y: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
     { kind: "block" as const, type: "maker_goto_mouse" },
     { kind: "block" as const, type: "maker_goto_star", inputs: { INDEX: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
@@ -86,6 +87,18 @@ export function registerCustomBlocks() {
         this.setNextStatement(true, null);
         this.setColour(230);
         this.setTooltip("让二零向右转指定度数");
+        this.setHelpUrl("");
+      },
+    },
+    maker_turn_left: {
+      init() {
+        this.appendValueInput("DEGREES").setCheck("Number").appendField("左转");
+        this.appendDummyInput().appendField("度");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("让二零向左转指定度数");
         this.setHelpUrl("");
       },
     },
@@ -455,6 +468,11 @@ export function registerCustomBlocks() {
   javascriptGenerator.forBlock["maker_turn"] = (block, generator) => {
     const value = generator.valueToCode(block, "DEGREES", Order.ATOMIC) || "0";
     return `__runtime.turn(${value});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_turn_left"] = (block, generator) => {
+    const value = generator.valueToCode(block, "DEGREES", Order.ATOMIC) || "0";
+    return `__runtime.turn(-${value});\n`;
   };
 
   javascriptGenerator.forBlock["maker_goto"] = (block, generator) => {

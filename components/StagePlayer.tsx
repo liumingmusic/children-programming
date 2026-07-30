@@ -348,8 +348,10 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
     }
 
     // 角色「二零」（位置用变换 + 自身旋转；尺寸用固定 ACTOR_SCALE，不随相机缩放，避免盖住笔迹）
+    // 角色本体默认朝「上」(局部 -y)。runtime 的 angle 约定：0=朝右(+x)、90=朝下(+y，屏幕坐标 y 向下)。
+    // 要让「脸朝的方向」对齐「移动方向」，需旋转 angle+90°（而非 -90°），否则会倒着走。
     const actor = toScreen(state.actor.x, state.actor.y);
-    const angleRad = ((state.actor.angle - 90) * Math.PI) / 180;
+    const angleRad = ((state.actor.angle + 90) * Math.PI) / 180;
     ctx.save();
     ctx.translate(actor.x, actor.y);
     ctx.scale(ACTOR_SCALE * (state.actor.size ?? 1), ACTOR_SCALE * (state.actor.size ?? 1));

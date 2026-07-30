@@ -69,6 +69,21 @@ describe("分类一序列类项目 defaultXml 真实生成 JS（看示范必须�
   }
 });
 
+describe("左转积木 maker_turn_left 生成器", () => {
+  it("左转应生成 __runtime.turn(-N)（负角度 = 向左转）", () => {
+    const xml = `<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_turn_left"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value></block>
+        </statement>
+      </block>
+    </xml>`;
+    let code = "";
+    expect(() => { code = loadAndGenCode(xml); }).not.toThrow();
+    expect(code).toContain("__runtime.turn(-90)");
+  });
+});
+
 // 分类2/3 新增项目（共 15 项）：defaultXml 必须能真实生成含正确标记的 JS
 const NEW_DRAW_SLUGS = [
   "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit",
