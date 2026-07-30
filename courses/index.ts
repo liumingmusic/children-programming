@@ -123,7 +123,7 @@ export const stages: Stage[] = [
     name: "图形化积木启蒙",
     tagline: "拖拽彩色积木，让二零动起来、画图案、做小游戏。",
     status: "open",
-    projectSlugs: ["hello", "flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag", "treasure", "dance", "frame", "square", "triangle", "star5", "flower", "rainbow", "stars", "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit", "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard", "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog", "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3", "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow", "treasure_map", "escort", "traffic_police"],
+    projectSlugs: ["hello", "flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag", "treasure", "dance", "frame", "square", "triangle", "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit", "star5", "flower", "rainbow", "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard", "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog", "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3", "stars", "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow", "treasure_map", "escort", "traffic_police"],
   },
   {
     id: "stage-9-12",

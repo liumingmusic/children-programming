@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import ErLingAvatar from "@/components/ErLingAvatar";
-import StageCard from "@/components/StageCard";
-import { stages } from "@/courses";
+import MissionsExplorer from "@/components/MissionsExplorer";
 
 export const metadata = {
   title: "星球任务 - 造物星球",
@@ -30,22 +29,18 @@ export default function MissionsPage() {
       <main className="flex-1 px-4 py-12 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-6xl">
           {/* 页头 */}
-          <div className="mb-12 text-center">
+          <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E1F5EE]">
               <Sparkles className="h-7 w-7 text-[#0F6E56]" />
             </div>
             <h1 className="text-3xl font-medium text-[#04342C] sm:text-4xl">星球任务</h1>
             <p className="mx-auto mt-3 max-w-xl text-[#5F5E5A]">
-              先选一个适合你的探险阶段，进去后再挑一个想做的小项目。
+              跟着闯关地图一步步来：完成当前关卡，才会解锁下一关。没解锁的关卡先练前面的吧！
             </p>
           </div>
 
-          {/* 学龄段列表（一级） */}
-          <div className="grid gap-6 md:grid-cols-3">
-            {stages.map((stage) => (
-              <StageCard key={stage.id} stage={stage} />
-            ))}
-          </div>
+          {/* 闯关路径 */}
+          <MissionsExplorer />
         </div>
       </main>
 

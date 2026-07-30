@@ -27,6 +27,7 @@ vi.mock("@/lib/db", () => ({
   saveProject: vi.fn(async () => {}),
   markProgress: vi.fn(async () => {}),
   getProgress: vi.fn(async () => null),
+  getAllProgress: vi.fn(async () => []),
   recordSessionTime: vi.fn(async () => {}),
 }));
 
@@ -39,7 +40,7 @@ describe("LearnPageClient 学习页冒烟", () => {
 
   it("顶部「返回任务列表」指向所属项目集合 /missions/{stage}，而非首页", async () => {
     render(<LearnPageClient project={getProject("hello")!} />);
-    const back = screen.getByRole("link", { name: /返回任务列表/ }) as HTMLAnchorElement;
+    const back = (await screen.findByRole("link", { name: /返回任务列表/ })) as HTMLAnchorElement;
     expect(back.getAttribute("href")).toBe("/missions/stage-6-8");
     expect(back.getAttribute("href")).not.toBe("/");
   });

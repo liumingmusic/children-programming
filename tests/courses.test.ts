@@ -42,10 +42,6 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
       "frame",
       "square",
       "triangle",
-      "star5",
-      "flower",
-      "rainbow",
-      "stars",
       "pentagon",
       "spin",
       "stairs",
@@ -54,6 +50,9 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
       "fence",
       "windmill",
       "pickfruit",
+      "star5",
+      "flower",
+      "rainbow",
       "snowflake",
       "mandala",
       "concentric",
@@ -75,6 +74,7 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
       "if_red_stop",
       "click_left_right",
       "collect3",
+      "stars",
       "maze_exit",
       "collect_apples",
       "light_lanterns",
@@ -102,7 +102,7 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
   });
 
   it("getNextProject 计算同阶段下一个项目（stage-6-8 共 32 项）", () => {
-    const chain = ["hello","flag","stone","shapeL","home","maze","arrow","zigzag","treasure","dance","frame","square","triangle","star5","flower","rainbow","stars","pentagon","spin","stairs","wave","spiral","fence","windmill","pickfruit","snowflake","mandala","concentric","connectdot","house","letter","checkerboard","click_jump","click_color","click_dialog","two_events","click_play_dialog","auto_patrol","key_forward","edge_bounce","size_toggle","if_touch_star","if_edge_turn","if_red_stop","click_left_right","collect3","maze_exit","collect_apples","light_lanterns","collect_rainbow","treasure_map","escort","traffic_police"];
+    const chain = ["hello","flag","stone","shapeL","home","maze","arrow","zigzag","treasure","dance","frame","square","triangle","pentagon","spin","stairs","wave","spiral","fence","windmill","pickfruit","star5","flower","rainbow","snowflake","mandala","concentric","connectdot","house","letter","checkerboard","click_jump","click_color","click_dialog","two_events","click_play_dialog","auto_patrol","key_forward","edge_bounce","size_toggle","if_touch_star","if_edge_turn","if_red_stop","click_left_right","collect3","stars","maze_exit","collect_apples","light_lanterns","collect_rainbow","treasure_map","escort","traffic_police"];
     for (let i = 0; i < chain.length - 1; i++) {
       expect(getNextProject(chain[i])?.slug, `${chain[i]} 的下一个`).toBe(chain[i + 1]);
     }

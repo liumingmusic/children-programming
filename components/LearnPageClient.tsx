@@ -9,9 +9,10 @@ import CompletionModal from "@/components/CompletionModal";
 import ErLingAvatar from "@/components/ErLingAvatar";
 import { Runtime, StageState } from "@/lib/runtime";
 import type { CourseProject } from "@/courses";
-import { getNextProject, getStageOfProject } from "@/courses";
-import { loadProject, saveProject, markProgress, getProgress, recordSessionTime } from "@/lib/db";
+import { getNextProject, getStageOfProject, getProject } from "@/courses";
+import { loadProject, saveProject, markProgress, getProgress, getAllProgress, recordSessionTime } from "@/lib/db";
 import { computeSteps, coach } from "@/lib/steps";
+import { isUnlocked, getPreviousSlug } from "@/lib/path";
 
 const STAGE_WIDTH = 480;
 const STAGE_HEIGHT = 360;
@@ -65,6 +66,10 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [showExample, setShowExample] = useState(false);
   const studentXmlRef = useRef<string | null>(null);
   const showExampleRef = useRef(false);
+
+  // 闯关锁门：未解锁的关卡不进编辑器（防止跨项目练习）
+  const [lockReady, setLockReady] = useState(false);
+  const [locked, setLocked] = useState(false);
 
   // 键盘事件：把方向键转发给运行时，用于「按键前进」等键盘操控项目
   useEffect(() => {
@@ -145,6 +150,21 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       runtime.reset();
     };
   }, [project.slug, project.defaultXml]);
+
+  // 锁门判定：读取本地进度，按严格顺序判断本关是否解锁
+  useEffect(() => {
+    const stage = getStageOfProject(project.slug);
+    if (!stage) {
+      setLockReady(true);
+      setLocked(false);
+      return;
+    }
+    getAllProgress().then((list) => {
+      const completed = new Set(list.filter((p) => p.completed).map((p) => p.slug));
+      setLocked(!isUnlocked(stage.id, project.slug, completed));
+      setLockReady(true);
+    });
+  }, [project.slug]);
 
   const closeBrief = useCallback(() => {
     setShowBrief(false);
@@ -282,6 +302,52 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   }, [stepStatus, progress.completed]);
 
   const completedSteps = stepStatus.filter((s) => s.done).length;
+
+  if (!lockReady) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-[#fafbfc]">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#0F6E56]/20 border-t-[#0F6E56]" />
+        <p className="mt-3 text-sm text-[#5F5E5A]">正在加载关卡…</p>
+      </div>
+    );
+  }
+
+  if (locked) {
+    const stage = getStageOfProject(project.slug);
+    const prevSlug = stage ? getPreviousSlug(stage.id, project.slug) : null;
+    const prevTitle = prevSlug ? getProject(prevSlug)?.title : null;
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-[#fafbfc] px-4">
+        <div className="w-full max-w-md rounded-3xl border border-black/5 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#E6F1FB]">
+            <span className="text-3xl">🔒</span>
+          </div>
+          <h1 className="mb-2 text-xl font-medium text-[#04342C]">这一关还没解锁</h1>
+          <p className="mb-6 leading-relaxed text-[#5F5E5A]">
+            {prevTitle
+              ? `先完成上一关《${prevTitle}》，就能解锁这一关啦！`
+              : "按顺序闯关，才能解锁后面的关卡哦。"}
+          </p>
+          <div className="flex flex-col gap-3">
+            {prevSlug && (
+              <Link
+                href={`/learn/${prevSlug}`}
+                className="rounded-xl bg-[#0F6E56] px-4 py-3 text-sm font-medium text-white hover:bg-[#085041]"
+              >
+                去完成《{prevTitle}》
+              </Link>
+            )}
+            <Link
+              href="/missions"
+              className="rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-[#5F5E5A] hover:bg-[#F1EFE8]"
+            >
+              返回任务地图
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen flex-col bg-[#fafbfc]">

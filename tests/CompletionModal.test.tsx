@@ -55,10 +55,10 @@ describe("CompletionModal 完成弹窗", () => {
     expect(screen.queryByRole("link", { name: /挑战下一个/ })).toBeNull();
   });
 
-  it("stars 不再是最后一个项目，显示「挑战下一个：画正五边形」并指向 /learn/pentagon", () => {
+  it("stars 不再是最后一个项目，显示「挑战下一个：走迷宫到出口」并指向 /learn/maze_exit", () => {
     render(<CompletionModal open onClose={() => {}} project={getProject("stars")!} />);
     const btn = screen.getByRole("link", { name: /挑战下一个/ }) as HTMLAnchorElement;
-    expect(btn).toHaveTextContent("画正五边形");
-    expect(btn.getAttribute("href")).toContain("/learn/pentagon");
+    expect(btn).toHaveTextContent("走迷宫到出口");
+    expect(btn.getAttribute("href")).toContain("/learn/maze_exit");
   });
 });
