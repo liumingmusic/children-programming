@@ -29,8 +29,8 @@ describe("Runtime 行为（完成判定依赖的日志/状态）", () => {
     rt.setScripts({ whenStart: "__runtime.move(100);", whenStageClicked: "" });
     await rt.handleRunStart();
     const s = getState();
-    // 初始角度 90°：向上移动，y 增大
-    expect(s.actor.y).toBeCloseTo(100, 5);
+    // 初始角度 270°（朝上）：向上移动，屏幕坐标 y 向下故 y 减小到 -100
+    expect(s.actor.y).toBeCloseTo(-100, 5);
     expect(logs.some((l) => l.includes("二零开始移动"))).toBe(true);
     expect(logs.some((l) => l.includes("程序执行完毕"))).toBe(true);
   });
@@ -45,9 +45,10 @@ describe("Runtime 行为（完成判定依赖的日志/状态）", () => {
   it("collectNearbyStars：靠近星星时收集成功", () => {
     const { rt, getState } = makeRuntime();
     const s = getState();
-    // 第一颗星星默认在 (-120, 80)
-    s.actor.x = -120;
-    s.actor.y = 80;
+    // 走到第一颗星星（实际坐标随 DEFAULT_STARS 定义，避免写死）
+    const star0 = s.stars[0];
+    s.actor.x = star0.x;
+    s.actor.y = star0.y;
     rt.collectNearbyStars();
     expect(getState().stars[0].collected).toBe(true);
   });
@@ -55,12 +56,13 @@ describe("Runtime 行为（完成判定依赖的日志/状态）", () => {
   it("touchingStar 在碰到星星时为 true", () => {
     const { rt, getState } = makeRuntime();
     const s = getState();
-    s.actor.x = -120;
-    s.actor.y = 80;
+    const star0 = s.stars[0];
+    s.actor.x = star0.x;
+    s.actor.y = star0.y;
     expect(rt.touchingStar()).toBe(true);
     // 远离时应为 false
-    s.actor.x = 200;
-    s.actor.y = 200;
+    s.actor.x = 400;
+    s.actor.y = 400;
     expect(rt.touchingStar()).toBe(false);
   });
 

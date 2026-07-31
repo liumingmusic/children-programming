@@ -89,9 +89,9 @@ export type Script = {
 };
 
 const DEFAULT_STARS: Star[] = [
-  { id: 1, x: -120, y: 80, collected: false },
-  { id: 2, x: 140, y: -60, collected: false },
-  { id: 3, x: 80, y: 110, collected: false },
+  { id: 1, x: 120, y: -80, collected: false },
+  { id: 2, x: -140, y: 60, collected: false },
+  { id: 3, x: -80, y: -110, collected: false },
 ];
 
 export class Runtime {
@@ -132,7 +132,7 @@ export class Runtime {
       actor: {
         x: 0,
         y: 0,
-        angle: 90,
+        angle: 270,
         message: null,
         messageUntil: 0,
         size: 1,
@@ -159,7 +159,7 @@ export class Runtime {
     this.state.actor = {
       x: 0,
       y: 0,
-      angle: 90,
+      angle: 270,
       message: null,
       messageUntil: 0,
       size: 1,

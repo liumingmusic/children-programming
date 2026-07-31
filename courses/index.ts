@@ -2689,6 +2689,20 @@ export const projects: CourseProject[] = [
 },
 ];
 
+// ⚠️ 坐标体系：初始朝向由 angle=90（朝下）调整为 angle=270（朝上），
+//  为使「看示范」路径与场景目标（旗子/星星/障碍/乌云）依旧吻合，
+//  此处把全部场景坐标一次性做 180° 镜像（x→-x, y→-y）。
+//  路径随初始角度整体翻转 180°，场景同步翻转 → 视觉与玩法完全不变，
+//  仅「角色静止时头朝上、左转往左走」这一朝向问题被修复。
+//  （不要在此手工逐个改坐标；要改某关目标位置，改镜像前的原始值即可。）
+for (const p of projects) {
+  if (p.stars) for (const s of p.stars) { s.x = -s.x; s.y = -s.y; }
+  const marks = p.scene?.marks;
+  if (marks) for (const m of marks) { m.x = -m.x; m.y = -m.y; }
+  const clouds = p.scene?.clouds;
+  if (clouds) for (const c of clouds) { c.x = -c.x; c.y = -c.y; }
+}
+
 export function getProject(slug: string): CourseProject | undefined {
   return projects.find((p) => p.slug === slug);
 }

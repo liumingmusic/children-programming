@@ -34,7 +34,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [stageState, setStageState] = useState<StageState>({
     width: STAGE_WIDTH,
     height: STAGE_HEIGHT,
-    actor: { x: 0, y: 0, angle: 90, message: null, messageUntil: 0, size: 1 },
+    actor: { x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1 },
     penPaths: [],
     currentPath: null,
     penColor: 0,

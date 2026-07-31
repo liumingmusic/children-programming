@@ -10,7 +10,7 @@ const DRAW_SLUGS = [
   "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard",
 ];
 
-// 这 11 个项目的轨迹是「闭合/对称回中心」的，执行完演员应回到原点附近、方向复原为 90°。
+// 这 11 个项目的轨迹是「闭合/对称回中心」的，执行完演员应回到原点附近、方向复原为初始角 270°（朝上）。
 // （fence 终点≈(100,300)、checkerboard 终点≈(200,0)、wave 为开口飘移波浪线，均不回原点，单独处理）
 const RETURNS_TO_ORIGIN = new Set([
   "pentagon", "spin", "stairs", "windmill", "pickfruit",
@@ -36,29 +36,29 @@ describe("分类2/3·端到端真实运行（看示范必须真能画出图形�
     });
   }
 
-  describe("闭合/对称图形：执行完应回到原点附近、方向复原 90°", () => {
+  describe("闭合/对称图形：执行完应回到原点附近、方向复原 270°（初始朝上）", () => {
     for (const slug of RETURNS_TO_ORIGIN) {
-      it(`${slug}：回到原点附近且方向 ≡ 90°`, async () => {
+      it(`${slug}：回到原点附近且方向 ≡ 270°`, async () => {
         await withInstantRaf(async () => {
           const { finalState } = await runDemo(slug);
           expect(finalState.actor.x).toBeCloseTo(0, 1);
           expect(finalState.actor.y).toBeCloseTo(0, 1);
-          expect(normAngle(finalState.actor.angle)).toBeCloseTo(90, 1);
+          expect(normAngle(finalState.actor.angle)).toBeCloseTo(270, 1);
         });
       });
     }
 
-    it("fence：方向复原 90°（不要求回原点）", async () => {
+    it("fence：方向复原 270°（不要求回原点）", async () => {
       await withInstantRaf(async () => {
         const { finalState } = await runDemo("fence");
-        expect(normAngle(finalState.actor.angle)).toBeCloseTo(90, 1);
+        expect(normAngle(finalState.actor.angle)).toBeCloseTo(270, 1);
       });
     });
 
-    it("checkerboard：方向复原 90°（不要求回原点）", async () => {
+    it("checkerboard：方向复原 270°（不要求回原点）", async () => {
       await withInstantRaf(async () => {
         const { finalState } = await runDemo("checkerboard");
-        expect(normAngle(finalState.actor.angle)).toBeCloseTo(90, 1);
+        expect(normAngle(finalState.actor.angle)).toBeCloseTo(270, 1);
       });
     });
   });
