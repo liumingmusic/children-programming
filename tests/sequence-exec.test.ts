@@ -54,16 +54,16 @@ async function runDemo(slug: string) {
 }
 
 // 有「目标点」的项目：演员最终必须停在目标 emoji 处（这才是「走到了」）
-// 注意：初始朝向已改为 angle=270（朝上），场景坐标同步做了 180° 镜像，
-// 故目标点取镜像后的坐标（x→-x, y→-y）。
+// 坐标约定（2026-07-31 修正）：move 的 Y 取负使「脸朝==移动方向」，
+// 场景仅做 X 镜像，故目标点 = 旧镜像坐标的 Y 翻转（x 不变，y 取反）。
 const GOALS: Record<string, { x: number; y: number }> = {
-  flag: { x: 80, y: -80 },
-  shapeL: { x: 100, y: -100 },
-  home: { x: 120, y: -80 },
+  flag: { x: 80, y: 80 },
+  shapeL: { x: 100, y: 100 },
+  home: { x: 120, y: 80 },
   maze: { x: 80, y: 0 },
-  arrow: { x: 100, y: -100 },
-  treasure: { x: 70, y: -90 },
-  stone: { x: -100, y: -75 }, // 绕过小石头后到达的终点🏁
+  arrow: { x: 100, y: 100 },
+  treasure: { x: 70, y: 90 },
+  stone: { x: -100, y: 75 }, // 绕过小石头后到达的终点🏁
 };
 
 const SEQ = ["flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag", "treasure", "dance", "frame"];
@@ -90,8 +90,8 @@ describe("分类一·端到端真实运行（看示范必须真能跑到目标�
   it("stone：演员路径全程不压到小石头（绕行成立）", async () => {
     await withInstantRaf(async () => {
       const { finalState } = await runDemo("stone");
-      // 小石头经 180° 镜像后位于 (0,-75)；路径终点在 (-100,-75)
-      const stone = { x: 0, y: -75 };
+      // 小石头经 X 镜像后位于 (0,75)；路径终点在 (-100,75)
+      const stone = { x: 0, y: 75 };
       const d = Math.hypot(finalState.actor.x - stone.x, finalState.actor.y - stone.y);
       expect(d).toBeGreaterThan(35);
     });

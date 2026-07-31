@@ -89,9 +89,9 @@ export type Script = {
 };
 
 const DEFAULT_STARS: Star[] = [
-  { id: 1, x: 120, y: -80, collected: false },
-  { id: 2, x: -140, y: 60, collected: false },
-  { id: 3, x: -80, y: -110, collected: false },
+  { id: 1, x: 120, y: 80, collected: false },
+  { id: 2, x: -140, y: -60, collected: false },
+  { id: 3, x: -80, y: 110, collected: false },
 ];
 
 export class Runtime {
@@ -505,8 +505,10 @@ export class Runtime {
         case "move": {
           this.log("[系统] 二零开始移动");
           const rad = (this.state.actor.angle * Math.PI) / 180;
+          // 渲染坐标世界 Y 轴朝上（toScreen 用 ch/2 - wy），故世界位移的 Y 分量取负，
+          // 使「脸朝的方向 == 移动方向」：angle=270(朝上) 时 dy=-sin(270)*steps=+steps → 世界 Y 增大=向上。
           const dx = action.steps * Math.cos(rad);
-          const dy = action.steps * Math.sin(rad);
+          const dy = -action.steps * Math.sin(rad);
           this.animateValue(
             { x: this.state.actor.x, y: this.state.actor.y },
             { x: this.state.actor.x + dx, y: this.state.actor.y + dy },

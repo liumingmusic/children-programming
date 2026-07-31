@@ -2689,18 +2689,20 @@ export const projects: CourseProject[] = [
 },
 ];
 
-// ⚠️ 坐标体系：初始朝向由 angle=90（朝下）调整为 angle=270（朝上），
-//  为使「看示范」路径与场景目标（旗子/星星/障碍/乌云）依旧吻合，
-//  此处把全部场景坐标一次性做 180° 镜像（x→-x, y→-y）。
-//  路径随初始角度整体翻转 180°，场景同步翻转 → 视觉与玩法完全不变，
-//  仅「角色静止时头朝上、左转往左走」这一朝向问题被修复。
+// ⚠️ 坐标体系（2026-07-31 修正）：
+//  渲染世界 Y 轴朝上（StagePlayer.toScreen 用 ch/2 - wy），而 runtime 的 move
+//  原本用 dy = steps·sin(angle)，导致「脸朝上(angle=270)时身体往下走」= 倒着走。
+//  已把 move 的 Y 分量改为 dy = -steps·sin(angle)，使「脸朝方向 == 移动方向」。
+//  初始 angle 保持 270（朝上）：move(100) → 世界 Y +100 → 屏幕向上，头朝上，一致。
+//  场景坐标只需做 X 镜像（x→-x）即可让「看示范」路径仍落在旗子/星星/障碍上；
+//  Y 不再镜像（已由 move 的 dy 负向修正统一处理，避免再翻一次）。
 //  （不要在此手工逐个改坐标；要改某关目标位置，改镜像前的原始值即可。）
 for (const p of projects) {
-  if (p.stars) for (const s of p.stars) { s.x = -s.x; s.y = -s.y; }
+  if (p.stars) for (const s of p.stars) { s.x = -s.x; }
   const marks = p.scene?.marks;
-  if (marks) for (const m of marks) { m.x = -m.x; m.y = -m.y; }
+  if (marks) for (const m of marks) { m.x = -m.x; }
   const clouds = p.scene?.clouds;
-  if (clouds) for (const c of clouds) { c.x = -c.x; c.y = -c.y; }
+  if (clouds) for (const c of clouds) { c.x = -c.x; }
 }
 
 export function getProject(slug: string): CourseProject | undefined {

@@ -29,8 +29,9 @@ describe("Runtime 行为（完成判定依赖的日志/状态）", () => {
     rt.setScripts({ whenStart: "__runtime.move(100);", whenStageClicked: "" });
     await rt.handleRunStart();
     const s = getState();
-    // 初始角度 270°（朝上）：向上移动，屏幕坐标 y 向下故 y 减小到 -100
-    expect(s.actor.y).toBeCloseTo(-100, 5);
+    // 初始角度 270°（朝上）：move 的 Y 取负（dy=-steps·sin），故向上移动 → 世界 Y 增大到 +100
+    // （toScreen 把世界 Y 向上映射为屏幕上方），头朝上与移动方向一致。
+    expect(s.actor.y).toBeCloseTo(100, 5);
     expect(logs.some((l) => l.includes("二零开始移动"))).toBe(true);
     expect(logs.some((l) => l.includes("程序执行完毕"))).toBe(true);
   });
