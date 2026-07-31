@@ -71,6 +71,7 @@ export default async function StagePage({ params }: StagePageProps) {
           </Link>
           <nav className="flex items-center gap-6 text-sm font-medium text-[#085041]">
             <Link href="/missions" className="hover:text-[#0F6E56]">星球任务</Link>
+            <Link href="/toolbox" className="hover:text-[#0F6E56]">组件库</Link>
             <Link href="/gallery" className="hover:text-[#0F6E56]">作品花园</Link>
             <Link href="/parent" className="hover:text-[#0F6E56]">家长入口</Link>
           </nav>

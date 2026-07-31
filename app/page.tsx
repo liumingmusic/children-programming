@@ -32,6 +32,7 @@ export default function Home() {
           </Link>
           <nav className="hidden items-center gap-8 text-sm font-medium text-[#085041] sm:flex">
             <Link href="/missions" className="hover:text-[#0F6E56]">星球任务</Link>
+            <Link href="/toolbox" className="hover:text-[#0F6E56]">组件库</Link>
             <Link href="/gallery" className="hover:text-[#0F6E56]">作品花园</Link>
             <Link href="/parent" className="hover:text-[#0F6E56]">家长入口</Link>
           </nav>
