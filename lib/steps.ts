@@ -247,6 +247,48 @@ export function computeSteps(
   });
 }
 
+/**
+ * 校验「目标是否真正达成」——这是修复「自己瞎做也提示作业完成」的核心。
+ *
+ * computeSteps 只检查「用了哪些积木 / 触发了哪些事件 / 程序是否跑完」，
+ * 从不验证结果是否正确。本函数补上「结果校验」：
+ *  - 收集类（项目定义了 stars）：必须集齐所有星星；
+ *  - 导航/到达类（分类为 seq 或 game，且场景里存在非障碍/非坏人的目标标记）：
+ *    角色必须真正走到某个目标标记附近（容差 55 世界单位）；
+ *  - 其余（绘图/事件/条件/无标记序列）：以步骤判定为准（积木使用正确即视为达成）。
+ *
+ * 注意：避开类项目（avoid_obstacle / escape_badguy / dodge_clouds）以「不撞上」为目标，
+ * 其达成与否无法从终态简单判定，故回退到步骤判定。
+ */
+export function isGoalAchieved(
+  project: CourseProject,
+  state: { actor: { x: number; y: number }; stars: { collected: boolean }[] },
+  _logs?: string[]
+): boolean {
+  const allMarks = project.scene?.marks ?? [];
+  const goalMarks = allMarks.filter(
+    (m) => m.kind !== "obstacle" && m.kind !== "badguy"
+  );
+  const avoidType = ["avoid_obstacle", "escape_badguy", "dodge_clouds"].includes(project.slug);
+
+  // dance 是绘图类，原点标记💃为纯装饰，不应要求抵达；以步骤判定为准即可。
+  if (project.slug === "dance") return true;
+
+  // 收集类（仅限 game 分类，如 collect3 / collect_apples / collect_rainbow / stars）：必须集齐所有星星。
+  // 注意 cond 分类的 if_touch_star 虽也有 stars，但它是「条件判断」演示，不应被要求集齐全部星星。
+  if (project.stars && project.stars.length > 0 && project.category === "game") {
+    return state.stars.length > 0 && state.stars.every((s) => s.collected);
+  }
+  // 导航/到达类（seq / game 且存在目标标记）：必须走到某个目标标记附近（容差 55 世界单位）。
+  if (!avoidType && (project.category === "seq" || project.category === "game") && goalMarks.length > 0) {
+    return goalMarks.some(
+      (m) => Math.hypot(state.actor.x - m.x, state.actor.y - m.y) < 55
+    );
+  }
+  // 其余（绘图/事件/条件/无标记序列）：以步骤判定为准
+  return true;
+}
+
 /** 针对「第一个未完成步骤」给出孩子能看懂的辅导提示。 */
 export function coach(slug: string, stepId: number): string {
   if (slug === "hello") {

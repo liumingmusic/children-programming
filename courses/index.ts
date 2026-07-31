@@ -2693,11 +2693,14 @@ export const projects: CourseProject[] = [
 //  渲染世界 Y 轴朝上（StagePlayer.toScreen 用 ch/2 - wy），而 runtime 的 move
 //  原本用 dy = steps·sin(angle)，导致「脸朝上(angle=270)时身体往下走」= 倒着走。
 //  已把 move 的 Y 分量改为 dy = -steps·sin(angle)，使「脸朝方向 == 移动方向」。
-//  初始 angle 保持 270（朝上）：move(100) → 世界 Y +100 → 屏幕向上，头朝上，一致。
-//  场景坐标只需做 X 镜像（x→-x）即可让「看示范」路径仍落在旗子/星星/障碍上；
-//  Y 不再镜像（已由 move 的 dy 负向修正统一处理，避免再翻一次）。
-//  （不要在此手工逐个改坐标；要改某关目标位置，改镜像前的原始值即可。）
+//  初始 angle 保持 270（朝上）。修好朝向后，移动类 demo 的整条路径相对原始坐标系做了
+//  一次「左右镜像」（X 翻转）：故场景标记需同步 X 镜像，demo 才能仍落在旗子/星星上。
+//  ⚠️ 例外：下列项目用「移到 x,y」（绝对坐标）积木，坐标写死在 demo 里、无法被场景镜像
+//  自动同步，一旦镜像就会「题目说右下角、演示却去左上角」对不上。这些项目不含移动类路径、
+//  镜像对它们无益，故跳过镜像——让 demo 坐标与原始场景标记、以及描述里的「右下角/左上角」一致。
+const MIRROR_SKIP = new Set(["light_lanterns", "treasure_map", "escort"]);
 for (const p of projects) {
+  if (MIRROR_SKIP.has(p.slug)) continue;
   if (p.stars) for (const s of p.stars) { s.x = -s.x; }
   const marks = p.scene?.marks;
   if (marks) for (const m of marks) { m.x = -m.x; }

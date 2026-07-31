@@ -12,7 +12,7 @@ import type { CourseProject } from "@/courses";
 import MemoryGame from "@/components/MemoryGame";
 import { getNextProject, getStageOfProject, getProject } from "@/courses";
 import { loadProject, saveProject, markProgress, getProgress, getAllProgress, recordSessionTime } from "@/lib/db";
-import { computeSteps, coach } from "@/lib/steps";
+import { computeSteps, coach, isGoalAchieved } from "@/lib/steps";
 import { isUnlocked, getPreviousSlug } from "@/lib/path";
 
 const STAGE_WIDTH = 480;
@@ -117,9 +117,13 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       setStageState(state);
       setLogs(state.log);
       if (state.log.includes("[系统] 程序执行完毕") && !progressRef.current.completed && !showExampleRef.current) {
-        progressRef.current = { completed: true, stars: 3 };
-        setProgress(progressRef.current);
-        markProgress(project.slug, true, 3).catch(console.error);
+        // 关键修复：不能「程序一跑完就判完成」——必须真正达成目标（走到旗子/集齐星星）才算数，
+        // 否则孩子瞎搭积木也能拿到「任务完成」，纯属误人子弟。
+        if (isGoalAchieved(project, state, state.log)) {
+          progressRef.current = { completed: true, stars: 3 };
+          setProgress(progressRef.current);
+          markProgress(project.slug, true, 3).catch(console.error);
+        }
       }
     }, project.stars
       ? project.stars.map((s, i) => ({ id: i + 1, x: s.x, y: s.y, collected: false }))
@@ -213,6 +217,12 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
         setHint(coach(project.slug, firstUndone.id));
         return;
       }
+    }
+    // 步骤都做对了，但还没真正达成目标（没走到旗子/没集齐星星）：给明确反馈，绝不谎报完成
+    const finalState = runtimeRef.current?.getState();
+    if (finalState && !isGoalAchieved(project, finalState, finalLogs)) {
+      setHint("积木都放对啦！不过二零好像还没真正到目标呢～再调整一下路线，让它走到小旗子 / 宝藏那里吧！");
+      return;
     }
     setHint(null);
   }, [project]);

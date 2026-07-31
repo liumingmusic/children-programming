@@ -199,34 +199,32 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
     }
     ctx.restore();
 
-    // ---- 计算自适应镜头：让所有内容（画笔轨迹/角色/星星）都落在画面内 ----
-    const pad = 36;
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
+    // ---- 固定参考系镜头：仅依据「静态场景（星星/标记/墙）+ 默认舞台范围」计算，运行期间恒定 ----
+    // 关键修复：原先每帧用「角色当前位置 + 实时笔迹」的包围盒重算 scale/cx/cy，
+    // 导致运行时画面突然缩放一下、且参考系随角色漂移——视觉上就像「倒着走 / 方向错乱」。
+    // 现在镜头只看静态布景 + 一个固定默认舞台范围，跑动时绝不重新取景，方向也就真实可信了。
+    const pad = 24;
+    // 默认舞台范围取舞台自身半宽高（480×360 → ±240×±180），保证绝大多数内容可见且比例正确。
+    const defaultHalfW = state.width / 2;
+    const defaultHalfH = state.height / 2;
+    let minX = -defaultHalfW;
+    let maxX = defaultHalfW;
+    let minY = -defaultHalfH;
+    let maxY = defaultHalfH;
     const add = (x: number, y: number) => {
       if (x < minX) minX = x;
       if (x > maxX) maxX = x;
       if (y < minY) minY = y;
       if (y > maxY) maxY = y;
     };
-    add(state.actor.x, state.actor.y);
     state.stars.forEach((s) => add(s.x, s.y));
     if (scene?.marks) scene.marks.forEach((m) => add(m.x, m.y));
     if (scene?.walls) scene.walls.forEach((w) => { add(w.x1, w.y1); add(w.x2, w.y2); });
-    state.penPaths.forEach((p) => p.points.forEach((pt) => add(pt.x, pt.y)));
-    if (state.currentPath) state.currentPath.points.forEach((pt) => add(pt.x, pt.y));
-    if (!isFinite(minX)) {
-      minX = -10;
-      minY = -10;
-      maxX = 10;
-      maxY = 10;
-    }
+    // 角色起始位置 (0,0) 已在默认盒内，无需额外 add；实时笔迹/角色当前位置故意不纳入，保证镜头稳定。
     const contentW = Math.max(maxX - minX, 1);
     const contentH = Math.max(maxY - minY, 1);
     const fit = Math.min((cw - pad * 2) / contentW, (ch - pad * 2) / contentH);
-    const scale = Math.max(0.12, Math.min(fit * zoom, 3));
+    const scale = Math.max(0.12, Math.min(fit * zoom, 6));
     const cx = (minX + maxX) / 2;
     const cy = (minY + maxY) / 2;
     viewRef.current = { scale, cx, cy };
