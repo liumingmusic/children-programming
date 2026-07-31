@@ -4,9 +4,11 @@ import { useState } from "react";
 import { stages } from "@/courses";
 import AdventurePath from "@/components/AdventurePath";
 
-export default function MissionsExplorer() {
+export default function MissionsExplorer({ defaultStage }: { defaultStage?: string }) {
   const openStage = stages.find((s) => s.status === "open") ?? stages[0];
-  const [selected, setSelected] = useState(openStage.id);
+  const initial =
+    defaultStage && stages.some((s) => s.id === defaultStage) ? defaultStage : openStage.id;
+  const [selected, setSelected] = useState(initial);
 
   return (
     <div>
