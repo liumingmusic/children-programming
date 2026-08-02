@@ -149,14 +149,6 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     });
     runtimeRef.current = runtime;
 
-    loadProject(project.slug).then((xml) => {
-      if (editorRef.current) {
-        // 默认进入给「空画布」，让学生自己拖积木；不直接把参考答案（defaultXml）预载进去。
-        // 想参考时再点「看示范」按钮加载示范，关闭后回到学生自己的画布。
-        editorRef.current.loadXml(xml || "");
-      }
-    });
-
     getProgress(project.slug).then((p) => {
       if (p) {
         progressRef.current = { completed: p.completed, stars: p.stars };
@@ -238,6 +230,21 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     setShowExample((s) => !s);
   }, []);
 
+  // 进入编辑器时拉取「已保存作品」用于还原画布（由 BlocklyEditor 在注入完成后调用，
+  // 彻底消除「加载早于注入 / editorRef 未就绪」导致的空白画布）。
+  const bootstrapXml = useCallback(
+    () => loadProject(project.slug),
+    [project.slug]
+  );
+
+  // 退出（卸载）时若有未落盘改动，用最新 XML 立即落盘，避免「拖完就走」丢作品。
+  const flushXml = useCallback(
+    (xml: string) => {
+      saveProject(project.slug, project.title, project.ageGroup, xml).catch(() => {});
+    },
+    [project.slug, project.title, project.ageGroup]
+  );
+
   // 防抖自动保存：学生一停手就把当前积木写入本地，避免「点保存没生效 / 刷新空白」
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
@@ -246,7 +253,10 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       if (!editor) return;
       const xml = editor.getXml();
       saveProject(project.slug, project.title, project.ageGroup, xml)
-        .then(() => setAutoSaved(true))
+        .then(() => {
+          setAutoSaved(true);
+          editor.markSaved();
+        })
         .catch(() => {});
     }, 800);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -309,6 +319,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       await saveProject(project.slug, project.title, project.ageGroup, xml);
       setSaveStatus("saved");
       setAutoSaved(true);
+      editor.markSaved();
       setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (e) {
       setSaveStatus("idle");
@@ -502,6 +513,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
                   ref={editorRef}
                   onChange={handleEditorChange}
                   onAutoSave={scheduleAutoSave}
+                  bootstrapXml={bootstrapXml}
+                  onFlush={flushXml}
                 />
               </div>
             </section>

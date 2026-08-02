@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from "react";
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
@@ -12,23 +12,78 @@ export interface BlocklyEditorHandle {
   getCode: () => string;
   run: (runtime: Runtime) => Promise<void>;
   resetWorkspace: () => void;
+  /** 标记当前内容已落盘，避免退出时重复 flush。 */
+  markSaved: () => void;
 }
 
 interface BlocklyEditorProps {
   onChange?: (code: string) => void;
   /** 真实用户改动（非程序化加载）时回调当前积木 XML，供上层做自动保存。 */
   onAutoSave?: (xml: string) => void;
+  /**
+   * 进入编辑器时拉取「已保存的作品」用于还原画布。
+   * 由本组件在 Blockly 注入完成、workspace 一定就绪后调用，
+   * 彻底消除「加载早于注入」「editorRef 尚未就绪」两类竞态导致的空白画布。
+   */
+  bootstrapXml?: () => Promise<string | null>;
+  /** 退出（卸载）时若有未落盘的改动，用最新 XML 立即落盘，避免「拖完就走」丢作品。 */
+  onFlush?: (xml: string) => void;
 }
 
 const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
-  function BlocklyEditor({ onChange, onAutoSave }, ref) {
+  function BlocklyEditor({ onChange, onAutoSave, bootstrapXml, onFlush }, ref) {
     const blocklyDiv = useRef<HTMLDivElement>(null);
     const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null);
     // 注入初始化 / 程序化 loadXml 期间抑制自动保存，避免把「刚加载的存档」或「看示范」误存成学生作品
     const suppressRef = useRef(false);
-    // 用 ref 持有最新 onAutoSave，保证 effect 依赖稳定（[onChange]），不会因为回调变化而重新注入 Blockly
+    // 用 ref 持有最新回调，保证 inject effect 依赖稳定（[onChange, doLoadXml]），不会因回调变化反复重注入
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
     const onAutoSaveRef = useRef(onAutoSave);
     onAutoSaveRef.current = onAutoSave;
+    const bootstrapRef = useRef(bootstrapXml);
+    bootstrapRef.current = bootstrapXml;
+    const onFlushRef = useRef(onFlush);
+    onFlushRef.current = onFlush;
+
+    // 最新一份 XML 与「是否有未保存改动」——供退出时 flush 使用
+    const latestXmlRef = useRef("");
+    const dirtyRef = useRef(false);
+
+    // 真正的载入逻辑（抽取出来，bootstrap 与命令式 loadXml 共用）
+    const doLoadXml = useCallback((xml: string) => {
+      const workspace = workspaceRef.current;
+      if (!workspace) return;
+      if (!xml) {
+        suppressRef.current = true;
+        workspace.clear();
+        dirtyRef.current = false;
+        latestXmlRef.current = "";
+        setTimeout(() => {
+          suppressRef.current = false;
+        }, 0);
+        return;
+      }
+      let dom: Element | null = null;
+      try {
+        dom = Blockly.utils.xml.textToDom(xml);
+      } catch (e) {
+        console.error("Failed to parse Blockly XML, keep current blocks", e);
+        return;
+      }
+      suppressRef.current = true;
+      workspace.clear();
+      try {
+        Blockly.Xml.domToWorkspace(dom, workspace);
+      } catch (e) {
+        console.error("Failed to load Blockly XML", e);
+      }
+      latestXmlRef.current = xml;
+      dirtyRef.current = false; // 还原的是「已保存内容」，不算脏
+      setTimeout(() => {
+        suppressRef.current = false;
+      }, 0);
+    }, []);
 
     useEffect(() => {
       if (!blocklyDiv.current || workspaceRef.current) return;
@@ -57,32 +112,57 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
 
       const handleChange = () => {
         const code = javascriptGenerator.workspaceToCode(workspace);
-        onChange?.(code);
+        onChangeRef.current?.(code);
         if (!suppressRef.current) {
           const xml = Blockly.utils.xml.domToText(Blockly.Xml.workspaceToDom(workspace));
+          latestXmlRef.current = xml;
+          dirtyRef.current = true; // 真实改动 → 标记为脏，供退出时 flush
           onAutoSaveRef.current?.(xml);
         }
       };
 
       workspace.addChangeListener(handleChange);
-      handleChange();
-      // 初始化完成后放开自动保存（下一个 tick 再放开，跳过本次 handleChange）
-      setTimeout(() => {
-        suppressRef.current = false;
-      }, 0);
+      handleChange(); // 初始化时 workspace 为空且 suppress 为 true，不会触发自动保存
+
+      // 注入完成后立即还原「已保存作品」：此刻 workspace 一定已就绪，
+      // 不再依赖外层 editorRef 异步就绪，从根上消除重进空白画布。
+      const boot = bootstrapRef.current;
+      if (boot) {
+        boot()
+          .then((xml) => doLoadXml(xml || ""))
+          .catch(() => doLoadXml(""));
+      } else {
+        setTimeout(() => {
+          suppressRef.current = false;
+        }, 0);
+      }
 
       return () => {
         workspace.removeChangeListener(handleChange);
+        // 退出前 flush 未落盘的改动：必须「确有改动」且「工作区里真有积木」才落盘。
+        // 注意不能只判断 xml 字符串非空——空工作区序列化出来是 `<xml .../>`（非空字符串），
+        // 那样会把用户已存的作品覆盖成空白画布。故以「实时积木数 > 0」为准。
+        const liveWs = workspaceRef.current;
+        if (liveWs && dirtyRef.current && liveWs.getAllBlocks().length > 0) {
+          try {
+            onFlushRef.current?.(
+              Blockly.utils.xml.domToText(Blockly.Xml.workspaceToDom(liveWs))
+            );
+          } catch {
+            /* 落盘失败不阻塞卸载 */
+          }
+        }
         workspace.dispose();
         workspaceRef.current = null;
       };
-    }, [onChange]);
+    }, [onChange, doLoadXml]);
 
     useImperativeHandle(ref, () => ({
       getXml: () => {
         const workspace = workspaceRef.current;
         if (!workspace) return "";
         const xml = Blockly.utils.xml.domToText(Blockly.Xml.workspaceToDom(workspace));
+        latestXmlRef.current = xml;
         return xml;
       },
       getCode: () => {
@@ -90,40 +170,15 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
         if (!workspace) return "";
         return javascriptGenerator.workspaceToCode(workspace).toString();
       },
-      loadXml: (xml: string) => {
-        const workspace = workspaceRef.current;
-        if (!workspace) return;
-        // 先解析校验：解析失败则保留原有积木、不破坏画布（避免「刷新后空白」的极端情况）
-        if (!xml) {
-          suppressRef.current = true;
-          workspace.clear();
-          setTimeout(() => {
-            suppressRef.current = false;
-          }, 0);
-          return;
-        }
-        let dom: Element | null = null;
-        try {
-          dom = Blockly.utils.xml.textToDom(xml);
-        } catch (e) {
-          console.error("Failed to parse Blockly XML, keep current blocks", e);
-          return;
-        }
-        suppressRef.current = true;
-        workspace.clear();
-        try {
-          Blockly.Xml.domToWorkspace(dom, workspace);
-        } catch (e) {
-          console.error("Failed to load Blockly XML", e);
-        }
-        setTimeout(() => {
-          suppressRef.current = false;
-        }, 0);
+      loadXml: (xml: string) => doLoadXml(xml),
+      markSaved: () => {
+        dirtyRef.current = false;
       },
       resetWorkspace: () => {
         const workspace = workspaceRef.current;
         if (!workspace) return;
         workspace.clear();
+        dirtyRef.current = true; // 清空也是改动，退出时会被 flush（若用户未另存）
       },
       run: async (runtime: Runtime) => {
         const workspace = workspaceRef.current;
