@@ -135,38 +135,51 @@ function ChapterSection({
       </button>
 
       {expanded && (
-        <div className="border-t border-black/5 px-5 py-5">
-          <div className="flex flex-wrap gap-x-5 gap-y-6">
+        <div className="border-t border-black/5 px-4 py-4 sm:px-5 sm:py-5">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {chapter.projects.map((p) => {
               const status = getNodeStatus(p.slug, completedSet, unlockedSet);
               const unlocked = unlockedSet.has(p.slug);
-              const body = (
+              const cardClass =
+                "flex items-center gap-3 rounded-xl border border-black/5 bg-white px-3 py-2.5 text-left transition-colors sm:px-3.5";
+              const inner = (
                 <>
                   <NodeDot status={status} />
-                  <span
-                    className={`mt-2 max-w-[5.5rem] truncate text-center text-xs ${
-                      status === "locked" ? "text-[#9B988E]" : "text-[#04342C]"
-                    }`}
-                  >
-                    {p.title}
-                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={`text-sm font-medium leading-snug break-words ${
+                        status === "locked" ? "text-[#9B988E]" : "text-[#04342C]"
+                      }`}
+                    >
+                      {p.title}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-[#9B988E]">
+                      {status === "completed"
+                        ? "已通关"
+                        : status === "current"
+                          ? "进行中"
+                          : unlocked
+                            ? "可挑战"
+                            : "未解锁"}
+                    </p>
+                  </div>
                 </>
               );
               return (
-                <div key={p.slug} className="flex w-[5.5rem] flex-col items-center">
+                <div key={p.slug}>
                   {unlocked ? (
                     <Link
                       href={`/learn/${p.slug}`}
-                      className="flex flex-col items-center rounded-xl p-1 hover:bg-[#F1EFE8]"
+                      className={`${cardClass} hover:border-[#0F6E56]/25 hover:bg-[#F1EFE8]`}
                     >
-                      {body}
+                      {inner}
                     </Link>
                   ) : (
                     <div
                       title="先完成前面的关卡就能解锁"
-                      className="flex cursor-not-allowed flex-col items-center rounded-xl p-1 opacity-90"
+                      className={`${cardClass} cursor-not-allowed opacity-90`}
                     >
-                      {body}
+                      {inner}
                     </div>
                   )}
                 </div>
