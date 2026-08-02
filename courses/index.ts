@@ -1,3 +1,4 @@
+import { seqProjects } from "@/content/stage-6-8";
 export interface CourseStep {
   id: number;
   title: string;
@@ -158,41 +159,7 @@ export const stages: Stage[] = [
 ];
 
 export const projects: CourseProject[] = [
-  {
-    slug: "hello",
-    category: "seq",
-    title: "二零，打个招呼！",
-    ageGroup: "6-8 岁",
-    description: "用积木让二零移动并说出第一句话。",
-    missionBrief: "二零刚来到造物星球，它想飞到舞台中央，跟大家说声「你好」。你能帮它写出第一个程序吗？",
-    erLingHint: "① 先从积木区拖一个绿色「当开始运行」事件到工作区；② 把黄色「移动」积木拖进它的里面；③ 再拖一个紫色「说」积木接在后面，输入想说的话；④ 点「运行」！卡住时点右上角「看示范」照着学。",
-    steps: [
-      { id: 1, title: "让二零移动" },
-      { id: 2, title: "让二零说话" },
-      { id: 3, title: "点击运行看到效果" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_move">
-            <value name="STEPS">
-              <shadow type="math_number"><field name="NUM">100</field></shadow>
-            </value>
-            <next>
-              <block type="maker_say">
-                <value name="TEXT">
-                  <shadow type="text"><field name="TEXT">你好！我是二零</field></shadow>
-                </value>
-                <value name="SECONDS">
-                  <shadow type="math_number"><field name="NUM">2</field></shadow>
-                </value>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-  },
+  ...seqProjects,
   {
     slug: "rainbow",
     category: "draw",
@@ -236,601 +203,6 @@ export const projects: CourseProject[] = [
                     </next>
                   </block>
                 </statement>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-  },
-  {
-    slug: "flag",
-    category: "seq",
-    title: "走到小旗子",
-    ageGroup: "6-8 岁",
-    description: "用前进和转向，指挥二零穿过星球走到小旗子旁。",
-    missionBrief: "造物星球上插着一面小旗子🚩。帮二零按顺序前进、转向，稳稳地走到小旗子旁边吧！",
-    erLingHint: "① 先拖一个绿色「当开始运行」事件到工作区；② 在里面放「落笔」，让路线看得见；③ 再依次放「移动」和「右转」积木，指挥二零前进、拐弯；④ 点「运行」，看二零走到小旗子旁。卡住就点「看示范」。",
-    steps: [
-      { id: 1, title: "让二零向前走" },
-      { id: 2, title: "用转向走到小旗子" },
-      { id: 3, title: "运行看二零到达" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
-                        <next>
-                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                            <next>
-                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
-                                <next>
-                                  <block type="maker_pen_up"></block>
-                                </next>
-                              </block>
-                            </next>
-                          </block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-    scene: { marks: [{ x: -80, y: 80, emoji: "🚩", label: "小旗子" }] },
-  },
-  {
-    slug: "stone",
-    category: "seq",
-    title: "绕过小石头",
-    ageGroup: "6-8 岁",
-    description: "路上有一块小石头，指挥二零拐个弯绕过去。",
-    missionBrief: "一颗小石头🪨挡在前面。让二零先往前走一点，再拐弯从旁边绕过去，别撞上它！",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 先「移动」往前走一段；③ 用「右转」拐弯，从石头旁边绕过去；④ 再「移动」继续前进，最后「抬笔」。点「运行」看看绕行的路线。",
-    steps: [
-      { id: 1, title: "让二零向前走" },
-      { id: 2, title: "拐弯绕过小石头" },
-      { id: 3, title: "运行看绕行路线" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
-                        <next>
-                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                            <next>
-                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
-                                <next>
-                                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                    <next>
-                                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">140</field></shadow></value>
-                                        <next>
-                                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                            <next>
-                                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">75</field></shadow></value>
-                                                <next>
-                                                  <block type="maker_pen_up"></block>
-                                                </next>
-                                              </block>
-                                            </next>
-                                          </block>
-                                        </next>
-                                      </block>
-                                    </next>
-                                  </block>
-                                </next>
-                              </block>
-                            </next>
-                          </block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-    scene: {
-      marks: [
-        { x: 0, y: 75, emoji: "🪨", label: "小石头" },
-        { x: 100, y: 75, emoji: "🏁", label: "终点" },
-      ],
-    },
-  },
-  {
-    slug: "shapeL",
-    category: "seq",
-    title: "画一个「L」形路线",
-    ageGroup: "6-8 岁",
-    description: "指挥二零画出一条笔直的 L 形路线。",
-    missionBrief: "用画笔让二零画出一条 L 形路线：先直直往上，再拐个弯往旁边。看，像不像字母 L？",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；②「移动」往上走一段；③「右转」拐弯；④ 再「移动」往旁边走一段，最后「抬笔」。运行后就能看到一条 L 形线。",
-    steps: [
-      { id: 1, title: "让二零落笔画线" },
-      { id: 2, title: "拐弯画出 L 的另一边" },
-      { id: 3, title: "运行看 L 形图案" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
-                        <next>
-                          <block type="maker_pen_up"></block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-    scene: { marks: [{ x: -100, y: 100, emoji: "🏁", label: "终点" }] },
-  },
-  {
-    slug: "home",
-    category: "seq",
-    title: "送信使回家",
-    ageGroup: "6-8 岁",
-    description: "送信使迷路了，指挥二零带它回到小屋。",
-    missionBrief: "一只送信使🏠找不到回家的路。帮二零按顺序走，把它平安送回小屋门口吧！",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 先「移动」往前；③「右转」换方向；④ 再「移动」走到小屋，最后「抬笔」。点「运行」看二零送它回家。",
-    steps: [
-      { id: 1, title: "让二零向前走" },
-      { id: 2, title: "转向走到小屋" },
-      { id: 3, title: "运行看到达小屋" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
-                        <next>
-                          <block type="maker_pen_up"></block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-    scene: { marks: [{ x: -120, y: 80, emoji: "🏠", label: "信使的家" }] },
-  },
-  {
-    slug: "maze",
-    category: "seq",
-    title: "走方格迷宫",
-    ageGroup: "6-8 岁",
-    description: "沿着格子路线，不靠循环走到出口。",
-    missionBrief: "造物星球有个小迷宫，出口🚪在一角。用一步一步的前进和转向，把二零带到出口吧（这一关先不用循环哦）！",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 按路线「移动」前进；③ 遇到墙就「右转」换方向；④ 继续「移动」直到出口，最后「抬笔」。点「运行」走一遍迷宫。",
-    steps: [
-      { id: 1, title: "让二零向前走" },
-      { id: 2, title: "拐弯穿过迷宫" },
-      { id: 3, title: "运行走到出口" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
-                        <next>
-                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                            <next>
-                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                                <next>
-                                  <block type="maker_pen_up"></block>
-                                </next>
-                              </block>
-                            </next>
-                          </block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-    scene: {
-      marks: [{ x: -80, y: 0, emoji: "🚪", label: "出口" }],
-      walls: [
-        { x1: 40, y1: 0, x2: 40, y2: 90 },
-        { x1: 0, y1: 40, x2: 110, y2: 40 },
-      ],
-    },
-  },
-  {
-    slug: "arrow",
-    category: "seq",
-    title: "跟着箭头走",
-    ageGroup: "6-8 岁",
-    description: "沿着箭头指的方向，一步步走到终点。",
-    missionBrief: "地上画着箭头⬆️⬅️，指引二零前进的方向。照着箭头走，把它带到终点🎯吧！",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 跟着箭头「移动」前进；③ 箭头转弯处用「右转」换方向；④ 走到终点🎯后「抬笔」。点「运行」照箭头走一遍。",
-    steps: [
-      { id: 1, title: "让二零向前走" },
-      { id: 2, title: "按箭头转向前进" },
-      { id: 3, title: "运行到终点" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
-                        <next>
-                          <block type="maker_pen_up"></block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-    scene: {
-      marks: [
-        { x: 0, y: 50, emoji: "⬆️" },
-        { x: -50, y: 100, emoji: "⬅️" },
-        { x: -100, y: 100, emoji: "🎯", label: "终点" },
-      ],
-    },
-  },
-  {
-    slug: "zigzag",
-    category: "seq",
-    title: "折线探险",
-    ageGroup: "6-8 岁",
-    description: "画出一条上下折返的折线探险路线。",
-    missionBrief: "造物星球有一条 zigzag 小路。指挥二零一会上、一会下，画出一条弯弯折折的探险路线吧！",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；②「移动」、「右转」交替使用，让路线一会上、一会下；③ 重复几次「移动 + 右转」画出折线，最后「抬笔」。点「运行」看折线。",
-    steps: [
-      { id: 1, title: "让二零落笔画线" },
-      { id: 2, title: "画出上下折返的折线" },
-      { id: 3, title: "运行看折线图案" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
-                        <next>
-                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                            <next>
-                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                                <next>
-                                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                    <next>
-                                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
-                                        <next>
-                                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                            <next>
-                                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                                                <next>
-                                                  <block type="maker_pen_up"></block>
-                                                </next>
-                                              </block>
-                                            </next>
-                                          </block>
-                                        </next>
-                                      </block>
-                                    </next>
-                                  </block>
-                                </next>
-                              </block>
-                            </next>
-                          </block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-  },
-  {
-    slug: "treasure",
-    category: "seq",
-    title: "到达宝藏箱",
-    ageGroup: "6-8 岁",
-    description: "找到藏起来的宝藏箱📦，指挥二零过去。",
-    missionBrief: "造物星球藏着一只宝藏箱📦！指挥二零穿过草地，走到宝藏箱旁边，把它找出来吧！",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 先「移动」往前；③「右转」换方向；④ 再「移动」走到宝藏箱，最后「抬笔」。点「运行」看二零找到宝藏。",
-    steps: [
-      { id: 1, title: "让二零向前走" },
-      { id: 2, title: "转向走到宝藏箱" },
-      { id: 3, title: "运行看找到宝藏" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">70</field></shadow></value>
-                        <next>
-                          <block type="maker_pen_up"></block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-    scene: { marks: [{ x: -70, y: 90, emoji: "📦", label: "宝藏箱" }] },
-  },
-  {
-    slug: "dance",
-    category: "seq",
-    title: "按指令跳舞",
-    ageGroup: "6-8 岁",
-    description: "用移动和转向，给二零编一段方块舞。",
-    missionBrief: "音乐响起来🎵！给二零下一串「移动 + 右转」的指令，看它转出一段可爱的方块舞步吧。",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 重复放「移动」和「右转」（比如 8 次），每次转一个小角度；③ 二零就会转着圈跳舞，最后「抬笔」。点「运行」看舞步。",
-    steps: [
-      { id: 1, title: "让二零动起来" },
-      { id: 2, title: "用转向跳出舞步" },
-      { id: 3, title: "运行看跳舞" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                        <next>
-                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                            <next>
-                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                                <next>
-                                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                                    <next>
-                                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                                        <next>
-                                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                                            <next>
-                                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                                                <next>
-                                                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                                                    <next>
-                                                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                                                        <next>
-                                                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                                                            <next>
-                                                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                                                                <next>
-                                                                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                                                                    <next>
-                                                                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                                                                        <next>
-                                                                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                                                                            <next>
-                                                                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                                                                                <next>
-                                                                                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                                                                                    <next>
-                                                                                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
-                                                                                        <next>
-                                                                                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
-                                                                                            <next>
-                                                                                              <block type="maker_pen_up"></block>
-                                                                                            </next>
-                                                                                          </block>
-                                                                                        </next>
-                                                                                      </block>
-                                                                                    </next>
-                                                                                  </block>
-                                                                                </next>
-                                                                              </block>
-                                                                            </next>
-                                                                          </block>
-                                                                        </next>
-                                                                      </block>
-                                                                    </next>
-                                                                  </block>
-                                                                </next>
-                                                              </block>
-                                                            </next>
-                                                          </block>
-                                                        </next>
-                                                      </block>
-                                                    </next>
-                                                  </block>
-                                                </next>
-                                              </block>
-                                            </next>
-                                          </block>
-                                        </next>
-                                      </block>
-                                    </next>
-                                  </block>
-                                </next>
-                              </block>
-                            </next>
-                          </block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-      </block>
-    </xml>`,
-    scene: { marks: [{ x: 0, y: 0, emoji: "💃", label: "跳舞" }] },
-  },
-  {
-    slug: "frame",
-    category: "seq",
-    title: "走「回」字路线",
-    ageGroup: "6-8 岁",
-    description: "指挥二零走出一个「回」字形路线。",
-    missionBrief: "挑战一下：让二零先走一个大正方形外框，再走一个小正方形内框，连起来就像汉字「回」啦！",
-    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 用「移动 + 右转」重复 4 次画出外框；③ 走到中间，再「移动 + 右转」重复 4 次画出内框；④ 最后「抬笔」。点「运行」看「回」字。",
-    steps: [
-      { id: 1, title: "让二零落笔画外框" },
-      { id: 2, title: "走到中间画内框" },
-      { id: 3, title: "运行看「回」字" },
-    ],
-    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
-      <block type="maker_when_start" x="60" y="60">
-        <statement name="STACK">
-          <block type="maker_pen_down">
-            <next>
-              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
-                <next>
-                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                    <next>
-                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
-                        <next>
-                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                            <next>
-                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
-                                <next>
-                                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                    <next>
-                                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
-                                        <next>
-                                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                            <next>
-                                              <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                                <next>
-                                                  <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
-                                                    <next>
-                                                      <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                                        <next>
-                                                          <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
-                                                            <next>
-                                                              <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                                                <next>
-                                                                  <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                                                                    <next>
-                                                                      <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                                                        <next>
-                                                                          <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                                                                            <next>
-                                                                              <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                                                                <next>
-                                                                                  <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                                                                                    <next>
-                                                                                      <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
-                                                                                        <next>
-                                                                                          <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
-                                                                                            <next>
-                                                                                              <block type="maker_pen_up"></block>
-                                                                                            </next>
-                                                                                          </block>
-                                                                                        </next>
-                                                                                      </block>
-                                                                                    </next>
-                                                                                  </block>
-                                                                                </next>
-                                                                              </block>
-                                                                            </next>
-                                                                          </block>
-                                                                        </next>
-                                                                      </block>
-                                                                    </next>
-                                                                  </block>
-                                                                </next>
-                                                              </block>
-                                                            </next>
-                                                          </block>
-                                                        </next>
-                                                      </block>
-                                                    </next>
-                                                  </block>
-                                                </next>
-                                              </block>
-                                            </next>
-                                          </block>
-                                        </next>
-                                      </block>
-                                    </next>
-                                  </block>
-                                </next>
-                              </block>
-                            </next>
-                          </block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </next>
               </block>
             </next>
           </block>
@@ -1079,8 +451,6 @@ export const projects: CourseProject[] = [
       </block>
     </xml>`,
   },
-
-  // === 分类 2 · 循环与重复（新增 8 项） ===
   {
     slug: "pentagon",
     category: "loop",
@@ -1404,8 +774,6 @@ export const projects: CourseProject[] = [
     </xml>`,
     scene: { marks: [{ x: 0, y: 0, emoji: "🌳", label: "果树" }] },
   },
-
-  // === 分类 3 · 画笔与几何艺术（新增 7 项） ===
   {
     slug: "snowflake",
     category: "draw",
@@ -1693,9 +1061,7 @@ export const projects: CourseProject[] = [
       </block>
     </xml>`,
   },
-
-// === 分类 4 · 事件与互动（9 项） ===
-{
+  {
   slug: "click_jump",
   category: "event",
   title: "点一下，二零跳一跳",
@@ -1724,7 +1090,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "click_color",
   category: "event",
   title: "点一下换颜色",
@@ -1753,7 +1119,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "click_dialog",
   category: "event",
   title: "连续点击对话",
@@ -1781,7 +1147,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "two_events",
   category: "event",
   title: "两个事件一起用",
@@ -1813,7 +1179,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "click_play_dialog",
   category: "event",
   title: "点我讲故事",
@@ -1845,7 +1211,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "auto_patrol",
   category: "event",
   title: "自动巡逻一圈",
@@ -1879,7 +1245,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "key_forward",
   category: "event",
   title: "按键前进",
@@ -1903,7 +1269,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "edge_bounce",
   category: "event",
   title: "碰壁就转弯",
@@ -1937,7 +1303,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "size_toggle",
   category: "event",
   title: "点一下变大",
@@ -1960,9 +1326,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-
-// === 分类 5 · 条件判断（5 项） ===
-{
+  {
   slug: "if_touch_star",
   category: "cond",
   title: "碰到星星就说话",
@@ -1992,7 +1356,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "if_edge_turn",
   category: "cond",
   title: "到边缘就拐弯",
@@ -2026,7 +1390,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "if_red_stop",
   category: "cond",
   title: "红色就停下",
@@ -2056,7 +1420,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "click_left_right",
   category: "cond",
   title: "点左点右走不同路",
@@ -2086,7 +1450,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "collect3",
   category: "cond",
   title: "集齐三颗星",
@@ -2120,9 +1484,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-
-// === 分类 6 · 收集与闯关游戏（7 项） ===
-{
+  {
   slug: "maze_exit",
   category: "game",
   title: "走迷宫到出口",
@@ -2166,7 +1528,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "collect_apples",
   category: "game",
   title: "摘完所有苹果",
@@ -2200,7 +1562,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "light_lanterns",
   category: "game",
   title: "按顺序点灯笼",
@@ -2260,7 +1622,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "collect_rainbow",
   category: "game",
   title: "收集彩虹碎片",
@@ -2297,7 +1659,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "treasure_map",
   category: "game",
   title: "跟着地图找宝藏",
@@ -2328,7 +1690,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "escort",
   category: "game",
   title: "护送小动物回家",
@@ -2370,7 +1732,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "traffic_police",
   category: "game",
   title: "交通警察指挥",
@@ -2402,7 +1764,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "expression_shake",
   category: "event",
   title: "摇晃变表情",
@@ -2435,7 +1797,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "random_branch",
   category: "cond",
   title: "随机走不同路",
@@ -2472,7 +1834,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "odd_even",
   category: "cond",
   title: "奇偶步数走不同路",
@@ -2524,7 +1886,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "size_threshold",
   category: "cond",
   title: "长到一定大小就停",
@@ -2561,7 +1923,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "avoid_obstacle",
   category: "cond",
   title: "遇到石头绕过去",
@@ -2596,7 +1958,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "escape_badguy",
   category: "cond",
   title: "碰到坏人就快跑",
@@ -2634,7 +1996,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "dodge_clouds",
   category: "game",
   title: "躲避乌云",
@@ -2672,7 +2034,7 @@ export const projects: CourseProject[] = [
     </block>
   </xml>`,
 },
-{
+  {
   slug: "memory_match",
   category: "game",
   title: "记忆翻牌",
@@ -2686,7 +2048,7 @@ export const projects: CourseProject[] = [
     { id: 3, title: "把全部卡片配对成功" },
   ],
   component: "memory",
-},
+}
 ];
 
 // ⚠️ 坐标体系（2026-07-31 修正）：

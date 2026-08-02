@@ -1,0 +1,54 @@
+import type { CourseProject } from "@/courses";
+
+export const mazeProject: CourseProject = {
+    slug: "maze",
+    category: "seq",
+    title: "走方格迷宫",
+    ageGroup: "6-8 岁",
+    description: "沿着格子路线，不靠循环走到出口。",
+    missionBrief: "造物星球有个小迷宫，出口🚪在一角。用一步一步的前进和转向，把二零带到出口吧（这一关先不用循环哦）！",
+    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 按路线「移动」前进；③ 遇到墙就「右转」换方向；④ 继续「移动」直到出口，最后「抬笔」。点「运行」走一遍迷宫。",
+    steps: [
+      { id: 1, title: "让二零向前走" },
+      { id: 2, title: "拐弯穿过迷宫" },
+      { id: 3, title: "运行走到出口" },
+    ],
+    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+                <next>
+                  <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                    <next>
+                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+                        <next>
+                          <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                            <next>
+                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+                                <next>
+                                  <block type="maker_pen_up"></block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>`,
+    scene: {
+      marks: [{ x: -80, y: 0, emoji: "🚪", label: "出口" }],
+      walls: [
+        { x1: 40, y1: 0, x2: 40, y2: 90 },
+        { x1: 0, y1: 40, x2: 110, y2: 40 },
+      ],
+    },
+  }
