@@ -304,12 +304,18 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     const editor = editorRef.current;
     if (!editor) return;
     setSaveStatus("loading");
-    const xml = editor.getXml();
-    await saveProject(project.slug, project.title, project.ageGroup, xml);
-    setSaveStatus("saved");
-    setAutoSaved(true);
-    setTimeout(() => setSaveStatus("idle"), 2000);
-  }, [project]);
+    try {
+      const xml = editor.getXml();
+      await saveProject(project.slug, project.title, project.ageGroup, xml);
+      setSaveStatus("saved");
+      setAutoSaved(true);
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    } catch (e) {
+      setSaveStatus("idle");
+      flashResetToast("保存失败：浏览器本地存储不可用，请检查设置或换浏览器");
+      console.error("保存失败", e);
+    }
+  }, [project, flashResetToast]);
 
   const stepStatus = computeSteps(project, generatedCode, logs);
 

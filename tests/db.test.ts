@@ -7,17 +7,13 @@ import {
   loadProject,
   recordSessionTime,
   getTimeStats,
+  clearStore,
 } from "@/lib/db";
 
-describe("本地进度存取（Dexie / fake-indexeddb）", () => {
+describe("本地进度存取（localStorage）", () => {
   beforeEach(async () => {
-    // 每个用例前清空，避免互相污染
-    const { db } = await import("@/lib/db");
-    if (db) {
-      await db.projects.clear();
-      await db.progress.clear();
-      await db.timeLogs.clear();
-    }
+    // 每个用例前清空本应用占用的本地存储，避免互相污染
+    await clearStore();
   });
 
   it("markProgress 后 getProgress 能读回已完成状态", async () => {
