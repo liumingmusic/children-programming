@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import BlockChip from "@/components/BlockChip";
+import SiteHeader from "@/components/SiteHeader";
 import {
   BLOCK_CATALOG,
   CATEGORY_ORDER,
@@ -87,26 +88,7 @@ export default function ToolboxPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* 导航栏 */}
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-lg font-medium text-[#04342C]">造物星球</span>
-          </Link>
-          <nav className="hidden items-center gap-8 text-sm font-medium text-[#085041] sm:flex">
-            <Link href="/missions" className="hover:text-[#0F6E56]">星球任务</Link>
-            <Link href="/toolbox" className="text-[#0F6E56]">组件库</Link>
-            <Link href="/gallery" className="hover:text-[#0F6E56]">作品花园</Link>
-            <Link href="/parent" className="hover:text-[#0F6E56]">家长入口</Link>
-          </nav>
-          <Link
-            href="/missions"
-            className="hidden rounded-full bg-[#0F6E56] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#085041] sm:inline-flex"
-          >
-            开始探索
-          </Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
         <div className="mb-2">

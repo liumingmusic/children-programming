@@ -1,0 +1,65 @@
+import type { CourseProject } from "@/courses";
+
+export const spiralProject: CourseProject = {
+    slug: "spiral",
+    category: "loop",
+    title: "螺旋线",
+    ageGroup: "6-8 岁",
+    description: "用几段循环让二零画出越转越大的螺旋。",
+    missionBrief: "蜗牛壳是螺旋形的！帮二零把几段「重复执行」拼起来，每一步走得更远，画出一条螺旋线吧。",
+    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 放 4 个「重复执行 8 次」，里面的「移动」步数分别用 10、20、30、40，每次都「右转 15 度」；③ 最后「抬笔」；④ 点「运行」看螺旋。",
+    steps: [
+      { id: 1, title: "让二零落笔开始" },
+      { id: 2, title: "用多段循环画出螺旋" },
+      { id: 3, title: "运行看到螺旋线" },
+    ],
+    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="controls_repeat_ext">
+                <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                <statement name="DO">
+                  <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                    <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value></block></next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_repeat_ext">
+                    <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                    <statement name="DO">
+                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">20</field></shadow></value>
+                        <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value></block></next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="controls_repeat_ext">
+                        <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                        <statement name="DO">
+                          <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+                            <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value></block></next>
+                          </block>
+                        </statement>
+                        <next>
+                          <block type="controls_repeat_ext">
+                            <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                            <statement name="DO">
+                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                                <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value></block></next>
+                              </block>
+                            </statement>
+                            <next><block type="maker_pen_up"></block></next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>`,
+  };

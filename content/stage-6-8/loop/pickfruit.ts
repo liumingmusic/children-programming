@@ -1,0 +1,36 @@
+import type { CourseProject } from "@/courses";
+
+export const pickfruitProject: CourseProject = {
+    slug: "pickfruit",
+    category: "loop",
+    title: "重复 N 次摘果子",
+    ageGroup: "6-8 岁",
+    description: "用循环绕着果树走，练习重复 N 次。",
+    missionBrief: "果树上挂满了果子🍎。让二零用「重复执行 8 次」绕着树转圈去摘果子吧！",
+    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 放「重复执行 8 次」，里面放「移动 60 步」和「右转 45 度」；③ 最后「抬笔」；④ 点「运行」，二零会绕着果树转一圈。",
+    steps: [
+      { id: 1, title: "让二零落笔开始" },
+      { id: 2, title: "用循环绕树转圈" },
+      { id: 3, title: "运行看到路线" },
+    ],
+    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="controls_repeat_ext">
+                <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                <statement name="DO">
+                  <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+                    <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value></block></next>
+                  </block>
+                </statement>
+                <next><block type="maker_pen_up"></block></next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>`,
+    scene: { marks: [{ x: 0, y: 0, emoji: "🌳", label: "果树" }] },
+  };

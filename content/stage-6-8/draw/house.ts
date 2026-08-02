@@ -1,0 +1,46 @@
+import type { CourseProject } from "@/courses";
+
+export const houseProject: CourseProject = {
+    slug: "house",
+    category: "draw",
+    title: "画小房子",
+    ageGroup: "6-8 岁",
+    description: "用循环画出房身和屋顶，拼出小房子。",
+    missionBrief: "造物星球需要一座小房子🏠。帮二零先用「重复执行 4 次」画方方的房身，再画一个三角形的屋顶吧！",
+    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 放「重复执行 4 次」画房身（移动 80、右转 90）；③ 再放「重复执行 3 次」画屋顶（移动 80、右转 120）；④ 最后「抬笔」；⑤ 点「运行」看小房子。",
+    steps: [
+      { id: 1, title: "让二零落笔开始" },
+      { id: 2, title: "用循环画房身和屋顶" },
+      { id: 3, title: "运行看到小房子" },
+    ],
+    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="controls_repeat_ext">
+                <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                <statement name="DO">
+                  <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+                    <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value></block></next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_repeat_ext">
+                    <value name="TIMES"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+                    <statement name="DO">
+                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+                        <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">120</field></shadow></value></block></next>
+                      </block>
+                    </statement>
+                    <next><block type="maker_pen_up"></block></next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>`,
+    scene: { marks: [{ x: 0, y: -40, emoji: "🏠", label: "小房子" }] },
+  };

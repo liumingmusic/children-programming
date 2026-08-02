@@ -1,0 +1,39 @@
+import type { CourseProject } from "@/courses";
+
+export const collectRainbowProject: CourseProject = {
+  slug: "collect_rainbow",
+  category: "game",
+  title: "收集彩虹碎片",
+  ageGroup: "6-8 岁",
+  description: "飞向四块彩虹碎片，把它们都收集齐。",
+  missionBrief: "彩虹碎成了 4 块散落各地。写一个程序：让二零依次飞向 1、2、3、4 号碎片，把它们都找回来，最后说「彩虹拼好啦！」。",
+  erLingHint: "① 绿色「当开始运行」里放四个「飞向星星 1 / 2 / 3 / 4 号」；② 最后放「说 彩虹拼好啦！ 1 秒」；③ 点「运行」看二零拼好彩虹。",
+  steps: [
+    { id: 1, title: "让二零飞向彩虹碎片" },
+    { id: 2, title: "收集到碎片" },
+    { id: 3, title: "集齐所有碎片" },
+  ],
+  stars: [{ x: -130, y: 60 }, { x: -50, y: -90 }, { x: 50, y: -90 }, { x: 130, y: 60 }],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_goto_star">
+          <value name="INDEX"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          <next><block type="maker_goto_star">
+            <value name="INDEX"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+            <next><block type="maker_goto_star">
+              <value name="INDEX"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+              <next><block type="maker_goto_star">
+                <value name="INDEX"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                <next><block type="maker_say">
+                  <value name="TEXT"><shadow type="text"><field name="TEXT">彩虹拼好啦！</field></shadow></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                </block></next>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

@@ -1,0 +1,40 @@
+import type { CourseProject } from "@/courses";
+
+export const escapeBadguyProject: CourseProject = {
+  slug: "escape_badguy",
+  category: "cond",
+  title: "碰到坏人就快跑",
+  ageGroup: "6-8 岁",
+  description: "用「碰到坏人」判断，让二零遇到坏猫咪就掉头逃跑。",
+  missionBrief: "星球上有只坏猫咪 🐱。写一个程序：二零往前走，一旦「碰到坏人」就立刻掉头跑开。",
+  erLingHint: "① 绿色「当开始运行」里放「重复执行 60 次」；② 里面放「移动 10 步」，再放「如果…那么」，条件放「碰到 坏人」、那么里放「右转 180 度」+「移动 30 步」；③ 点「运行」看二零遇到坏猫咪就掉头。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「碰到坏人」做判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  scene: {
+    marks: [{ x: 40, y: 40, emoji: "🐱", label: "坏猫咪", kind: "badguy" }],
+  },
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+          <statement name="DO"><block type="maker_move">
+            <value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+            <next><block type="controls_if">
+              <value name="IF0"><block type="maker_touching_mark"><field name="KIND">badguy</field></block></value>
+              <statement name="DO0"><block type="maker_turn">
+                <value name="DEGREES"><shadow type="math_number"><field name="NUM">180</field></shadow></value>
+                <next><block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+                </block></next>
+              </block></statement>
+            </block></next>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

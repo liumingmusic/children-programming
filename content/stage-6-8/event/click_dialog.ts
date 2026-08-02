@@ -1,0 +1,30 @@
+import type { CourseProject } from "@/courses";
+
+export const clickDialogProject: CourseProject = {
+  slug: "click_dialog",
+  category: "event",
+  title: "连续点击对话",
+  ageGroup: "6-8 岁",
+  description: "每点一次舞台，二零说出不同的话。",
+  missionBrief: "二零是个小话痨。写一个程序：每次点击舞台，它先说一句「你好呀！」，再说一句「今天天气真好！」，像在跟你聊天。",
+  erLingHint: "① 蓝色「当舞台被点击」里放第一个紫色「说 你好呀！ 1 秒」；② 接第二个「说 今天天气真好！ 1 秒」；③ 点「运行」后多点几下舞台，听听二零聊天。",
+  steps: [
+    { id: 1, title: "使用「当舞台被点击」事件" },
+    { id: 2, title: "让二零说出两句话" },
+    { id: 3, title: "点击舞台看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">你好呀！</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          <next><block type="maker_say">
+            <value name="TEXT"><shadow type="text"><field name="TEXT">今天天气真好！</field></shadow></value>
+            <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

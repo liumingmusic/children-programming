@@ -1,0 +1,39 @@
+import type { CourseProject } from "@/courses";
+
+export const sizeThresholdProject: CourseProject = {
+  slug: "size_threshold",
+  category: "cond",
+  title: "长到一定大小就停",
+  ageGroup: "6-8 岁",
+  description: "用「比较 + 二零当前大小」做阈值判断。",
+  missionBrief: "二零一点点变大。写一个程序：它不断变大，一旦「大小超过 2」就大声说「够大啦！」停下来。",
+  erLingHint: "① 绿色「当开始运行」里放「重复执行 8 次」；② 里面先放「二零大小增加 0.4」；③ 接「如果…那么」，条件放「比较：二零当前大小 大于 2」，那么里放「说 够大啦！ 1 秒」；④ 点「运行」，看二零变大到阈值就喊停。",
+  steps: [
+    { id: 1, title: "使用「当开始运行」事件" },
+    { id: 2, title: "用「比较 + 二零当前大小」做阈值判断" },
+    { id: 3, title: "运行看到效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+          <statement name="DO"><block type="maker_change_size">
+            <value name="DELTA"><shadow type="math_number"><field name="NUM">0.4</field></shadow></value>
+            <next><block type="controls_if">
+              <value name="IF0"><block type="maker_compare">
+                <value name="A"><block type="maker_get_size"></block></value>
+                <field name="OP">></field>
+                <value name="B"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+              </block></value>
+              <statement name="DO0"><block type="maker_say">
+                <value name="TEXT"><shadow type="text"><field name="TEXT">够大啦！</field></shadow></value>
+                <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              </block></statement>
+            </block></next>
+          </block></statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Lock } from "lucide-react";
 import ErLingAvatar from "@/components/ErLingAvatar";
+import SiteHeader from "@/components/SiteHeader";
 import MissionsExplorer from "@/components/MissionsExplorer";
 import { stages, type Stage } from "@/courses";
 import { stageAccent } from "@/components/StageCard";
@@ -31,21 +32,7 @@ export default async function StagePage({ params }: StagePageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* 导航栏 */}
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <ErLingAvatar className="h-9 w-9" />
-            <span className="text-lg font-medium text-[#04342C]">造物星球</span>
-          </Link>
-          <nav className="flex items-center gap-6 text-sm font-medium text-[#085041]">
-            <Link href="/missions" className="hover:text-[#0F6E56]">星球任务</Link>
-            <Link href="/toolbox" className="hover:text-[#0F6E56]">组件库</Link>
-            <Link href="/gallery" className="hover:text-[#0F6E56]">作品花园</Link>
-            <Link href="/parent" className="hover:text-[#0F6E56]">家长入口</Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="flex-1 px-4 py-10 sm:px-6 sm:py-14">
         <div className="mx-auto max-w-6xl">

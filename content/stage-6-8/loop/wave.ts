@@ -1,0 +1,50 @@
+import type { CourseProject } from "@/courses";
+
+export const waveProject: CourseProject = {
+    slug: "wave",
+    category: "loop",
+    title: "波浪线",
+    ageGroup: "6-8 岁",
+    description: "用嵌套循环画出上下起伏的波浪线。",
+    missionBrief: "小河边的水波一上一下。帮二零用「循环里再套循环」画出弯弯的波浪线吧！",
+    erLingHint: "① 绿色「当开始运行」里放「落笔」；② 放「重复执行 4 次」，里面先放一个「重复执行 9 次」画上半圆（移动 10、右转 20），再放一个「重复执行 9 次」画下半圆（移动 10、右转 -20）；③ 最后「抬笔」；④ 点「运行」看波浪。",
+    steps: [
+      { id: 1, title: "让二零落笔开始" },
+      { id: 2, title: "用嵌套循环画波浪" },
+      { id: 3, title: "运行看到波浪线" },
+    ],
+    defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="controls_repeat_ext">
+                <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                <statement name="DO">
+                  <block type="controls_repeat_ext">
+                    <value name="TIMES"><shadow type="math_number"><field name="NUM">9</field></shadow></value>
+                    <statement name="DO">
+                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                        <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block></next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="controls_repeat_ext">
+                        <value name="TIMES"><shadow type="math_number"><field name="NUM">9</field></shadow></value>
+                        <statement name="DO">
+                          <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                            <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">-20</field></shadow></value></block></next>
+                          </block>
+                        </statement>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next><block type="maker_pen_up"></block></next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>`,
+  };
