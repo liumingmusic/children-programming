@@ -91,6 +91,9 @@ export default function DemoOverlay({
     const ws = wsRef.current;
     const rt = runtimeRef.current;
     if (!ws || !rt || running) return;
+    // 关键：每次运行前先把运行时重置到初始状态（角色位置/朝向/大小、星星、笔迹全部复位），
+    // 否则会从上一次运行的终点接着跑、大小/位置逐次累积，表现为「越跑越远、无限放大」。
+    rt.reset();
     setRunning(true);
     javascriptGenerator.init(ws);
     let whenStart = "";
