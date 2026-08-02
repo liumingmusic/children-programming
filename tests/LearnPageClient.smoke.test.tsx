@@ -22,6 +22,10 @@ vi.mock("@/components/StagePlayer", () => ({
   default: () => <div data-testid="stage" />,
 }));
 
+vi.mock("@/components/DemoOverlay", () => ({
+  default: () => <div data-testid="demo-overlay" />,
+}));
+
 vi.mock("@/lib/db", () => ({
   loadProject: vi.fn(async () => ""),
   saveProject: vi.fn(async () => {}),

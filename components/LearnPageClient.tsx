@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Play, RotateCcw, Save, CheckCircle, BookOpen, Info, X } from "lucide-react";
 import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
 import StagePlayer from "@/components/StagePlayer";
-import CompletionModal from "@/components/CompletionModal";
+import DemoOverlay from "@/components/DemoOverlay";
 import ErLingAvatar from "@/components/ErLingAvatar";
 import { Runtime, StageState, type Hazard, type Cloud } from "@/lib/runtime";
 import type { CourseProject } from "@/courses";
@@ -55,18 +55,24 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const progressRef = useRef({ completed: false, stars: 0 });
 
   const [showBrief, setShowBrief] = useState(false);
-  const [showCelebration, setShowCelebration] = useState(false);
   const [toasts, setToasts] = useState<StepToast[]>([]);
   const [hint, setHint] = useState<string | null>(null);
   const prevStepsDone = useRef<boolean[]>(project.steps.map(() => false));
   const sessionStartRef = useRef<number>(0);
-  // 标记本次会话是否已弹过完成庆祝，避免关闭后被 effect 立刻重新弹开
-  const celebratedRef = useRef(false);
 
-  // 是否处于「参考答案（看示范）」模式：进入时记住学生自己的画布，关闭后还原，避免覆盖学生作业
+  // 「看示范」浮层开关（只读参考，不触碰学生主画布）
   const [showExample, setShowExample] = useState(false);
-  const studentXmlRef = useRef<string | null>(null);
-  const showExampleRef = useRef(false);
+
+  // 自动保存：真实改动后防抖写入本地，避免「点保存没生效 / 刷新空白」
+  const autoSaveTimerRef = useRef<number | null>(null);
+  const [autoSaved, setAutoSaved] = useState(false);
+
+  // 完成后的温和通知（替代原来的强制弹窗）：本次会话内首次达成时显示一次
+  const [doneBanner, setDoneBanner] = useState(false);
+  const prevCompletedRef = useRef<boolean | null>(null);
+
+  // 「重置舞台 / 清空积木」的轻提示
+  const [resetToast, setResetToast] = useState<string | null>(null);
 
   // 闯关锁门：未解锁的关卡不进编辑器（防止跨项目练习）
   const [lockReady, setLockReady] = useState(false);
@@ -116,7 +122,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     const runtime = new Runtime(STAGE_WIDTH, STAGE_HEIGHT, (state) => {
       setStageState(state);
       setLogs(state.log);
-      if (state.log.includes("[系统] 程序执行完毕") && !progressRef.current.completed && !showExampleRef.current) {
+      if (state.log.includes("[系统] 程序执行完毕") && !progressRef.current.completed) {
         // 关键修复：不能「程序一跑完就判完成」——必须真正达成目标（走到旗子/集齐星星）才算数，
         // 否则孩子瞎搭积木也能拿到「任务完成」，纯属误人子弟。
         if (isGoalAchieved(project, state, state.log)) {
@@ -205,7 +211,6 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
 
     runtime.reset();
     setSaveStatus("idle");
-    setShowCelebration(false);
     await editor.run(runtime);
 
     // 运行后给出针对性辅导：聚焦第一个未完成的步骤
@@ -227,45 +232,34 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     setHint(null);
   }, [project]);
 
-  // 「看示范 / 参考答案」：进入时记住学生自己的画布，载入参考答案并运行；再点「关闭示范」则还原学生画布。
-  // 关键：示范模式下不把项目标记为「已完成」，避免看一眼答案就误判通关。
-  const handleShowExample = useCallback(async () => {
-    const editor = editorRef.current;
-    const runtime = runtimeRef.current;
-    if (!editor || !runtime) return;
+  // 「看示范」：打开只读参考浮层（不触碰学生主画布，见 DemoOverlay）。
+  const toggleExample = useCallback(() => {
+    setShowBrief(false);
+    setShowExample((s) => !s);
+  }, []);
 
-    if (!showExample) {
-      studentXmlRef.current = editor.getXml();
-      editor.loadXml(project.defaultXml || "");
-      const code = editor.getCode();
+  // 防抖自动保存：学生一停手就把当前积木写入本地，避免「点保存没生效 / 刷新空白」
+  const scheduleAutoSave = useCallback(() => {
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = window.setTimeout(() => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      const xml = editor.getXml();
+      saveProject(project.slug, project.title, project.ageGroup, xml)
+        .then(() => setAutoSaved(true))
+        .catch(() => {});
+    }, 800);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project.slug, project.title, project.ageGroup]);
+
+  // 编辑器真实改动：更新代码预览 + 触发防抖自动保存
+  const handleEditorChange = useCallback(
+    (code: string) => {
       setGeneratedCode(code);
-      runtime.reset();
-      setSaveStatus("idle");
-      setShowCelebration(false);
-      setShowBrief(false);
-      showExampleRef.current = true;
-      setShowExample(true);
-      await editor.run(runtime);
-
-      const finalLogs = runtimeRef.current?.getState().log ?? [];
-      const st = computeSteps(project, code, finalLogs);
-      if (!st.every((s) => s.done)) {
-        const firstUndone = st.find((s) => !s.done);
-        if (firstUndone) setHint(coach(project.slug, firstUndone.id));
-      } else {
-        setHint("这是参考答案～照着搭一遍，或改一改看看会怎样！");
-        setTimeout(() => setHint(null), 4000);
-      }
-    } else {
-      // 关闭示范：还原学生自己的画布（不运行、不覆盖存档）
-      editor.loadXml(studentXmlRef.current ?? "");
-      runtime.reset();
-      showExampleRef.current = false;
-      setShowExample(false);
-      setGeneratedCode(editor.getCode());
-      setHint(null);
-    }
-  }, [project, showExample]);
+      scheduleAutoSave();
+    },
+    [scheduleAutoSave]
+  );
 
   const handleStageClick = useCallback(async (x: number, y: number) => {
     const runtime = runtimeRef.current;
@@ -273,12 +267,29 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     await runtime.handleStageClick(x, y);
   }, []);
 
+  // 「重置舞台」：清掉刚才运行的结果（角色回原点、清除笔迹与日志、停止动画），
+  // 方便学生重新运行看效果。不破坏积木，并给出轻提示，避免「点了没反应」。
+  const flashResetToast = useCallback((msg: string) => {
+    setResetToast(msg);
+    setTimeout(() => setResetToast(null), 2200);
+  }, []);
+
   const handleReset = useCallback(() => {
     runtimeRef.current?.reset();
     setSaveStatus("idle");
-    setShowCelebration(false);
-    celebratedRef.current = false;
-  }, []);
+    flashResetToast("舞台已重置，可以重新运行");
+  }, [flashResetToast]);
+
+  // 「清空积木」：彻底清掉学生工作区（破坏性，需二次确认），满足「重来」诉求
+  const handleClearBlocks = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const ok = window.confirm("确定要清空当前所有积木吗？此操作无法撤销。");
+    if (!ok) return;
+    editorRef.current?.resetWorkspace();
+    setSaveStatus("idle");
+    setAutoSaved(false);
+    flashResetToast("积木已清空，从头开始吧");
+  }, [flashResetToast]);
 
   // 记忆翻牌等独立组件类项目：由组件自己判定完成，胜利时回调这里
   const handleMemoryWin = useCallback(() => {
@@ -286,7 +297,6 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       progressRef.current = { completed: true, stars: 3 };
       setProgress(progressRef.current);
       markProgress(project.slug, true, 3).catch(console.error);
-      setShowCelebration(true);
     }
   }, [project.slug]);
 
@@ -297,6 +307,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     const xml = editor.getXml();
     await saveProject(project.slug, project.title, project.ageGroup, xml);
     setSaveStatus("saved");
+    setAutoSaved(true);
     setTimeout(() => setSaveStatus("idle"), 2000);
   }, [project]);
 
@@ -305,6 +316,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   // 项目页「返回」应回到它所属的项目集合（学龄段页），而非首页
   const stage = getStageOfProject(project.slug);
   const backHref = stage ? `/missions/${stage.id}` : "/missions";
+  const nextProject = getNextProject(project.slug);
 
   // Trigger toasts when steps newly complete
   useEffect(() => {
@@ -325,13 +337,18 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     }
   }, [stepStatus]);
 
-  // Trigger celebration when all steps complete（用 ref 保证只弹一次，关闭后不会立刻重开）
+  // 完成温和通知：本次会话内「首次」达成（false→true 的那一刻）才显示一次浮条，
+  // 不强制弹窗——学生只是想看看运行效果时不会被打断。
   useEffect(() => {
-    if (stepStatus.every((s) => s.done) && progress.completed && !celebratedRef.current) {
-      celebratedRef.current = true;
-      setShowCelebration(true);
+    if (prevCompletedRef.current === null) {
+      prevCompletedRef.current = progress.completed; // 初始化（含「旧已完成」项目），不弹
+      return;
     }
-  }, [stepStatus, progress.completed]);
+    if (progress.completed && !prevCompletedRef.current) {
+      setDoneBanner(true);
+    }
+    prevCompletedRef.current = progress.completed;
+  }, [progress.completed]);
 
   const completedSteps = stepStatus.filter((s) => s.done).length;
 
@@ -398,8 +415,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
               <Info className="h-3 w-3" />
               任务简报
             </button>
-            <button
-              onClick={handleShowExample}
+              <button
+              onClick={toggleExample}
               className={`ml-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                 showExample
                   ? "bg-[#0F6E56] text-white hover:bg-[#085041]"
@@ -423,20 +440,6 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           <ErLingAvatar className="h-8 w-8" />
         </div>
       </header>
-
-      {/* 参考答案模式提示条：看示范时显示，关闭示范即回到学生自己的画布 */}
-      {showExample && (
-        <div className="flex items-center justify-center gap-3 border-b border-[#0F6E56]/20 bg-[#E1F5EE] px-4 py-2 text-center text-sm text-[#04342C]">
-          <BookOpen className="h-4 w-4 shrink-0 text-[#0F6E56]" />
-          <span>这是「参考答案」模式——可以照着学，但还没开始答题哦。点「关闭示范」就回到你自己的画布。</span>
-          <button
-            onClick={handleShowExample}
-            className="shrink-0 rounded-full bg-[#0F6E56] px-3 py-1 text-xs font-medium text-white hover:bg-[#085041]"
-          >
-            关闭示范
-          </button>
-        </div>
-      )}
 
       {/* 主内容区 */}
       <div className="flex flex-1 gap-3 overflow-hidden p-3">
@@ -489,7 +492,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
             <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
               <h2 className="mb-2 text-sm font-medium text-[#04342C]">积木工作区</h2>
               <div className="min-h-0 flex-1">
-                <BlocklyEditor ref={editorRef} onChange={setGeneratedCode} />
+                <BlocklyEditor
+                  ref={editorRef}
+                  onChange={handleEditorChange}
+                  onAutoSave={scheduleAutoSave}
+                />
               </div>
             </section>
 
@@ -523,20 +530,33 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           <button
             onClick={handleReset}
             disabled={stageState.running}
+            title="清空刚才运行的结果（角色回原点、清除笔迹与日志），不影响你的积木"
             className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#EF9F27]/30 bg-[#FAEEDA] px-4 text-sm font-medium text-[#412402] hover:bg-[#FAC775] disabled:opacity-50"
           >
             <RotateCcw className="h-4 w-4" />
-            重置
+            重置舞台
+          </button>
+          <button
+            onClick={handleClearBlocks}
+            disabled={stageState.running}
+            title="清空工作区里所有积木，从头开始（需确认）"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-4 text-sm font-medium text-[#5F5E5A] hover:bg-[#F1EFE8] disabled:opacity-50"
+          >
+            <RotateCcw className="h-4 w-4" />
+            清空积木
           </button>
           <button
             onClick={handleSave}
             disabled={stageState.running || saveStatus === "loading" || showExample}
-            title={showExample ? "查看示范时不可保存，关闭示范后再保存你的作品" : undefined}
+            title={showExample ? "查看示范时不可保存，关闭示范后再保存你的作品" : "修改会自动保存，也可手动点此确认保存"}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#5DCAA5]/30 bg-[#E1F5EE] px-4 text-sm font-medium text-[#04342C] hover:bg-[#9FE1CB] disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
             {saveStatus === "saved" ? "已保存" : saveStatus === "loading" ? "保存中" : "保存"}
           </button>
+          {autoSaved && (
+            <span className="hidden text-xs text-[#5DCAA5] sm:inline">·已自动保存</span>
+          )}
         </div>
         <button
           onClick={handleRun}
@@ -613,12 +633,52 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
         </div>
       )}
 
-      {/* Completion celebration */}
-      <CompletionModal
-        open={showCelebration}
-        onClose={() => setShowCelebration(false)}
-        project={project}
-      />
+      {/* 完成温和通知（非阻塞浮条，替代强制弹窗）—— 不挡住学生看运行效果 */}
+      {doneBanner && (
+        <div className="fixed left-1/2 top-20 z-40 w-[min(92vw,32rem)] -translate-x-1/2 rounded-2xl border border-[#5DCAA5]/40 bg-[#E1F5EE] px-5 py-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🎉</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-[#04342C]">《{project.title}》已完成！</p>
+              <p className="text-xs text-[#5F5E5A]">可以挑战下一关啦～</p>
+            </div>
+            <button
+              onClick={() => setDoneBanner(false)}
+              aria-label="关闭"
+              className="rounded-full p-1 text-[#5F5E5A] hover:bg-white/60"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="mt-3 flex gap-2">
+            {nextProject && (
+              <Link
+                href={`/learn/${nextProject.slug}`}
+                className="flex-1 rounded-xl bg-[#0F6E56] px-3 py-2 text-center text-sm font-medium text-white hover:bg-[#085041]"
+              >
+                挑战下一个：{nextProject.title}
+              </Link>
+            )}
+            <Link
+              href={backHref}
+              onClick={() => setDoneBanner(false)}
+              className="rounded-xl border border-[#0F6E56]/20 bg-white px-3 py-2 text-center text-sm font-medium text-[#0F6E56] hover:bg-[#F1EFE8]"
+            >
+              返回任务列表
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* 重置 / 清空 的轻提示 */}
+      {resetToast && (
+        <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-[#04342C] px-4 py-2 text-sm font-medium text-white shadow-lg">
+          {resetToast}
+        </div>
+      )}
+
+      {/* 看示范只读浮层（不触碰学生主画布） */}
+      {showExample && <DemoOverlay project={project} onClose={() => setShowExample(false)} />}
     </div>
   );
 }
