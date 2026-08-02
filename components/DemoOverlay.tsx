@@ -40,10 +40,24 @@ export default function DemoOverlay({
     });
     wsRef.current = ws;
 
+    // Blockly 注入后必须校正一次尺寸：浮层挂载瞬间父容器可能尚未完成布局，
+    // 若不 resize，workSpace 会停在 0×0，积木被渲染到不可见区域 → 表现为「参考答案页面空白」。
+    const layout = () => {
+      try {
+        ws.resize();
+        ws.scrollCenter();
+      } catch {
+        /* noop */
+      }
+    };
+    requestAnimationFrame(layout);
+
     if (project.defaultXml) {
       try {
         const dom = Blockly.utils.xml.textToDom(project.defaultXml);
         Blockly.Xml.domToWorkspace(dom, ws);
+        // 加载完积木后再次居中，确保参考答案完整可见
+        requestAnimationFrame(() => ws.scrollCenter());
       } catch (e) {
         console.error("Failed to load demo XML", e);
       }
@@ -140,9 +154,9 @@ export default function DemoOverlay({
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-6 md:flex-row">
           {/* 参考答案积木（只读） */}
           <div className="flex min-h-0 flex-1 flex-col">
-            <p className="mb-2 text-xs font-medium text-[#444441]">参考答案积木</p>
-            <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-black/10 bg-[#F1EFE8] p-2">
-              <div ref={blocklyDiv} className="min-h-[360px]" />
+            <p className="mb-2 shrink-0 text-xs font-medium text-[#444441]">参考答案积木</p>
+            <div className="h-[440px] w-full shrink-0 overflow-hidden rounded-xl border border-black/10 bg-[#F1EFE8]">
+              <div ref={blocklyDiv} className="h-full w-full" />
             </div>
           </div>
 
