@@ -10,9 +10,16 @@
 import type { GameDefMeta } from "./types";
 import { game2048Meta } from "./entries/game2048/meta";
 import { beatTapMeta } from "./entries/beat-tap/meta";
+import { planetRaceMeta } from "./entries/planet-race/meta";
+import { starPianoMeta } from "./entries/star-piano/meta";
 
 /** 全部游戏（按展示顺序排列）。 */
-export const GAMES: GameDefMeta[] = [game2048Meta, beatTapMeta];
+export const GAMES: GameDefMeta[] = [
+  game2048Meta,
+  beatTapMeta,
+  planetRaceMeta,
+  starPianoMeta,
+];
 
 /** 给 generateStaticParams 用的 slug 列表。 */
 export const GAME_SLUGS = GAMES.map((g) => ({ slug: g.slug }));

@@ -6,6 +6,8 @@ import GameShell from "./GameShell";
 import { getGameMeta } from "@/games/registry";
 import Game2048 from "@/games/entries/game2048";
 import BeatTap from "@/games/entries/beat-tap";
+import PlanetRace from "@/games/entries/planet-race";
+import StarPiano from "@/games/entries/star-piano";
 
 // slug -> 游戏组件 映射（客户端）。
 // 新增游戏时：① 建 entries/<slug>/{index.tsx,logic.ts,meta.ts} ② 在 registry.ts 加 meta
@@ -14,6 +16,8 @@ import BeatTap from "@/games/entries/beat-tap";
 const GAME_COMPONENTS: Record<string, ComponentType> = {
   game2048: Game2048,
   "beat-tap": BeatTap,
+  "planet-race": PlanetRace,
+  "star-piano": StarPiano,
 };
 
 export default function GamePlayer({ slug }: { slug: string }) {
