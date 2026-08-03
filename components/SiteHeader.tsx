@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/lib/nav";
+import { BASE_PATH } from "@/lib/basePath";
 
 /** 全站统一导航栏。新增模块只需改 lib/nav.ts 的 NAV_ITEMS，所有页面自动同步。 */
 export default function SiteHeader() {
@@ -15,7 +16,7 @@ export default function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           <img
-            src="/sun-parrot.svg"
+            src={`${BASE_PATH}/sun-parrot.svg`}
             alt="造物星球"
             className="h-9 w-9 rounded-full"
           />
