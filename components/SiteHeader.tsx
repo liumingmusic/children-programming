@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ErLingAvatar from "@/components/ErLingAvatar";
 import { NAV_ITEMS } from "@/lib/nav";
 
 /** 全站统一导航栏。新增模块只需改 lib/nav.ts 的 NAV_ITEMS，所有页面自动同步。 */
@@ -15,7 +14,11 @@ export default function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <ErLingAvatar className="h-9 w-9" />
+          <img
+            src="/sun-parrot.svg"
+            alt="造物星球"
+            className="h-9 w-9 rounded-full"
+          />
           <span className="text-lg font-medium text-[#04342C]">造物星球</span>
         </Link>
         <nav className="hidden items-center gap-8 text-sm font-medium text-[#085041] sm:flex">
