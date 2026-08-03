@@ -14,7 +14,8 @@ const STAGE = "stage-6-8";
 describe("闯关路径（lib/path）", () => {
   it("getStagePath：章节按注册表顺序、分类连续，且所有项目都进线性顺序", () => {
     const path = getStagePath(STAGE);
-    // 有项目的分类：seq/loop/draw/event/cond/game
+    // 全部注册分类（含尚未开发的空分类 story/math/science/pbl，以及本次新增的 music）：
+    // seq/loop/draw/event/cond/game/story/music/math/science/pbl
     expect(path.chapters.map((c) => c.id)).toEqual([
       "seq",
       "loop",
@@ -22,13 +23,18 @@ describe("闯关路径（lib/path）", () => {
       "event",
       "cond",
       "game",
+      "story",
+      "music",
+      "math",
+      "science",
+      "pbl",
     ]);
-    // 线性顺序与分类顺序一致（seq 块在前）
+    // 线性顺序与分类顺序一致（seq 块在前）；空分类不贡献解锁节点
     expect(path.linearOrder.slice(0, 3)).toEqual(["hello", "flag", "stone"]);
     expect(path.linearOrder).toContain("square"); // loop 在 seq 之后
     expect(path.linearOrder.indexOf("square")).toBeGreaterThan(path.linearOrder.indexOf("frame"));
-    // 总数 = 61（含本次新增的 8 个项目）
-    expect(path.linearOrder.length).toBe(61);
+    // 总数 = 71（原 61 + 本次新增音乐分类 10 项）
+    expect(path.linearOrder.length).toBe(71);
   });
 
   it("getUnlockedSet：空进度时只有第一关解锁", () => {
@@ -51,7 +57,7 @@ describe("闯关路径（lib/path）", () => {
     const path = getStagePath(STAGE);
     const all = new Set(path.linearOrder);
     const unlocked = getUnlockedSet(path.linearOrder, all);
-    expect(unlocked.size).toBe(61);
+    expect(unlocked.size).toBe(71);
   });
 
   it("getUnlockedSet：已完成的关卡永远解锁（兼容乱序完成造成的空洞）", () => {

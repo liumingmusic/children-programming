@@ -1,4 +1,4 @@
-import { getStageCategories, getStageOfProject, getProject } from "@/courses";
+import { getStageOfProject, getProject, CATEGORIES, getStageProjects } from "@/courses";
 
 export type NodeStatus = "completed" | "current" | "locked";
 
@@ -23,17 +23,22 @@ export interface StagePath {
 }
 
 /**
- * 取某个学龄段的「闯关路径」：章节（=分类）按注册表顺序，章节内项目按 projectSlugs 顺序。
- * 因为 stage.projectSlugs 已是「分类连续」排列，所以 flattened 后即严格线性顺序。
+ * 取某个学龄段的「闯关路径」：章节（=分类）按注册表顺序，**包含尚未开发的空分类**，
+ * 这样 /missions/[stage] 页能为 story/math/science/pbl 等「敬请期待」占位分类也渲染出分组卡片。
+ * 章节内项目按 projectSlugs 顺序（CATEGORIES 顺序 + projectSlugs 顺序共同保证「分类连续」）。
+ * 空分类的 projects 为空数组，不贡献任何线性解锁节点，故不影响闯关解锁逻辑。
  */
 export function getStagePath(stageId: string): StagePath {
-  const cats = getStageCategories(stageId); // 已按 CATEGORIES 顺序、且过滤掉空分类
-  const chapters: PathChapter[] = cats.map((c) => ({
+  const catDefs = CATEGORIES[stageId] ?? [];
+  const stageProjects = getStageProjects(stageId);
+  const chapters: PathChapter[] = catDefs.map((c) => ({
     id: c.id,
     name: c.name,
     shortTag: c.shortTag,
     description: c.description,
-    projects: c.projects.map((p) => ({ slug: p.slug, title: p.title })),
+    projects: stageProjects
+      .filter((p) => p.category === c.id)
+      .map((p) => ({ slug: p.slug, title: p.title })),
   }));
   const linearOrder = chapters.flatMap((ch) => ch.projects.map((p) => p.slug));
   return { stageId, chapters, linearOrder };

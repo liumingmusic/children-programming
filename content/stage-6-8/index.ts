@@ -60,6 +60,16 @@ import { escortProject } from "./game/escort";
 import { trafficPoliceProject } from "./game/traffic_police";
 import { dodgeCloudsProject } from "./game/dodge_clouds";
 import { memoryMatchProject } from "./game/memory_match";
+import { playDoremiProject } from "./music/play_doremi";
+import { twinkleProject } from "./music/twinkle";
+import { drumBeatProject } from "./music/drum_beat";
+import { randomNoteProject } from "./music/random_note";
+import { loopMelodyProject } from "./music/loop_melody";
+import { pitchByClickProject } from "./music/pitch_by_click";
+import { pitchByMoveProject } from "./music/pitch_by_move";
+import { chordProject } from "./music/chord";
+import { birthdayProject } from "./music/birthday";
+import { composeProject } from "./music/compose";
 
 export const seqProjects: CourseProject[] = [helloProject, flagProject, stoneProject, shapeLProject, homeProject, mazeProject, arrowProject, zigzagProject, treasureProject, danceProject, frameProject];
 export const loopProjects: CourseProject[] = [squareProject, triangleProject, pentagonProject, spinProject, stairsProject, waveProject, spiralProject, fenceProject, windmillProject, pickfruitProject];
@@ -67,8 +77,9 @@ export const drawProjects: CourseProject[] = [rainbowProject, star5Project, flow
 export const eventProjects: CourseProject[] = [clickJumpProject, clickColorProject, clickDialogProject, twoEventsProject, clickPlayDialogProject, autoPatrolProject, keyForwardProject, edgeBounceProject, sizeToggleProject, expressionShakeProject];
 export const condProjects: CourseProject[] = [ifTouchStarProject, ifEdgeTurnProject, ifRedStopProject, clickLeftRightProject, collect3Project, randomBranchProject, oddEvenProject, sizeThresholdProject, avoidObstacleProject, escapeBadguyProject];
 export const gameProjects: CourseProject[] = [starsProject, mazeExitProject, collectApplesProject, lightLanternsProject, collectRainbowProject, treasureMapProject, escortProject, trafficPoliceProject, dodgeCloudsProject, memoryMatchProject];
+export const musicProjects: CourseProject[] = [playDoremiProject, twinkleProject, drumBeatProject, randomNoteProject, loopMelodyProject, pitchByClickProject, pitchByMoveProject, chordProject, birthdayProject, composeProject];
 
-/** 全 61 项目，按 projectSlugs 规范顺序：seq→loop→draw→event→cond→game。
+/** 全 71 项目，按 projectSlugs 规范顺序：seq→loop→draw→event→cond→game→music。
  * 运行时的 MIRROR 坐标镜像、getProject、闯关路径等逻辑对本文件导出的对象照常生效。 */
 export const stage6Projects: CourseProject[] = [
   ...seqProjects,
@@ -77,4 +88,5 @@ export const stage6Projects: CourseProject[] = [
   ...eventProjects,
   ...condProjects,
   ...gameProjects,
+  ...musicProjects,
 ];

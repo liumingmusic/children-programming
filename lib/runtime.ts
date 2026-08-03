@@ -66,6 +66,114 @@ export interface StageState {
 // 画笔默认粗细（屏幕像素）。项目里未放「设置画笔粗细」积木时使用此值。
 const DEFAULT_PEN_SIZE = 3;
 
+// ---- 音频合成（Web Audio）----
+// 站点为纯前端静态站，仅在浏览器内用 Web Audio 实时合成音效，无需任何音频资源文件。
+// SSR 守卫：服务端（含 jsdom 测试）没有 AudioContext，getAudioContext 返回 null，
+// 所有音频方法退化为「静音但按节拍推进队列」，既不会报错，也能在测试里被真实执行。
+const NOTE_FREQ: Record<string, number> = {
+  do: 261.63, // C4
+  re: 293.66, // D4
+  mi: 329.63, // E4
+  fa: 349.23, // F4
+  sol: 392.0, // G4
+  la: 440.0, // A4
+  ti: 493.88, // B4
+  do2: 523.25, // C5（高音 do）
+};
+const SCALE: number[] = [261.63, 293.66, 329.63, 349.23, 392.0, 440.0, 493.88, 523.25];
+const BEAT_MS = 400; // 一拍时长（毫秒），与「拍数」积木对应
+
+let audioCtx: AudioContext | null = null;
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (!audioCtx) {
+    const Ctor =
+      (window as unknown as { AudioContext?: typeof AudioContext }).AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctor) return null;
+    try {
+      audioCtx = new Ctor();
+    } catch {
+      audioCtx = null;
+    }
+  }
+  return audioCtx;
+}
+
+/** 单个音符：正弦波 + 短暂淡出。返回是否真正出声（无音频上下文时为 false）。 */
+function playToneAt(ctx: AudioContext, freq: number, durationMs: number, gainPeak = 0.18): boolean {
+  const now = ctx.currentTime;
+  const dur = durationMs / 1000;
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(gainPeak, now + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+  osc.connect(g);
+  g.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + dur + 0.03);
+  return true;
+}
+
+/** 鼓点：按种类用不同合成方式模拟（鼓 / 镲 / 木鱼）。 */
+function playDrumAt(ctx: AudioContext | null, kind: string) {
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  if (kind === "kick" || kind === "鼓") {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
+    g.gain.setValueAtTime(0.4, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  } else if (kind === "hat" || kind === "镲") {
+    const bufferSize = Math.floor(ctx.sampleRate * 0.1);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 7000;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.25, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+    noise.connect(hp);
+    hp.connect(g);
+    g.connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + 0.1);
+  } else {
+    // 木鱼：短促方波
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.value = 800;
+    g.gain.setValueAtTime(0.2, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.1);
+  }
+}
+
+/** 把舞台横向坐标 x 映射到音阶音高（点击 / 移动位置越靠右音越高）。 */
+function pitchFromX(x: number, width: number): number {
+  const t = (x + width / 2) / width; // 0..1（左 → 右）
+  const idx = Math.max(0, Math.min(SCALE.length - 1, Math.round(t * (SCALE.length - 1))));
+  return SCALE[idx];
+}
+
 type Action =
   | { type: "move"; steps: number; duration: number }
   | { type: "turn"; degrees: number; duration: number }
@@ -80,7 +188,13 @@ type Action =
   | { type: "penChangeColor"; delta: number }
   | { type: "penSetSize"; size: number }
   | { type: "setSize"; size: number }
-  | { type: "changeSize"; delta: number };
+  | { type: "changeSize"; delta: number }
+  | { type: "playNote"; note: string; beats: number }
+  | { type: "playDrum"; kind: string }
+  | { type: "playRandomNote" }
+  | { type: "playToneByMouseX" }
+  | { type: "playToneByActorX" }
+  | { type: "playChord"; notes: string[] };
 
 export type Script = {
   whenStart: string;
@@ -363,6 +477,37 @@ export class Runtime {
     this.actions.push({ type: "wait", seconds: seconds * 1000 });
   }
 
+  // --- 音频（Web Audio 实时合成，排队播放，使旋律按顺序发声）---
+  playNote(note: string, beats = 1) {
+    this.actions.push({ type: "playNote", note, beats: Math.max(0.25, beats) });
+    this.log(`[音频] 弹奏 ${note} 音`);
+  }
+
+  playDrum(kind: string) {
+    this.actions.push({ type: "playDrum", kind });
+    this.log(`[音频] 敲响${kind}`);
+  }
+
+  playRandomNote() {
+    this.actions.push({ type: "playRandomNote" });
+    this.log("[音频] 随机弹奏一个音符");
+  }
+
+  playToneByMouseX() {
+    this.actions.push({ type: "playToneByMouseX" });
+    this.log("[音频] 按点击位置弹音");
+  }
+
+  playToneByActorX() {
+    this.actions.push({ type: "playToneByActorX" });
+    this.log("[音频] 按二零位置弹音");
+  }
+
+  playChord(notes: string[]) {
+    this.actions.push({ type: "playChord", notes });
+    this.log(`[音频] 弹奏和弦 ${notes.join("+")}`);
+  }
+
   // --- Touching detection used by generated scripts ---
   touchingStar(): boolean {
     return this.state.stars.some((star) => {
@@ -438,6 +583,9 @@ export class Runtime {
     this.state.running = true;
     this.runningType = type;
     this.startClouds();
+    // 在用户手势内恢复 / 创建音频上下文，满足浏览器自动播放策略（首次发声前必须已 resume）
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === "suspended") ctx.resume().catch(() => {});
     this.log(
       type === "start"
         ? "[系统] 开始执行程序"
@@ -472,6 +620,19 @@ export class Runtime {
     this.state.running = false;
     this.runningType = null;
     this.emit();
+  }
+
+  /** 播放一个音符并在其时长后 resolve，使音频动作在队列里「按拍等待」，旋律依次发声。 */
+  private playAndWait(freq: number, durationMs: number): Promise<void> {
+    return new Promise((resolve) => {
+      const ctx = getAudioContext();
+      if (ctx) {
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        playToneAt(ctx, freq, durationMs);
+      }
+      this.emit();
+      setTimeout(resolve, durationMs);
+    });
   }
 
   private commitCurrentPath() {
@@ -617,6 +778,47 @@ export class Runtime {
         }
         case "wait": {
           setTimeout(resolve, action.seconds);
+          break;
+        }
+        case "playNote": {
+          const freq = NOTE_FREQ[action.note] ?? 440;
+          const dur = action.beats * BEAT_MS;
+          this.playAndWait(freq, dur).then(() => resolve());
+          break;
+        }
+        case "playRandomNote": {
+          const scaleNotes = ["do", "re", "mi", "fa", "sol", "la", "ti"];
+          const note = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+          const freq = NOTE_FREQ[note] ?? 440;
+          this.playAndWait(freq, BEAT_MS).then(() => resolve());
+          break;
+        }
+        case "playDrum": {
+          playDrumAt(getAudioContext(), action.kind);
+          this.emit();
+          setTimeout(() => resolve(), 200);
+          break;
+        }
+        case "playToneByMouseX": {
+          const freq = pitchFromX(this.mouse.x, this.width);
+          this.playAndWait(freq, BEAT_MS).then(() => resolve());
+          break;
+        }
+        case "playToneByActorX": {
+          const freq = pitchFromX(this.state.actor.x, this.width);
+          this.playAndWait(freq, BEAT_MS).then(() => resolve());
+          break;
+        }
+        case "playChord": {
+          const ctx = getAudioContext();
+          const chosen = action.notes.filter((n) => NOTE_FREQ[n] != null);
+          const dur = BEAT_MS * 2;
+          if (ctx) {
+            if (ctx.state === "suspended") ctx.resume().catch(() => {});
+            chosen.forEach((n) => playToneAt(ctx, NOTE_FREQ[n], dur, 0.12));
+          }
+          this.emit();
+          setTimeout(() => resolve(), dur);
           break;
         }
         case "penDown": {

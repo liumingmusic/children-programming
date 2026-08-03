@@ -100,6 +100,7 @@ function ChapterSection({
 }) {
   const prog = getChapterProgress(chapter, completedSet);
   const allDone = prog.done === prog.total && prog.total > 0;
+  const empty = chapter.projects.length === 0;
   return (
     <div
       ref={innerRef}
@@ -123,10 +124,21 @@ function ChapterSection({
                 已通关
               </span>
             )}
+            {empty && (
+              <span className="rounded-full bg-[#E6F1FB] px-2 py-0.5 text-xs font-medium text-[#0C447C]">
+                敬请期待
+              </span>
+            )}
           </div>
           <p className="truncate text-sm text-[#5F5E5A]">{chapter.description}</p>
         </div>
-        <ProgressRing done={prog.done} total={prog.total} />
+        {empty ? (
+          <span className="shrink-0 rounded-full bg-[#E6F1FB] px-3 py-1 text-xs font-medium text-[#0C447C]">
+            筹备中
+          </span>
+        ) : (
+          <ProgressRing done={prog.done} total={prog.total} />
+        )}
         {expanded ? (
           <ChevronDown className="h-5 w-5 text-[#9B988E]" />
         ) : (
@@ -136,6 +148,14 @@ function ChapterSection({
 
       {expanded && (
         <div className="border-t border-black/5 px-4 py-4 sm:px-5 sm:py-5">
+          {empty ? (
+            <div className="flex items-center gap-3 rounded-xl border border-dashed border-[#9FC3E8] bg-[#F4F9FE] px-4 py-5 text-[#0C447C]">
+              <span className="text-2xl">🚧</span>
+              <p className="text-sm leading-relaxed">
+                这个分类的内容还在筹备中，敬请期待～ 先来挑战已经上线的关卡吧！
+              </p>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {chapter.projects.map((p) => {
               const status = getNodeStatus(p.slug, completedSet, unlockedSet);
@@ -186,6 +206,7 @@ function ChapterSection({
               );
             })}
           </div>
+          )}
         </div>
       )}
     </div>

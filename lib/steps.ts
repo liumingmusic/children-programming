@@ -35,9 +35,32 @@ const GAME_SLUGS = [
   "treasure_map", "escort", "traffic_police", "dodge_clouds", "memory_match",
 ];
 
+/** 分类 8 · 音乐与节奏（全 10 项，slug 顺序与 projectSlugs 一致）。 */
+const MUSIC_SLUGS = [
+  "play_doremi", "twinkle", "drum_beat", "random_note", "loop_melody",
+  "pitch_by_click", "pitch_by_move", "chord", "birthday", "compose",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
+}
+
+/** 统计生成代码里「音频积木」的出现总次数（任一弹奏 / 鼓 / 随机 / 和弦 / 按位置弹音均计 1）。 */
+function countAudio(code: string): number {
+  return (
+    countMark(code, "__runtime.playNote(") +
+    countMark(code, "__runtime.playDrum(") +
+    countMark(code, "__runtime.playRandomNote(") +
+    countMark(code, "__runtime.playChord(") +
+    countMark(code, "__runtime.playToneByMouseX(") +
+    countMark(code, "__runtime.playToneByActorX(")
+  );
+}
+
+/** 是否用到了任意音频积木（基于真实 JS 标记）。 */
+function hasAnyAudio(code: string): boolean {
+  return /__runtime\.(playNote|playDrum|playRandomNote|playChord|playToneByMouseX|playToneByActorX)\(/.test(code);
 }
 
 /** 序列类项目第 2 步：是否已写出「前进 + 转向」的路线（阈值按项目不同，低于示范但保证方向正确）。 */
@@ -242,6 +265,59 @@ export function computeSteps(
         // 记忆翻牌由独立组件驱动完成，步骤清单作为静态引导，不在代码层判定。
         done = false;
       }
+    } else if (MUSIC_SLUGS.includes(project.slug)) {
+      // 音乐类（分类 8）：基于真实 JS 标记 / 运行日志判定「用了哪个音频积木、弹了几个音、事件是否触发」。
+      // 完成判定以「步骤」为准（无 stars / 无 goalMarks，isGoalAchieved 回退为 true）。
+      const finished = logs.includes("[系统] 程序执行完毕");
+      const clickFired = logs.some((l) => l.includes("舞台被点击"));
+      const startFired = logs.some((l) => l.includes("开始执行程序"));
+      const audioCount = countAudio(code);
+      const hasAudio = hasAnyAudio(code);
+      if (project.slug === "play_doremi") {
+        if (id === 1) done = hasAudio;
+        else if (id === 2) done = audioCount >= 3;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "twinkle") {
+        if (id === 1) done = hasAudio;
+        else if (id === 2) done = audioCount >= 7;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "drum_beat") {
+        if (id === 1) done = code.includes("__runtime.playDrum(");
+        else if (id === 2) done = hasLoop && code.includes("__runtime.playDrum(");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "random_note") {
+        if (id === 1) done = code.includes("__runtime.playRandomNote(");
+        else if (id === 2) done = hasLoop && code.includes("__runtime.playRandomNote(");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "loop_melody") {
+        if (id === 1) done = hasLoop;
+        else if (id === 2) done = hasLoop && hasAudio;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "pitch_by_click") {
+        if (id === 1) done = clickFired;
+        else if (id === 2) done = code.includes("__runtime.playToneByMouseX(");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "pitch_by_move") {
+        if (id === 1) done = startFired;
+        else if (id === 2) done = code.includes("__runtime.playToneByActorX(") && code.includes("__runtime.move(");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "chord") {
+        if (id === 1) done = code.includes("__runtime.playChord(");
+        else if (id === 2) {
+          // 和弦里至少包含 2 个音符：解析 playChord([...]) 数组的元素个数
+          const m = code.match(/__runtime\.playChord\(\[([^\]]*)\]\)/);
+          const n = m ? m[1].split(",").length : 0;
+          done = n >= 2;
+        } else if (id === 3) done = finished;
+      } else if (project.slug === "birthday") {
+        if (id === 1) done = hasAudio;
+        else if (id === 2) done = audioCount >= 6;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "compose") {
+        if (id === 1) done = hasAudio;
+        else if (id === 2) done = audioCount >= 3 || hasLoop;
+        else if (id === 3) done = finished;
+      }
     }
     return { ...step, done };
   });
@@ -440,6 +516,56 @@ export function coach(slug: string, stepId: number): string {
     if (stepId === 1) return "先拖一个蓝色「当舞台被点击」事件。";
     if (stepId === 2) return "放「如果…那么…否则」，条件放「点击在左半边」；那么里「说 红灯，停！」，否则里「说 绿灯，走！」。";
     if (stepId === 3) return "点「运行」后分别点左边和右边，听交警指挥。";
+  }
+  if (slug === "play_doremi") {
+    if (stepId === 1) return "拖一个紫色「弹奏音符」积木（默认就是 do）放进绿色「当开始运行」里。";
+    if (stepId === 2) return "在 do 下面再接两个「弹奏音符」，把音符分别改成 re、mi，二零就会唱出 do re mi。";
+    if (stepId === 3) return "点「运行」，听二零弹出 do re mi！";
+  }
+  if (slug === "twinkle") {
+    if (stepId === 1) return "从紫色「弹奏音符」积木开始搭。";
+    if (stepId === 2) return "依次接 7 个「弹奏音符」，按顺序设成 do、do、sol、sol、la、la、sol，就是《小星星》第一句。";
+    if (stepId === 3) return "点「运行」，听二零唱出《小星星》！";
+  }
+  if (slug === "drum_beat") {
+    if (stepId === 1) return "先放一个「敲响 鼓」积木。";
+    if (stepId === 2) return "把它放进「重复执行 8 次」里，并在它下面用「下一个」接一个「敲响 镲」，就成了一段节奏。";
+    if (stepId === 3) return "点「运行」，听二零敲出咚嚓咚嚓的鼓点！";
+  }
+  if (slug === "random_note") {
+    if (stepId === 1) return "拖一个橙色「随机弹一个音」积木。";
+    if (stepId === 2) return "把它放进「重复执行 8 次」里，每次运行二零都会即兴弹出不同音符。";
+    if (stepId === 3) return "多点几次「运行」，听二零每次不一样的随机小曲！";
+  }
+  if (slug === "loop_melody") {
+    if (stepId === 1) return "先拖一个绿色「当开始运行」，里面放「重复执行 4 次」。";
+    if (stepId === 2) return "循环里依次放「弹奏音符」do、mi、sol，旋律就会一遍遍回荡。";
+    if (stepId === 3) return "点「运行」，听循环旋律！";
+  }
+  if (slug === "pitch_by_click") {
+    if (stepId === 1) return "先拖一个蓝色「当舞台被点击」事件。";
+    if (stepId === 2) return "在事件里放「按点击位置弹音（越靠右越高）」，点不同位置音高会不同。";
+    if (stepId === 3) return "点「运行」后在舞台上不同位置点几下，听音高随位置变化！";
+  }
+  if (slug === "pitch_by_move") {
+    if (stepId === 1) return "先拖一个绿色「当开始运行」。";
+    if (stepId === 2) return "放「重复执行 8 次」，里面先放「移动 40 步」，再用「下一个」接「按二零位置弹音」，边走边奏。";
+    if (stepId === 3) return "点「运行」，听二零边走边弹出越来越高的音！";
+  }
+  if (slug === "chord") {
+    if (stepId === 1) return "拖一个紫色「弹和弦」积木（默认就是 do、mi、sol 三个音）。";
+    if (stepId === 2) return "和弦里至少放 2 个音符（默认三个），点运行就能同时听到饱满的和声。";
+    if (stepId === 3) return "点「运行」，听几个音一起响起的厚实声音！";
+  }
+  if (slug === "birthday") {
+    if (stepId === 1) return "从紫色「弹奏音符」积木开始搭。";
+    if (stepId === 2) return "依次接 6 个「弹奏音符」，顺序为 sol、sol、la、sol、高音do、ti，就是《生日快乐歌》第一句。";
+    if (stepId === 3) return "点「运行」，为小伙伴唱一首生日歌！";
+  }
+  if (slug === "compose") {
+    if (stepId === 1) return "拖一个紫色「弹奏音符」积木开始你的创作。";
+    if (stepId === 2) return "随便排至少 3 个「弹奏音符」（或用一个循环包住几个音），没有标准答案，好听就行。";
+    if (stepId === 3) return "点「运行」，听二零唱出你的原创小曲！";
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
 }

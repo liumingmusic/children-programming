@@ -39,6 +39,13 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_set_expression" },
     { kind: "block" as const, type: "maker_touching_mark" },
     { kind: "block" as const, type: "maker_touching_cloud" },
+    // ---- 音乐与节奏分类（分类 8）----
+    { kind: "block" as const, type: "maker_play_note", fields: { NOTE: "do" }, inputs: { BEATS: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
+    { kind: "block" as const, type: "maker_play_drum", fields: { KIND: "kick" } },
+    { kind: "block" as const, type: "maker_random_note" },
+    { kind: "block" as const, type: "maker_play_by_mouse" },
+    { kind: "block" as const, type: "maker_play_by_actor" },
+    { kind: "block" as const, type: "maker_play_chord", fields: { N1: "do", N2: "mi", N3: "sol" } },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -447,6 +454,136 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+    // ---- 音乐与节奏（分类 8）----
+    maker_play_note: {
+      init() {
+        this.appendDummyInput()
+          .appendField("弹奏")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["do", "do"],
+              ["re", "re"],
+              ["mi", "mi"],
+              ["fa", "fa"],
+              ["sol", "sol"],
+              ["la", "la"],
+              ["ti", "ti"],
+              ["高音do", "do2"],
+            ]),
+            "NOTE"
+          )
+          .appendField("持续");
+        this.appendValueInput("BEATS").setCheck("Number").appendField("拍");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(280);
+        this.setTooltip("弹奏一个音符（do~ti 或高音do），可设置持续几拍。把几个连起来就能弹出旋律。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_play_drum: {
+      init() {
+        this.appendDummyInput()
+          .appendField("敲响")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["鼓", "kick"],
+              ["镲", "hat"],
+              ["木鱼", "wood"],
+            ]),
+            "KIND"
+          );
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(280);
+        this.setTooltip("敲一下鼓 / 镲 / 木鱼，做出节奏。常放进「重复执行」里循环敲击。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_random_note: {
+      init() {
+        this.appendDummyInput().appendField("随机弹一个音");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(280);
+        this.setTooltip("让二零从 do~ti 里随机挑一个音弹出来，每次都不一样。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_play_by_mouse: {
+      init() {
+        this.appendDummyInput().appendField("按点击位置弹音（越靠右越高）");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(280);
+        this.setTooltip("根据最近一次点击的位置发出不同音高：越靠右声音越高。常放进「当舞台被点击」里。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_play_by_actor: {
+      init() {
+        this.appendDummyInput().appendField("按二零位置弹音（越靠右越高）");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(280);
+        this.setTooltip("根据二零当前的位置发出不同音高：越靠右声音越高。常放进「移动」循环里，边走边奏。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_play_chord: {
+      init() {
+        this.appendDummyInput()
+          .appendField("弹和弦")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["do", "do"],
+              ["re", "re"],
+              ["mi", "mi"],
+              ["fa", "fa"],
+              ["sol", "sol"],
+              ["la", "la"],
+              ["ti", "ti"],
+              ["高音do", "do2"],
+            ]),
+            "N1"
+          )
+          .appendField("+")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["do", "do"],
+              ["re", "re"],
+              ["mi", "mi"],
+              ["fa", "fa"],
+              ["sol", "sol"],
+              ["la", "la"],
+              ["ti", "ti"],
+              ["高音do", "do2"],
+            ]),
+            "N2"
+          )
+          .appendField("+")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["do", "do"],
+              ["re", "re"],
+              ["mi", "mi"],
+              ["fa", "fa"],
+              ["sol", "sol"],
+              ["la", "la"],
+              ["ti", "ti"],
+              ["高音do", "do2"],
+            ]),
+            "N3"
+          );
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(280);
+        this.setTooltip("同时弹出 3 个音，组成好听的和弦。");
+        this.setHelpUrl("");
+      },
+    },
   });
 
   // Hat block: when start runs the stack and then ends
@@ -611,5 +748,36 @@ export function registerCustomBlocks() {
 
   javascriptGenerator.forBlock["maker_touching_cloud"] = () => {
     return ["__runtime.touchingCloud()", Order.FUNCTION_CALL];
+  };
+
+  // ---- 音乐与节奏（分类 8）----
+  javascriptGenerator.forBlock["maker_play_note"] = (block, generator) => {
+    const note = JSON.stringify(block.getFieldValue("NOTE"));
+    const beats = generator.valueToCode(block, "BEATS", Order.ATOMIC) || "1";
+    return `__runtime.playNote(${note}, ${beats});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_play_drum"] = (block) => {
+    const kind = JSON.stringify(block.getFieldValue("KIND"));
+    return `__runtime.playDrum(${kind});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_random_note"] = () => {
+    return "__runtime.playRandomNote();\n";
+  };
+
+  javascriptGenerator.forBlock["maker_play_by_mouse"] = () => {
+    return "__runtime.playToneByMouseX();\n";
+  };
+
+  javascriptGenerator.forBlock["maker_play_by_actor"] = () => {
+    return "__runtime.playToneByActorX();\n";
+  };
+
+  javascriptGenerator.forBlock["maker_play_chord"] = (block) => {
+    const n1 = JSON.stringify(block.getFieldValue("N1"));
+    const n2 = JSON.stringify(block.getFieldValue("N2"));
+    const n3 = JSON.stringify(block.getFieldValue("N3"));
+    return `__runtime.playChord([${n1}, ${n2}, ${n3}]);\n`;
   };
 }
