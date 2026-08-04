@@ -57,9 +57,16 @@ describe("CompletionModal 完成弹窗", () => {
     expect(btn.getAttribute("href")).toContain("/learn/play_doremi");
   });
 
-  it("compose 是阶段最后一个项目，不显示「挑战下一个」", () => {
-    render(<CompletionModal open onClose={() => {}} project={getProject("compose")!} />);
+  it("calculator 是阶段最后一个项目，不显示「挑战下一个」", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("calculator")!} />);
     expect(screen.queryByRole("link", { name: /挑战下一个/ })).toBeNull();
+  });
+
+  it("compose 不再是最后一个项目，显示「挑战下一个：数数 1 到 10」并指向 /learn/count10", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("compose")!} />);
+    const btn = screen.getByRole("link", { name: /挑战下一个/ }) as HTMLAnchorElement;
+    expect(btn).toHaveTextContent("数数 1 到 10");
+    expect(btn.getAttribute("href")).toContain("/learn/count10");
   });
 
   it("stars 不再是最后一个项目，显示「挑战下一个：走迷宫到出口」并指向 /learn/maze_exit", () => {

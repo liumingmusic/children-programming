@@ -46,6 +46,11 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_play_by_mouse" },
     { kind: "block" as const, type: "maker_play_by_actor" },
     { kind: "block" as const, type: "maker_play_chord", fields: { N1: "do", N2: "mi", N3: "sol" } },
+    // ---- 数学启蒙（分类 9）· 算术积木 ----
+    { kind: "block" as const, type: "maker_add", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 3 } } }, B: { shadow: { type: "math_number", fields: { NUM: 5 } } } } },
+    { kind: "block" as const, type: "maker_sub", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 8 } } }, B: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
+    { kind: "block" as const, type: "maker_mul", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 3 } } }, B: { shadow: { type: "math_number", fields: { NUM: 4 } } } } },
+    { kind: "block" as const, type: "maker_div", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 12 } } }, B: { shadow: { type: "math_number", fields: { NUM: 3 } } } } },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -146,14 +151,14 @@ export function registerCustomBlocks() {
     },
     maker_say: {
       init() {
-        this.appendValueInput("TEXT").setCheck("String").appendField("说");
+        this.appendValueInput("TEXT").setCheck(null).appendField("说");
         this.appendValueInput("SECONDS").setCheck("Number").appendField("持续");
         this.appendDummyInput().appendField("秒");
         this.setInputsInline(true);
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(290);
-        this.setTooltip("让二零说出一段话");
+        this.setTooltip("让二零说出一段话，也能直接把算式的结果（如 3+5）说出来。");
         this.setHelpUrl("");
       },
     },
@@ -395,6 +400,55 @@ export function registerCustomBlocks() {
         this.setOutput(true, "Boolean");
         this.setColour(210);
         this.setTooltip("比较两个数字的大小关系，成立时返回真。常放进「如果…那么」的条件里。");
+        this.setHelpUrl("");
+      },
+    },
+    // ---- 数学启蒙（分类 9）· 算术积木（值积木，可嵌套、可接进「说」）----
+    maker_add: {
+      init() {
+        this.appendValueInput("A").setCheck("Number").appendField("");
+        this.appendDummyInput().appendField("加");
+        this.appendValueInput("B").setCheck("Number").appendField("");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setColour(60);
+        this.setTooltip("把两个数相加，得到它们的和。常放进「说」里把结果说出来。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_sub: {
+      init() {
+        this.appendValueInput("A").setCheck("Number").appendField("");
+        this.appendDummyInput().appendField("减");
+        this.appendValueInput("B").setCheck("Number").appendField("");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setColour(60);
+        this.setTooltip("用第一个数减第二个数，得到差。常放进「说」里把结果说出来。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_mul: {
+      init() {
+        this.appendValueInput("A").setCheck("Number").appendField("");
+        this.appendDummyInput().appendField("乘");
+        this.appendValueInput("B").setCheck("Number").appendField("");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setColour(60);
+        this.setTooltip("把两个数相乘，得到积。常放进「说」里把结果说出来。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_div: {
+      init() {
+        this.appendValueInput("A").setCheck("Number").appendField("");
+        this.appendDummyInput().appendField("除以");
+        this.appendValueInput("B").setCheck("Number").appendField("");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setColour(60);
+        this.setTooltip("用第一个数除以第二个数，得到商（除以 0 时按除以 1 处理，不会出错）。常放进「说」里把结果说出来。");
         this.setHelpUrl("");
       },
     },
@@ -730,6 +784,28 @@ export function registerCustomBlocks() {
     const b = generator.valueToCode(block, "B", Order.ATOMIC) || "0";
     const op = block.getFieldValue("OP");
     return [`(${a} ${op} ${b})`, Order.RELATIONAL];
+  };
+
+  // ---- 数学启蒙（分类 9）· 算术积木生成器 ----
+  javascriptGenerator.forBlock["maker_add"] = (block, generator) => {
+    const a = generator.valueToCode(block, "A", Order.ATOMIC) || "0";
+    const b = generator.valueToCode(block, "B", Order.ATOMIC) || "0";
+    return [`__runtime.add(${a}, ${b})`, Order.FUNCTION_CALL];
+  };
+  javascriptGenerator.forBlock["maker_sub"] = (block, generator) => {
+    const a = generator.valueToCode(block, "A", Order.ATOMIC) || "0";
+    const b = generator.valueToCode(block, "B", Order.ATOMIC) || "0";
+    return [`__runtime.sub(${a}, ${b})`, Order.FUNCTION_CALL];
+  };
+  javascriptGenerator.forBlock["maker_mul"] = (block, generator) => {
+    const a = generator.valueToCode(block, "A", Order.ATOMIC) || "0";
+    const b = generator.valueToCode(block, "B", Order.ATOMIC) || "0";
+    return [`__runtime.mul(${a}, ${b})`, Order.FUNCTION_CALL];
+  };
+  javascriptGenerator.forBlock["maker_div"] = (block, generator) => {
+    const a = generator.valueToCode(block, "A", Order.ATOMIC) || "0";
+    const b = generator.valueToCode(block, "B", Order.ATOMIC) || "0";
+    return [`__runtime.div(${a}, ${b})`, Order.FUNCTION_CALL];
   };
 
   javascriptGenerator.forBlock["maker_get_size"] = () => {

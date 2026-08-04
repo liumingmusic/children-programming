@@ -41,6 +41,12 @@ const MUSIC_SLUGS = [
   "pitch_by_click", "pitch_by_move", "chord", "birthday", "compose",
 ];
 
+/** 分类 9 · 数学启蒙（全 10 项，slug 顺序与 projectSlugs 一致）。 */
+const MATH_SLUGS = [
+  "count10", "count_apples", "compare_size", "add_sub", "shape_names",
+  "symmetry", "multiplication", "clock", "geometry_puzzle", "calculator",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -318,6 +324,60 @@ export function computeSteps(
         else if (id === 2) done = audioCount >= 3 || hasLoop;
         else if (id === 3) done = finished;
       }
+    } else if (MATH_SLUGS.includes(project.slug)) {
+      // 数学启蒙（分类 9）：基于真实 JS 标记 / 运行日志判定「数数 / 比较 / 算术 / 图形」。
+      // 完成判定以「步骤」为准（无 stars / 无 goalMarks，isGoalAchieved 回退为 true）。
+      const finished = logs.includes("[系统] 程序执行完毕");
+      const sayCount = countMark(code, "__runtime.say(");
+      const hasVar = code.includes("__runtime.setVar") || code.includes("__runtime.changeVar") || code.includes("__runtime.getVar");
+      // 比较积木会额外包一层括号：生成形如 `__runtime.getVar("a")) > __runtime.getVar("b")`，
+      // 故 getVar(...) 后可能有 0~1 个 `)`，再用 [><]=? 兜底 ≥ / ≤。
+      const hasCompare = /__runtime\.getVar\([^)]*\)\)*\s*[><]=?/.test(code);
+      const hasArith = code.includes("__runtime.add(") || code.includes("__runtime.sub(") || code.includes("__runtime.mul(") || code.includes("__runtime.div(");
+      // 重复执行次数（controls_repeat_ext 生成 `for (var count = 0; count < N; count++)`），用于校验「数到 10 / 数到 5」。
+      const loopBound = (() => { const m = code.match(/count\s*<\s*(\d+)/); return m ? Number(m[1]) : 0; })();
+      const hasChangeVar = code.includes("__runtime.changeVar(");
+      if (project.slug === "count10" || project.slug === "count_apples") {
+        const target = project.slug === "count10" ? 10 : 5;
+        // 第 1 步：用一个「重复执行」循环 + 变量来数数（循环里要有变量增减）。
+        if (id === 1) done = hasLoop && (hasChangeVar || code.includes("__runtime.getVar("));
+        // 第 2 步：循环里「一边加一边说出数字」，且循环次数达到目标（数到 10 / 数到 5）。
+        // 注意 say 在循环体内生成代码只出现一次，不能靠 countMark 数运行时次数，改为校验循环次数。
+        else if (id === 2) done = hasLoop && hasChangeVar && code.includes("__runtime.say(") && loopBound >= target;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "compare_size") {
+        if (id === 1) done = countMark(code, "__runtime.setVar(") >= 2;
+        else if (id === 2) done = hasVar && hasCompare;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "add_sub") {
+        if (id === 1) done = code.includes("__runtime.add(");
+        else if (id === 2) done = code.includes("__runtime.sub(");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "shape_names") {
+        if (id === 1) done = code.includes("__runtime.penDown()");
+        else if (id === 2) done = hasLoop && code.includes("__runtime.move") && code.includes("__runtime.turn");
+        else if (id === 3) done = sayCount >= 1;
+      } else if (project.slug === "symmetry") {
+        if (id === 1) done = code.includes("__runtime.penDown()");
+        else if (id === 2) done = code.includes("__runtime.goto(") && countMark(code, "__runtime.goto(") >= 2 && hasLoop;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "multiplication") {
+        if (id === 1) done = hasLoop;
+        else if (id === 2) done = hasLoop && hasVar;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "clock") {
+        if (id === 1) done = code.includes("__runtime.penDown()") && hasLoop && code.includes("__runtime.move") && code.includes("__runtime.turn");
+        else if (id === 2) done = sayCount >= 1;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "geometry_puzzle") {
+        if (id === 1) done = code.includes("__runtime.penDown()");
+        else if (id === 2) done = code.includes("__runtime.goto(") && countMark(code, "__runtime.penDown()") >= 2 && hasLoop;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "calculator") {
+        if (id === 1) done = countMark(code, "__runtime.setVar(") >= 2;
+        else if (id === 2) done = hasArith;
+        else if (id === 3) done = finished;
+      }
     }
     return { ...step, done };
   });
@@ -566,6 +626,56 @@ export function coach(slug: string, stepId: number): string {
     if (stepId === 1) return "拖一个紫色「弹奏音符」积木开始你的创作。";
     if (stepId === 2) return "随便排至少 3 个「弹奏音符」（或用一个循环包住几个音），没有标准答案，好听就行。";
     if (stepId === 3) return "点「运行」，听二零唱出你的原创小曲！";
+  }
+  if (slug === "count10") {
+    if (stepId === 1) return "先把橙色「重复执行 10 次」拖进绿色「当开始运行」里，二零才会一遍遍数。";
+    if (stepId === 2) return "循环里放「变量 n 增加 1」，再用「说 变量 n」把数字说出来，二零就能数 1、2、3……10。";
+    if (stepId === 3) return "点「运行」，听二零把 1 到 10 数出来！";
+  }
+  if (slug === "count_apples") {
+    if (stepId === 1) return "用橙色「重复执行 5 次」包住「变量 n 增加 1」和「说 变量 n」，就能一个个数苹果。";
+    if (stepId === 2) return "循环里每数一个就说出来，数到 5 个后，外面再放一个「说 一共 5 个苹果！」。";
+    if (stepId === 3) return "点「运行」，听二零清点苹果。";
+  }
+  if (slug === "compare_size") {
+    if (stepId === 1) return "先放两个「把变量 a 设为 8」「把变量 b 设为 3」，把两个数存起来。";
+    if (stepId === 2) return "在「如果…那么」里放「比较 变量 a 大于 变量 b」，二零就能判断谁大。";
+    if (stepId === 3) return "点「运行」，看二零比出大小！";
+  }
+  if (slug === "add_sub") {
+    if (stepId === 1) return "拖一个粉色「说」，把数字口接上黄色「加」积木（左边 3、右边 5），二零就会算 3+5。";
+    if (stepId === 2) return "再放一个「说」，接上黄色「减」积木（左边 8、右边 2），算一算 8-2。";
+    if (stepId === 3) return "点「运行」，听二零报出 8 和 6！";
+  }
+  if (slug === "shape_names") {
+    if (stepId === 1) return "先放绿色「落笔」，二零才会画出线来。";
+    if (stepId === 2) return "把「移动 80 步」和「右转 90 度」都放进「重复执行 4 次」里，就画出正方形。";
+    if (stepId === 3) return "最后放「说 我画了一个正方形！」，点运行看二零报名。";
+  }
+  if (slug === "symmetry") {
+    if (stepId === 1) return "先「落笔」，用「移到」定位到左边。";
+    if (stepId === 2) return "画完左边，再用「移到」定位到右边画一个一样的图形，左右就对称啦。";
+    if (stepId === 3) return "点「运行」，看二零拼出对称图案！";
+  }
+  if (slug === "multiplication") {
+    if (stepId === 1) return "先拖一个「重复执行 4 次」。";
+    if (stepId === 2) return "里面放「变量 sum 增加 3」，把 3 加 4 次就是 3×4，再用「说 变量 sum」报答案。";
+    if (stepId === 3) return "点「运行」，看二零用加法变出乘法！";
+  }
+  if (slug === "clock") {
+    if (stepId === 1) return "「落笔」后放「重复执行 36 次」，里面「移动 10 步 + 右转 10 度」，就能画出圆圆的表盘。";
+    if (stepId === 2) return "最后放「说 3 点整啦！」，给钟楼报时。";
+    if (stepId === 3) return "点「运行」，看二零画出时钟。";
+  }
+  if (slug === "geometry_puzzle") {
+    if (stepId === 1) return "先「落笔」，用「移到」定位画第一个图形。";
+    if (stepId === 2) return "「抬笔」后再「落笔」，用「移到」定位到另一处画第二个图形，拼成一幅画。";
+    if (stepId === 3) return "点「运行」，看二零拼出图案！";
+  }
+  if (slug === "calculator") {
+    if (stepId === 1) return "先放「把变量 x 设为 12」「把变量 y 设为 7」，把两个数字存进变量。";
+    if (stepId === 2) return "「说」的数字口接上「加」或「减」积木，左右都放进「变量 x」「变量 y」，二零就当小计算器。";
+    if (stepId === 3) return "点「运行」，听二零算出答案！";
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
 }

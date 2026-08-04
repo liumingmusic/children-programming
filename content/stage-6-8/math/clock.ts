@@ -1,0 +1,50 @@
+import type { CourseProject } from "@/courses";
+
+export const clockProject: CourseProject = {
+  slug: "clock",
+  category: "math",
+  title: "时钟整点",
+  ageGroup: "6-8 岁",
+  description: "用循环画一个圆圆的表盘，再说出现在是几点整。",
+  missionBrief:
+    "造物星球的小镇钟楼要报时了。写一个程序：当开始运行时，让二零画出一个圆形的表盘，并说「3 点整啦！」。",
+  erLingHint:
+    "① 拖绿色「当开始运行」；② 放「落笔」，再放橙色「重复执行 36 次」，里面放「移动 10 步」和「右转 10 度」，画出一个圆；③ 放「抬笔」；④ 最后放「说 3 点整啦！」；⑤ 点运行，看二零画出钟表。",
+  steps: [
+    { id: 1, title: "用落笔 + 循环画出圆形表盘" },
+    { id: 2, title: "说出整点的时间" },
+    { id: 3, title: "点运行看二零画出时钟" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_pen_down">
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">36</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                  <next>
+                    <block type="maker_turn">
+                      <value name="DEGREES"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_pen_up">
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">3 点整啦！</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

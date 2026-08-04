@@ -100,6 +100,16 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
       "chord",
       "birthday",
       "compose",
+      "count10",
+      "count_apples",
+      "compare_size",
+      "add_sub",
+      "shape_names",
+      "symmetry",
+      "multiplication",
+      "clock",
+      "geometry_puzzle",
+      "calculator",
     ]);
   });
 
@@ -119,8 +129,8 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     expect(getProject("nope")).toBeUndefined();
   });
 
-  it("getNextProject 计算同阶段下一个项目（stage-6-8 共 71 项）", () => {
-    const chain = ["hello","flag","stone","shapeL","home","maze","arrow","zigzag","treasure","dance","frame","square","triangle","pentagon","spin","stairs","wave","spiral","fence","windmill","pickfruit","star5","flower","rainbow","snowflake","mandala","concentric","connectdot","house","letter","checkerboard","click_jump","click_color","click_dialog","two_events","click_play_dialog","auto_patrol","key_forward","edge_bounce","size_toggle","expression_shake","if_touch_star","if_edge_turn","if_red_stop","click_left_right","collect3","random_branch","odd_even","size_threshold","avoid_obstacle","escape_badguy","stars","maze_exit","collect_apples","light_lanterns","collect_rainbow","treasure_map","escort","traffic_police","dodge_clouds","memory_match","play_doremi","twinkle","drum_beat","random_note","loop_melody","pitch_by_click","pitch_by_move","chord","birthday","compose"];
+  it("getNextProject 计算同阶段下一个项目（stage-6-8 共 81 项）", () => {
+    const chain = ["hello","flag","stone","shapeL","home","maze","arrow","zigzag","treasure","dance","frame","square","triangle","pentagon","spin","stairs","wave","spiral","fence","windmill","pickfruit","star5","flower","rainbow","snowflake","mandala","concentric","connectdot","house","letter","checkerboard","click_jump","click_color","click_dialog","two_events","click_play_dialog","auto_patrol","key_forward","edge_bounce","size_toggle","expression_shake","if_touch_star","if_edge_turn","if_red_stop","click_left_right","collect3","random_branch","odd_even","size_threshold","avoid_obstacle","escape_badguy","stars","maze_exit","collect_apples","light_lanterns","collect_rainbow","treasure_map","escort","traffic_police","dodge_clouds","memory_match","play_doremi","twinkle","drum_beat","random_note","loop_melody","pitch_by_click","pitch_by_move","chord","birthday","compose","count10","count_apples","compare_size","add_sub","shape_names","symmetry","multiplication","clock","geometry_puzzle","calculator"];
     for (let i = 0; i < chain.length - 1; i++) {
       expect(getNextProject(chain[i])?.slug, `${chain[i]} 的下一个`).toBe(chain[i + 1]);
     }
@@ -155,15 +165,15 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
 
   it("getStageCategories 对 stage-6-8 按分类分组且不丢项目", () => {
     const sections = getStageCategories("stage-6-8");
-    // 分类数量：seq / loop / draw / event / cond / game / music 共 7 个非空分类
-    // （story / math / science / pbl 暂未开发，被过滤掉）
+    // 分类数量：seq / loop / draw / event / cond / game / music / math 共 8 个非空分类
+    // （story / science / pbl 暂未开发，被过滤掉）
     expect(sections.map((s) => s.id)).toEqual([
-      "seq", "loop", "draw", "event", "cond", "game", "music",
+      "seq", "loop", "draw", "event", "cond", "game", "music", "math",
     ]);
-    // 分组内项目数之和 == 全部项目数（71），不丢不重
+    // 分组内项目数之和 == 全部项目数（81），不丢不重
     const total = sections.reduce((n, s) => n + s.projects.length, 0);
     expect(total).toBe(getStageProjects("stage-6-8").length);
-    expect(total).toBe(71);
+    expect(total).toBe(81);
     // 分类内的顺序遵循 projectSlugs（seq 在前 11 个）
     expect(sections[0].id).toBe("seq");
     expect(sections[0].projects.map((p) => p.slug)).toEqual([
@@ -192,6 +202,12 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     expect(sections[6].projects.map((p) => p.slug)).toEqual([
       "play_doremi", "twinkle", "drum_beat", "random_note", "loop_melody",
       "pitch_by_click", "pitch_by_move", "chord", "birthday", "compose",
+    ]);
+    // 分类 9 · 数学启蒙（新增 10 项）
+    expect(sections[7].id).toBe("math");
+    expect(sections[7].projects.map((p) => p.slug)).toEqual([
+      "count10", "count_apples", "compare_size", "add_sub", "shape_names",
+      "symmetry", "multiplication", "clock", "geometry_puzzle", "calculator",
     ]);
   });
 

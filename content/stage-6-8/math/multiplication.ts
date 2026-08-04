@@ -1,0 +1,49 @@
+import type { CourseProject } from "@/courses";
+
+export const multiplicationProject: CourseProject = {
+  slug: "multiplication",
+  category: "math",
+  title: "九九乘法初识",
+  ageGroup: "6-8 岁",
+  description: "乘法就是「几个相同的数相加」，用循环和变量就能算出来。",
+  missionBrief:
+    "造物星球的数学老师说：3 × 4 就是把 3 加 4 次。写一个程序：当开始运行时，让二零算出 3 × 4，并说出答案。",
+  erLingHint:
+    "① 拖绿色「当开始运行」；② 先放「把变量 sum 设为 0」；③ 再放橙色「重复执行 4 次」，里面放「变量 sum 增加 3」；④ 循环后放「说 变量 sum」和「说 3×4=12！」；⑤ 点运行，看二零用加法变出乘法。",
+  steps: [
+    { id: 1, title: "用重复执行来算" },
+    { id: 2, title: "用变量累加（乘法=几个相同数相加）" },
+    { id: 3, title: "点运行听二零算出乘法" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_var">
+          <field name="NAME">sum</field>
+          <value name="VALUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_change_var">
+                  <field name="NAME">sum</field>
+                  <value name="DELTA"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><block type="maker_get_var"><field name="NAME">sum</field></block></value>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">3×4=12！</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

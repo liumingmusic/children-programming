@@ -403,6 +403,30 @@ export class Runtime {
     return this.vars[name] ?? 0;
   }
 
+  // --- 算术（分类 9 · 数学启蒙）：同步计算并返回结果，同时记日志供步骤判定 ---
+  // 与 getVar 一样是「即时计算」，不进 Action 队列（运算本身无需动画，结果由「说」展示）。
+  add(a: number, b: number): number {
+    const r = a + b;
+    this.log(`[计算] ${a} + ${b} = ${r}`);
+    return r;
+  }
+  sub(a: number, b: number): number {
+    const r = a - b;
+    this.log(`[计算] ${a} - ${b} = ${r}`);
+    return r;
+  }
+  mul(a: number, b: number): number {
+    const r = a * b;
+    this.log(`[计算] ${a} × ${b} = ${r}`);
+    return r;
+  }
+  div(a: number, b: number): number {
+    const d = b === 0 ? 1 : b;
+    const r = a / d;
+    this.log(`[计算] ${a} ÷ ${b} = ${r}`);
+    return r;
+  }
+
   /** 角色是否碰到指定种类的危险标记（障碍 / 坏人）。 */
   touchingMark(kind: string): boolean {
     return this.hazards.some((h) => {
@@ -469,8 +493,9 @@ export class Runtime {
     this.actions.push({ type: "gotoStar", index, duration: 600 });
   }
 
-  say(text: string, seconds: number) {
-    this.actions.push({ type: "say", text, duration: seconds * 1000 });
+  say(text: string | number, seconds: number) {
+    const t = text == null ? "" : String(text);
+    this.actions.push({ type: "say", text: t, duration: seconds * 1000 });
   }
 
   wait(seconds: number) {

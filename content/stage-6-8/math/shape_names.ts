@@ -1,0 +1,50 @@
+import type { CourseProject } from "@/courses";
+
+export const shapeNamesProject: CourseProject = {
+  slug: "shape_names",
+  category: "math",
+  title: "认识图形",
+  ageGroup: "6-8 岁",
+  description: "落笔 + 循环画出一个正方形，再说出它的名字。",
+  missionBrief:
+    "造物星球的图形课上，二零要画出各种形状并说出名字。先来画一个正方形：当开始运行时，让二零画出一个正方形，并说「我画了一个正方形！」。",
+  erLingHint:
+    "① 拖绿色「当开始运行」；② 先放绿色「落笔」；③ 再放橙色「重复执行 4 次」，里面放「移动 80 步」和「右转 90 度」；④ 放「抬笔」；⑤ 最后放「说 我画了一个正方形！」；⑥ 点运行，看二零画出正方形并报名。",
+  steps: [
+    { id: 1, title: "用落笔开始画画" },
+    { id: 2, title: "用循环画出一个图形" },
+    { id: 3, title: "说出图形的名字" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_pen_down">
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+                  <next>
+                    <block type="maker_turn">
+                      <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_pen_up">
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">我画了一个正方形！</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};
