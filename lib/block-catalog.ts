@@ -14,6 +14,7 @@ export type BlockCategory =
   | "侦测"
   | "运算"
   | "变量"
+  | "声音"
   | "特殊";
 
 export type BlockShape = "hat" | "statement" | "reporter" | "boolean" | "special";
@@ -50,6 +51,7 @@ export const CATEGORY_COLORS: Record<BlockCategory, string> = {
   侦测: "#4A90D9",
   运算: "#D98C3F",
   变量: "#9B6CC9",
+  声音: "#B45EC9",
   特殊: "#C0566B",
 };
 
@@ -62,6 +64,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   "侦测",
   "运算",
   "变量",
+  "声音",
   "特殊",
 ];
 
@@ -476,6 +479,54 @@ export const BLOCK_CATALOG: BlockDoc[] = [
     example: "比较 (步数 取余数 2) 等于 0 那么 走直路 否则 拐弯",
     stages: ["stage-6-8"],
   },
+  {
+    id: "maker_add",
+    label: "加",
+    category: "运算",
+    color: 60,
+    shape: "reporter",
+    parts: [N("3"), T("加"), N("5")],
+    purpose: "把两个数字相加，吐出一个结果数字。可嵌进「说」「比较」等积木里参与运算。",
+    usage: "两个槽都填数字或算式；结果常接「说」显示，如：说 (3 加 5)。",
+    example: "说 (3 加 5) → 屏幕显示 8",
+    stages: ["stage-6-8"],
+  },
+  {
+    id: "maker_sub",
+    label: "减",
+    category: "运算",
+    color: 60,
+    shape: "reporter",
+    parts: [N("8"), T("减"), N("2")],
+    purpose: "把两个数字相减（A − B），吐出结果数字。",
+    usage: "算「还剩多少」「差多少」时用；结果可接「说」显示。",
+    example: "说 (8 减 2) → 屏幕显示 6",
+    stages: ["stage-6-8"],
+  },
+  {
+    id: "maker_mul",
+    label: "乘",
+    category: "运算",
+    color: 60,
+    shape: "reporter",
+    parts: [N("3"), T("乘"), N("4")],
+    purpose: "把两个数字相乘（A × B），吐出结果数字。是「重复累加」的快速写法。",
+    usage: "算「几组共有多少」时用，比如 3 个 4 就是 3 乘 4；结果可接「说」。",
+    example: "说 (3 乘 4) → 屏幕显示 12",
+    stages: ["stage-6-8"],
+  },
+  {
+    id: "maker_div",
+    label: "除以",
+    category: "运算",
+    color: 60,
+    shape: "reporter",
+    parts: [N("12"), T("除以"), N("3")],
+    purpose: "把两个数字相除（A ÷ B），吐出结果数字（除以 0 时自动按 1 算，避免出错）。",
+    usage: "算「平均分」时用；结果可接「说」显示。",
+    example: "说 (12 除以 3) → 屏幕显示 4",
+    stages: ["stage-6-8"],
+  },
 
   // —— 变量 ——
   {
@@ -512,6 +563,44 @@ export const BLOCK_CATALOG: BlockDoc[] = [
     purpose: "取出某个变量当前的值，可放进「比较」「取余数」或算式里参与运算。",
     usage: "配合「设置/改变变量」一起用，是做计数、奇偶、随机分支的基础。",
     example: "比较 变量 n 取余数 2 等于 0 那么 …",
+    stages: ["stage-6-8"],
+  },
+
+  // —— 声音 ——
+  {
+    id: "maker_play_note",
+    label: "弹奏音符",
+    category: "声音",
+    color: 280,
+    shape: "statement",
+    parts: [T("弹奏"), D(["do", "re", "mi", "fa", "sol", "la", "ti", "高音do"]), T("持续"), N("1"), T("拍")],
+    purpose: "让二零发出一个音符（do~ti 或高音do），并持续指定拍数。是「作曲」的最小单位。",
+    usage: "在「当开始运行」下接几个「弹奏音符」，就能弹出一段简单旋律；拍数控制每个音多长。",
+    example: "当开始运行 ▸ 弹奏 do 持续1拍 ▸ 弹奏 re 持续1拍",
+    stages: ["stage-6-8"],
+  },
+  {
+    id: "maker_play_chord",
+    label: "弹奏和弦",
+    category: "声音",
+    color: 280,
+    shape: "statement",
+    parts: [T("弹和弦"), D(["do", "re", "mi", "fa", "sol", "la", "ti", "高音do"]), T("+"), D(["do", "re", "mi", "fa", "sol", "la", "ti", "高音do"]), T("+"), D(["do", "re", "mi", "fa", "sol", "la", "ti", "高音do"])],
+    purpose: "一次同时发出三个音符（根音/三度/五度），形成「和弦」，比单音更饱满。",
+    usage: "三个下拉各自选一个音；常放在旋律开头做「前奏」或结尾做「收束」。",
+    example: "弹和弦 do + mi + sol（大三和弦）",
+    stages: ["stage-6-8"],
+  },
+  {
+    id: "maker_random_note",
+    label: "随机音符",
+    category: "声音",
+    color: 280,
+    shape: "statement",
+    parts: [T("随机弹一个音")],
+    purpose: "每次运行从 do~ti 里随机挑一个音弹出来，让旋律每次都不一样，充满惊喜。",
+    usage: "放在「重复执行」里，就能生成一段随机的小曲子。",
+    example: "重复 5 次 ▸ 随机弹一个音",
     stages: ["stage-6-8"],
   },
 
