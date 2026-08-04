@@ -1,0 +1,48 @@
+1:"$Sreact.fragment"
+2:I[39756,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"default"]
+3:I[37457,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"default"]
+5:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+6:"$Sreact.suspense"
+9:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"ViewportBoundary"]
+b:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"MetadataBoundary"]
+d:I[68027,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"default",1]
+:HL["/children-programming/_next/static/chunks/3nrpfywtp6cbj.css","style"]
+0:{"P":null,"c":["","learn","checkerboard"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["id","checkerboard","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/3nrpfywtp6cbj.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/14mrh2-p_w84d.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col font-sans","children":["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":["$L4",[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/23ma0uimsaloj.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/07o66dh54uzq-.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/0g3w_lf55x6wn.js","async":true,"nonce":"$undefined"}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],{},null,false,null]},null,false,"$@8"]},null,false,"$@8"]},null,false,null],["$","$1","h",{"children":[null,["$","$L9",null,{"children":"$La"}],["$","div",null,{"hidden":true,"children":["$","$Lb",null,{"children":["$","$6",null,{"name":"Next.Metadata","children":"$Lc"}]}]}],null]}],false]],"m":"$undefined","G":["$d",[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/3nrpfywtp6cbj.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"O0MfrZo3k6BIecrRPLp44"}
+e:[]
+8:"$We"
+f:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/23ma0uimsaloj.js","/children-programming/_next/static/chunks/07o66dh54uzq-.js","/children-programming/_next/static/chunks/0g3w_lf55x6wn.js"],"default"]
+10:T6f8,<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="controls_repeat_ext">
+                <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                <statement name="DO">
+                  <block type="controls_repeat_ext">
+                    <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                    <statement name="DO">
+                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                        <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value></block></next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                        <next><block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
+                          <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">-90</field></shadow></value></block></next>
+                        </block></next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next><block type="maker_pen_up"></block></next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>4:["$","$Lf",null,{"project":{"slug":"checkerboard","category":"draw","title":"棋盘格","ageGroup":"6-8 岁","description":"用嵌套循环画出一排排小方格，组成棋盘。","missionBrief":"下棋需要棋盘格。帮二零用「循环里再套循环」画出一格格的小方块吧！","erLingHint":"① 绿色「当开始运行」里放「落笔」；② 放「重复执行 4 次」，里面先放「重复执行 4 次」画一个小方格（移动 40、右转 90），再放「右转 90」「移动 50」「右转 -90」挪到下一格；③ 最后「抬笔」；④ 点「运行」看棋盘格。","steps":[{"id":1,"title":"让二零落笔开始"},{"id":2,"title":"用嵌套循环画方格"},{"id":3,"title":"运行看到棋盘格"}],"defaultXml":"$10"}}]
+a:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+11:I[27201,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"IconMark"]
+7:null
+c:[["$","title","0",{"children":"造物星球 - 和二零一起，把想法种成作品"}],["$","meta","1",{"name":"description","content":"免费、无广告、项目驱动的少儿编程学习平台"}],["$","link","2",{"rel":"icon","href":"/children-programming/sun-parrot.svg"}],["$","$L11","3",{}]]

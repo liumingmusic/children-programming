@@ -1,0 +1,37 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/23ma0uimsaloj.js","/children-programming/_next/static/chunks/07o66dh54uzq-.js","/children-programming/_next/static/chunks/0g3w_lf55x6wn.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T4b3,<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="controls_repeat_ext">
+                <value name="TIMES">
+                  <shadow type="math_number"><field name="NUM">4</field></shadow>
+                </value>
+                <statement name="DO">
+                  <block type="maker_move">
+                    <value name="STEPS">
+                      <shadow type="math_number"><field name="NUM">100</field></shadow>
+                    </value>
+                    <next>
+                      <block type="maker_turn">
+                        <value name="DEGREES">
+                          <shadow type="math_number"><field name="NUM">90</field></shadow>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="maker_pen_up"></block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"square","category":"loop","title":"二零画正方形","ageGroup":"6-8 岁","description":"用循环和画笔，让二零画出方方正正的正方形。","missionBrief":"造物星球要盖一座方形的小房子，需要一条笔直的四边围墙。帮二零拿起画笔，用「重复执行」一次画出四条边吧！","erLingHint":"① 绿色「当开始运行」里先放绿色「落笔」；② 再放「重复执行 4 次」，里面依次放「移动 100 步」和「右转 90 度」；③ 最后接一个「抬笔」收尾；④ 点「运行」，二零会转着圈画出正方形。卡住就点「看示范」。","steps":[{"id":1,"title":"让二零落笔开始画"},{"id":2,"title":"用循环画出四条边"},{"id":3,"title":"运行看到正方形"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/23ma0uimsaloj.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/07o66dh54uzq-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/0g3w_lf55x6wn.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"O0MfrZo3k6BIecrRPLp44"}
+6:null
