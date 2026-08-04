@@ -92,7 +92,7 @@
           </block>
         </statement>
       </block>
-    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"dance","category":"seq","title":"按指令跳舞","ageGroup":"6-8 岁","description":"用移动和转向，给二零编一段方块舞。","missionBrief":"音乐响起来🎵！给二零下一串「移动 + 右转」的指令，看它转出一段可爱的方块舞步吧。","erLingHint":"① 绿色「当开始运行」里放「落笔」；② 重复放「移动」和「右转」（比如 8 次），每次转一个小角度；③ 二零就会转着圈跳舞，最后「抬笔」。点「运行」看舞步。","steps":[{"id":1,"title":"让二零动起来"},{"id":2,"title":"用转向跳出舞步"},{"id":3,"title":"运行看跳舞"}],"defaultXml":"$3","scene":{"marks":[{"x":"$-0","y":0,"emoji":"💃","label":"跳舞"}]}}}],["$L4","$L5","$L6"],"$L7"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"QcPTcM8wg0RngR7v89F4I"}
+    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"dance","category":"seq","title":"按指令跳舞","ageGroup":"6-8 岁","description":"用移动和转向，给二零编一段方块舞。","missionBrief":"音乐响起来🎵！给二零下一串「移动 + 右转」的指令，看它转出一段可爱的方块舞步吧。","erLingHint":"① 绿色「当开始运行」里放「落笔」；② 重复放「移动」和「右转」（比如 8 次），每次转一个小角度；③ 二零就会转着圈跳舞，最后「抬笔」。点「运行」看舞步。","steps":[{"id":1,"title":"让二零动起来"},{"id":2,"title":"用转向跳出舞步"},{"id":3,"title":"运行看跳舞"}],"defaultXml":"$3","scene":{"marks":[{"x":"$-0","y":0,"emoji":"💃","label":"跳舞"}]}}}],["$L4","$L5","$L6"],"$L7"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"nGWELEqKDEvAzUQiBbt6-"}
 4:["$","script","script-0",{"src":"/children-programming/_next/static/chunks/23ma0uimsaloj.js","async":true}]
 5:["$","script","script-1",{"src":"/children-programming/_next/static/chunks/2_ivd32ry3d2k.js","async":true}]
 6:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2n-h_2z2_916p.js","async":true}]
