@@ -1,4 +1,4 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,30684,51494,94757,e=>{"use strict";let t=[{id:"stage-6-8",ageRange:"6-8 岁",name:"图形化积木启蒙",tagline:"拖拽彩色积木，让二零动起来、画图案、做小游戏。",status:"open",projectSlugs:["hello","flag","stone","shapeL","home","maze","arrow","zigzag","treasure","dance","frame","square","triangle","pentagon","spin","stairs","wave","spiral","fence","windmill","pickfruit","star5","flower","rainbow","snowflake","mandala","concentric","connectdot","house","letter","checkerboard","click_jump","click_color","click_dialog","two_events","click_play_dialog","auto_patrol","key_forward","edge_bounce","size_toggle","expression_shake","if_touch_star","if_edge_turn","if_red_stop","click_left_right","collect3","random_branch","odd_even","size_threshold","avoid_obstacle","escape_badguy","stars","maze_exit","collect_apples","light_lanterns","collect_rainbow","treasure_map","escort","traffic_police","dodge_clouds","memory_match","play_doremi","twinkle","drum_beat","random_note","loop_melody","pitch_by_click","pitch_by_move","chord","birthday","compose"]},{id:"stage-9-12",ageRange:"9-12 岁",name:"代码初探",tagline:"从积木过渡到 JavaScript，做小工具与互动游戏。",status:"soon",projectSlugs:[]},{id:"stage-13-16",ageRange:"13-16 岁",name:"进阶工坊",tagline:"用 Python 与网页技术，完成属于自己的独立项目。",status:"soon",projectSlugs:[]}];e.s(["stages",0,t],51494);let a={"stage-6-8":[{id:"seq",name:"基础序列与方向",shortTag:"序列",description:"用「前进 / 转向」让二零按指令移动，先打好程序顺序的基础。"},{id:"loop",name:"循环与重复",shortTag:"循环",description:"用「重复执行」省去重复步骤，画出整齐的图形。"},{id:"draw",name:"画笔与几何艺术",shortTag:"绘图",description:"落笔 + 循环，画出彩虹、星星、花朵等美丽图案。"},{id:"event",name:"事件与互动",shortTag:"事件",description:"用「当点击 / 当开始」让程序响应外界动作。"},{id:"cond",name:"条件判断",shortTag:"条件",description:"用「如果…那么」让二零根据情况做不同选择。"},{id:"game",name:"收集与闯关游戏",shortTag:"游戏",description:"结合移动、判定与收集，做成好玩的小游戏。"},{id:"story",name:"故事与动画",shortTag:"故事",description:"让二零说话、表演，编排小动画和故事。"},{id:"music",name:"音乐与节奏",shortTag:"音乐",description:"用积木弹奏旋律，感受编程与节奏的结合。"},{id:"math",name:"数学启蒙",shortTag:"数学",description:"在玩中认识数数、图形、对称与规律。"},{id:"science",name:"自然科学模拟",shortTag:"科学",description:"模拟昼夜、四季、生长等自然现象。"},{id:"pbl",name:"综合创意 / 毕业项目",shortTag:"综合",description:"把学到的本领组合起来，做出属于自己的作品。"}],"stage-9-12":[{id:"fn",name:"函数与自定义积木",shortTag:"函数",description:"把重复的动作打包成自己的积木，学会抽象。"},{id:"var",name:"变量与状态",shortTag:"变量",description:"用变量记录分数、步数、状态，让程序记住东西。"},{id:"multi",name:"多角色与协作",shortTag:"多角色",description:"让多个角色一起表演、对话、协作。"},{id:"key",name:"键盘与操控游戏",shortTag:"键盘",description:"用方向键控制角色，做可操控的小游戏。"},{id:"music",name:"音乐创作",shortTag:"音乐",description:"用积木创作旋律与节奏。"},{id:"math",name:"数学与逻辑进阶",shortTag:"数学",description:"乘法表、质数、坐标绘图等进阶数学。"},{id:"list",name:"列表与数据",shortTag:"列表",description:"用列表管理一组有序的数据。"},{id:"game",name:"综合小游戏",shortTag:"游戏",description:"贪吃蛇、井字棋、猜数字等综合小游戏。"},{id:"story",name:"交互绘本与故事",shortTag:"故事",description:"可点击、可分支的互动绘本。"},{id:"science",name:"科学探究",shortTag:"科学",description:"昼夜、四季、水循环等科学模拟。"}],"stage-13-16":[{id:"js",name:"文本代码过渡",shortTag:"JS",description:"从积木平滑过渡到 JavaScript 文本代码。"},{id:"algo",name:"算法与数据结构",shortTag:"算法",description:"排序、查找、递归等算法思维。"},{id:"phys",name:"物理与模拟",shortTag:"物理",description:"自由落体、碰撞、重力等物理模拟。"},{id:"dataviz",name:"数据可视化",shortTag:"数据",description:"用图表把数据画出来。"},{id:"creative",name:"创意编程",shortTag:"创意",description:"分形、粒子、生成艺术等创意作品。"},{id:"web",name:"网页 / 小游戏开发",shortTag:"Web",description:"用 DOM 与画布做网页和小游戏。"},{id:"ai",name:"人工智能启蒙",shortTag:"AI",description:"决策树、分类器、聊天机器人等 AI 直觉。"},{id:"capstone",name:"毕业项目",shortTag:"毕业",description:"综合运用，完成属于自己的完整作品。"}]},l=[{slug:"hello",category:"seq",title:"二零，打个招呼！",ageGroup:"6-8 岁",description:"用积木让二零移动并说出第一句话。",missionBrief:"二零刚来到造物星球，它想飞到舞台中央，跟大家说声「你好」。你能帮它写出第一个程序吗？",erLingHint:"① 先从积木区拖一个绿色「当开始运行」事件到工作区；② 把黄色「移动」积木拖进它的里面；③ 再拖一个紫色「说」积木接在后面，输入想说的话；④ 点「运行」！卡住时点右上角「看示范」照着学。",steps:[{id:1,title:"让二零移动"},{id:2,title:"让二零说话"},{id:3,title:"点击运行看到效果"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,30684,51494,94757,e=>{"use strict";let t=[{id:"stage-6-8",ageRange:"6-8 岁",name:"图形化积木启蒙",tagline:"拖拽彩色积木，让二零动起来、画图案、做小游戏。",status:"open",projectSlugs:["hello","flag","stone","shapeL","home","maze","arrow","zigzag","treasure","dance","frame","square","triangle","pentagon","spin","stairs","wave","spiral","fence","windmill","pickfruit","star5","flower","rainbow","snowflake","mandala","concentric","connectdot","house","letter","checkerboard","click_jump","click_color","click_dialog","two_events","click_play_dialog","auto_patrol","key_forward","edge_bounce","size_toggle","expression_shake","if_touch_star","if_edge_turn","if_red_stop","click_left_right","collect3","random_branch","odd_even","size_threshold","avoid_obstacle","escape_badguy","stars","maze_exit","collect_apples","light_lanterns","collect_rainbow","treasure_map","escort","traffic_police","dodge_clouds","memory_match","play_doremi","twinkle","drum_beat","random_note","loop_melody","pitch_by_click","pitch_by_move","chord","birthday","compose","count10","count_apples","compare_size","add_sub","shape_names","symmetry","multiplication","clock","geometry_puzzle","calculator"]},{id:"stage-9-12",ageRange:"9-12 岁",name:"代码初探",tagline:"从积木过渡到 JavaScript，做小工具与互动游戏。",status:"soon",projectSlugs:[]},{id:"stage-13-16",ageRange:"13-16 岁",name:"进阶工坊",tagline:"用 Python 与网页技术，完成属于自己的独立项目。",status:"soon",projectSlugs:[]}];e.s(["stages",0,t],51494);let a={"stage-6-8":[{id:"seq",name:"基础序列与方向",shortTag:"序列",description:"用「前进 / 转向」让二零按指令移动，先打好程序顺序的基础。"},{id:"loop",name:"循环与重复",shortTag:"循环",description:"用「重复执行」省去重复步骤，画出整齐的图形。"},{id:"draw",name:"画笔与几何艺术",shortTag:"绘图",description:"落笔 + 循环，画出彩虹、星星、花朵等美丽图案。"},{id:"event",name:"事件与互动",shortTag:"事件",description:"用「当点击 / 当开始」让程序响应外界动作。"},{id:"cond",name:"条件判断",shortTag:"条件",description:"用「如果…那么」让二零根据情况做不同选择。"},{id:"game",name:"收集与闯关游戏",shortTag:"游戏",description:"结合移动、判定与收集，做成好玩的小游戏。"},{id:"story",name:"故事与动画",shortTag:"故事",description:"让二零说话、表演，编排小动画和故事。"},{id:"music",name:"音乐与节奏",shortTag:"音乐",description:"用积木弹奏旋律，感受编程与节奏的结合。"},{id:"math",name:"数学启蒙",shortTag:"数学",description:"在玩中认识数数、图形、对称与规律。"},{id:"science",name:"自然科学模拟",shortTag:"科学",description:"模拟昼夜、四季、生长等自然现象。"},{id:"pbl",name:"综合创意 / 毕业项目",shortTag:"综合",description:"把学到的本领组合起来，做出属于自己的作品。"}],"stage-9-12":[{id:"fn",name:"函数与自定义积木",shortTag:"函数",description:"把重复的动作打包成自己的积木，学会抽象。"},{id:"var",name:"变量与状态",shortTag:"变量",description:"用变量记录分数、步数、状态，让程序记住东西。"},{id:"multi",name:"多角色与协作",shortTag:"多角色",description:"让多个角色一起表演、对话、协作。"},{id:"key",name:"键盘与操控游戏",shortTag:"键盘",description:"用方向键控制角色，做可操控的小游戏。"},{id:"music",name:"音乐创作",shortTag:"音乐",description:"用积木创作旋律与节奏。"},{id:"math",name:"数学与逻辑进阶",shortTag:"数学",description:"乘法表、质数、坐标绘图等进阶数学。"},{id:"list",name:"列表与数据",shortTag:"列表",description:"用列表管理一组有序的数据。"},{id:"game",name:"综合小游戏",shortTag:"游戏",description:"贪吃蛇、井字棋、猜数字等综合小游戏。"},{id:"story",name:"交互绘本与故事",shortTag:"故事",description:"可点击、可分支的互动绘本。"},{id:"science",name:"科学探究",shortTag:"科学",description:"昼夜、四季、水循环等科学模拟。"}],"stage-13-16":[{id:"js",name:"文本代码过渡",shortTag:"JS",description:"从积木平滑过渡到 JavaScript 文本代码。"},{id:"algo",name:"算法与数据结构",shortTag:"算法",description:"排序、查找、递归等算法思维。"},{id:"phys",name:"物理与模拟",shortTag:"物理",description:"自由落体、碰撞、重力等物理模拟。"},{id:"dataviz",name:"数据可视化",shortTag:"数据",description:"用图表把数据画出来。"},{id:"creative",name:"创意编程",shortTag:"创意",description:"分形、粒子、生成艺术等创意作品。"},{id:"web",name:"网页 / 小游戏开发",shortTag:"Web",description:"用 DOM 与画布做网页和小游戏。"},{id:"ai",name:"人工智能启蒙",shortTag:"AI",description:"决策树、分类器、聊天机器人等 AI 直觉。"},{id:"capstone",name:"毕业项目",shortTag:"毕业",description:"综合运用，完成属于自己的完整作品。"}]},l=[{slug:"hello",category:"seq",title:"二零，打个招呼！",ageGroup:"6-8 岁",description:"用积木让二零移动并说出第一句话。",missionBrief:"二零刚来到造物星球，它想飞到舞台中央，跟大家说声「你好」。你能帮它写出第一个程序吗？",erLingHint:"① 先从积木区拖一个绿色「当开始运行」事件到工作区；② 把黄色「移动」积木拖进它的里面；③ 再拖一个紫色「说」积木接在后面，输入想说的话；④ 点「运行」！卡住时点右上角「看示范」照着学。",steps:[{id:1,title:"让二零移动"},{id:2,title:"让二零说话"},{id:3,title:"点击运行看到效果"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
       <block type="maker_when_start" x="60" y="60">
         <statement name="STACK">
           <block type="maker_move">
@@ -1740,6 +1740,363 @@
                     <block type="maker_play_note">
                       <field name="NOTE">sol</field>
                       <value name="BEATS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"count10",category:"math",title:"数数 1 到 10",ageGroup:"6-8 岁",description:"用「重复执行」加上「变量」，让二零一边数一边把数字说出来。",missionBrief:"造物星球上要办数数比赛。写一个程序：当开始运行时，让二零从 1 数到 10，每数一个数就大声说出来。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面放一个橙色「重复执行 10 次」；③ 循环里先放紫色「变量 n 增加 1」，再放粉色「说 变量 n」（用「变量 n」积木当数字）；④ 点运行，听二零数 1、2、3……10！",steps:[{id:1,title:"用重复执行或变量来数数"},{id:2,title:"一边加一边说出数字，数到 10"},{id:3,title:"点运行听二零数完 1-10"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+          <statement name="DO">
+            <block type="maker_change_var">
+              <field name="NAME">n</field>
+              <value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><block type="maker_get_var"><field name="NAME">n</field></block></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">0.5</field></shadow></value>
+                </block>
+              </next>
+            </block>
+          </statement>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"count_apples",category:"math",title:"数一数苹果",ageGroup:"6-8 岁",description:"树上有 5 个苹果，用「重复执行」和「变量」把它们一个一个数出来。",missionBrief:"造物星球的小果园丰收啦！写一个程序：当开始运行时，让二零把树上的 5 个苹果一个一个数出来，最后告诉大家「一共 5 个苹果」。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面放橙色「重复执行 5 次」；③ 循环里先放「变量 n 增加 1」，再放「说 变量 n」；④ 循环外面再放一个「说 一共 5 个苹果！」；⑤ 点运行，听二零清点苹果。",steps:[{id:1,title:"用重复执行或变量来数苹果"},{id:2,title:"一边加一边说出数字，数到 5"},{id:3,title:"点运行听二零数完苹果"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">5</field></shadow></value>
+          <statement name="DO">
+            <block type="maker_change_var">
+              <field name="NAME">n</field>
+              <value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><block type="maker_get_var"><field name="NAME">n</field></block></value>
+                </block>
+              </next>
+            </block>
+          </statement>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">一共 5 个苹果！</field></shadow></value>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"compare_size",category:"math",title:"比一比谁更大",ageGroup:"6-8 岁",description:"用「变量」记下两个数，再用「比较」积木判断谁大谁小。",missionBrief:"造物星球的两颗能量球，一颗是 8，一颗是 3。写一个程序：当开始运行时，让二零比较它们，说出「8 比 3 大！」。",erLingHint:"① 拖绿色「当开始运行」；② 里面放两个「把变量 a 设为 8」「把变量 b 设为 3」；③ 再放一个「如果…那么」，条件里放「比较 变量 a 大于 变量 b」；④ 那么里放「说 8 比 3 大！」；⑤ 点运行，看二零比大小。",steps:[{id:1,title:"用变量记下两个数"},{id:2,title:"用比较积木判断谁更大"},{id:3,title:"点运行听二零比出大小"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_var">
+          <field name="NAME">a</field>
+          <value name="VALUE"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+          <next>
+            <block type="maker_set_var">
+              <field name="NAME">b</field>
+              <value name="VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+              <next>
+                <block type="controls_if">
+                  <value name="IF0">
+                    <block type="maker_compare">
+                      <value name="A"><block type="maker_get_var"><field name="NAME">a</field></block></value>
+                      <value name="B"><block type="maker_get_var"><field name="NAME">b</field></block></value>
+                      <field name="OP">&gt;</field>
+                    </block>
+                  </value>
+                  <statement name="DO0">
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">8 比 3 大！</field></shadow></value>
+                    </block>
+                  </statement>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"add_sub",category:"math",title:"加减法小助手",ageGroup:"6-8 岁",description:"用「加法」「减法」积木算出结果，再把答案说出来。",missionBrief:"造物星球的小商店要用到算术。写一个程序：当开始运行时，让二零算出 3 + 5 和 8 - 2，并把两个答案都说出来。",erLingHint:"① 拖绿色「当开始运行」；② 里面放一个粉色「说」，把它的数字口接上一个黄色「加」积木（左边 3、右边 5）；③ 下面再放一个「说」，接上黄色「减」积木（左边 8、右边 2）；④ 点运行，听二零报出 8 和 6！",steps:[{id:1,title:"用加法积木算出结果"},{id:2,title:"用减法积木算出结果"},{id:3,title:"点运行听二零报出答案"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT">
+            <block type="maker_add">
+              <value name="A"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+              <value name="B"><shadow type="math_number"><field name="NUM">5</field></shadow></value>
+            </block>
+          </value>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT">
+                <block type="maker_sub">
+                  <value name="A"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                  <value name="B"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                </block>
+              </value>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"shape_names",category:"math",title:"认识图形",ageGroup:"6-8 岁",description:"落笔 + 循环画出一个正方形，再说出它的名字。",missionBrief:"造物星球的图形课上，二零要画出各种形状并说出名字。先来画一个正方形：当开始运行时，让二零画出一个正方形，并说「我画了一个正方形！」。",erLingHint:"① 拖绿色「当开始运行」；② 先放绿色「落笔」；③ 再放橙色「重复执行 4 次」，里面放「移动 80 步」和「右转 90 度」；④ 放「抬笔」；⑤ 最后放「说 我画了一个正方形！」；⑥ 点运行，看二零画出正方形并报名。",steps:[{id:1,title:"用落笔开始画画"},{id:2,title:"用循环画出一个图形"},{id:3,title:"说出图形的名字"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_pen_down">
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">80</field></shadow></value>
+                  <next>
+                    <block type="maker_turn">
+                      <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_pen_up">
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">我画了一个正方形！</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"symmetry",category:"math",title:"对称图形",ageGroup:"6-8 岁",description:"用「移到」把两个一样的图形摆成左右镜像，感受对称。",missionBrief:"造物星球的对称花园里，左右两边要一模一样。写一个程序：当开始运行时，让二零在左边和右边各画一个一样的正方形，组成左右对称的图案。",erLingHint:"① 拖绿色「当开始运行」；② 放「落笔」，再用「移到 x:-60 y:-40」定位到左边；③ 放「重复执行 4 次」画一个正方形；④ 放「抬笔」，再用「移到 x:60 y:-40」定位到右边；⑤ 再「落笔」画一个一样的正方形；⑥ 最后「说 左右两边一样，这就是对称！」；⑦ 点运行看对称图案。",steps:[{id:1,title:"用落笔开始画画"},{id:2,title:"用「移到」摆出左右对称的两部分"},{id:3,title:"点运行看二零画出对称图案"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_pen_down">
+          <next>
+            <block type="maker_goto">
+              <value name="X"><shadow type="math_number"><field name="NUM">-60</field></shadow></value>
+              <value name="Y"><shadow type="math_number"><field name="NUM">-40</field></shadow></value>
+              <next>
+                <block type="controls_repeat_ext">
+                  <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                  <statement name="DO">
+                    <block type="maker_move">
+                      <value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                      <next>
+                        <block type="maker_turn">
+                          <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                        </block>
+                      </next>
+                    </block>
+                  </statement>
+                  <next>
+                    <block type="maker_pen_up">
+                      <next>
+                        <block type="maker_goto">
+                          <value name="X"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+                          <value name="Y"><shadow type="math_number"><field name="NUM">-40</field></shadow></value>
+                          <next>
+                            <block type="maker_pen_down">
+                              <next>
+                                <block type="controls_repeat_ext">
+                                  <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                                  <statement name="DO">
+                                    <block type="maker_move">
+                                      <value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                                      <next>
+                                        <block type="maker_turn">
+                                          <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                                        </block>
+                                      </next>
+                                    </block>
+                                  </statement>
+                                  <next>
+                                    <block type="maker_pen_up">
+                                      <next>
+                                        <block type="maker_say">
+                                          <value name="TEXT"><shadow type="text"><field name="TEXT">左右两边一样，这就是对称！</field></shadow></value>
+                                        </block>
+                                      </next>
+                                    </block>
+                                  </next>
+                                </block>
+                              </next>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"multiplication",category:"math",title:"九九乘法初识",ageGroup:"6-8 岁",description:"乘法就是「几个相同的数相加」，用循环和变量就能算出来。",missionBrief:"造物星球的数学老师说：3 × 4 就是把 3 加 4 次。写一个程序：当开始运行时，让二零算出 3 × 4，并说出答案。",erLingHint:"① 拖绿色「当开始运行」；② 先放「把变量 sum 设为 0」；③ 再放橙色「重复执行 4 次」，里面放「变量 sum 增加 3」；④ 循环后放「说 变量 sum」和「说 3×4=12！」；⑤ 点运行，看二零用加法变出乘法。",steps:[{id:1,title:"用重复执行来算"},{id:2,title:"用变量累加（乘法=几个相同数相加）"},{id:3,title:"点运行听二零算出乘法"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_var">
+          <field name="NAME">sum</field>
+          <value name="VALUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_change_var">
+                  <field name="NAME">sum</field>
+                  <value name="DELTA"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><block type="maker_get_var"><field name="NAME">sum</field></block></value>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">3\xd74=12！</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"clock",category:"math",title:"时钟整点",ageGroup:"6-8 岁",description:"用循环画一个圆圆的表盘，再说出现在是几点整。",missionBrief:"造物星球的小镇钟楼要报时了。写一个程序：当开始运行时，让二零画出一个圆形的表盘，并说「3 点整啦！」。",erLingHint:"① 拖绿色「当开始运行」；② 放「落笔」，再放橙色「重复执行 36 次」，里面放「移动 10 步」和「右转 10 度」，画出一个圆；③ 放「抬笔」；④ 最后放「说 3 点整啦！」；⑤ 点运行，看二零画出钟表。",steps:[{id:1,title:"用落笔 + 循环画出圆形表盘"},{id:2,title:"说出整点的时间"},{id:3,title:"点运行看二零画出时钟"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_pen_down">
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">36</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                  <next>
+                    <block type="maker_turn">
+                      <value name="DEGREES"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_pen_up">
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">3 点整啦！</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"geometry_puzzle",category:"math",title:"几何拼图",ageGroup:"6-8 岁",description:"用「移到」把几个图形摆到不同位置，拼出一幅小图画。",missionBrief:"造物星球的拼图角，要用基本图形拼出图案。写一个程序：当开始运行时，让二零在左右两边各画一个正方形，拼出一座小房子。",erLingHint:"① 拖绿色「当开始运行」；② 放「落笔」，用「移到 x:-50 y:-30」定位，再「重复执行 4 次」画一个正方形；③ 放「抬笔」，再「落笔」用「移到 x:40 y:-30」定位到右边，画第二个正方形；④ 放「说 我用两个正方形拼出了一座小房子！」；⑤ 点运行看拼图。",steps:[{id:1,title:"用落笔开始画画"},{id:2,title:"用「移到」摆好几个图形拼成图案"},{id:3,title:"点运行看二零拼出图案"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_pen_down">
+          <next>
+            <block type="maker_goto">
+              <value name="X"><shadow type="math_number"><field name="NUM">-50</field></shadow></value>
+              <value name="Y"><shadow type="math_number"><field name="NUM">-30</field></shadow></value>
+              <next>
+                <block type="controls_repeat_ext">
+                  <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                  <statement name="DO">
+                    <block type="maker_move">
+                      <value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                      <next>
+                        <block type="maker_turn">
+                          <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                        </block>
+                      </next>
+                    </block>
+                  </statement>
+                  <next>
+                    <block type="maker_pen_up">
+                      <next>
+                        <block type="maker_pen_down">
+                          <next>
+                            <block type="maker_goto">
+                              <value name="X"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                              <value name="Y"><shadow type="math_number"><field name="NUM">-30</field></shadow></value>
+                              <next>
+                                <block type="controls_repeat_ext">
+                                  <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                                  <statement name="DO">
+                                    <block type="maker_move">
+                                      <value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                                      <next>
+                                        <block type="maker_turn">
+                                          <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                                        </block>
+                                      </next>
+                                    </block>
+                                  </statement>
+                                  <next>
+                                    <block type="maker_pen_up">
+                                      <next>
+                                        <block type="maker_say">
+                                          <value name="TEXT"><shadow type="text"><field name="TEXT">我用两个正方形拼出了一座小房子！</field></shadow></value>
+                                        </block>
+                                      </next>
+                                    </block>
+                                  </next>
+                                </block>
+                              </next>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"calculator",category:"math",title:"小小计算器",ageGroup:"6-8 岁",description:"把两个数存进变量，再用算术积木算出结果并显示出来。",missionBrief:"造物星球的小朋友想要一个会算数的一零。写一个程序：当开始运行时，让二零算出 12 + 7 和 12 - 7，并把两个答案都说出来。",erLingHint:"① 拖绿色「当开始运行」；② 放「把变量 x 设为 12」「把变量 y 设为 7」；③ 放一个「说」，数字口接黄色「加」积木，左右都放进「变量 x」「变量 y」；④ 再放一个「说」，接黄色「减」积木（也都是变量 x、y）；⑤ 点运行，听二零当小计算器！",steps:[{id:1,title:"用变量输入两个数"},{id:2,title:"用加 / 减等算术积木算出结果"},{id:3,title:"点运行听二零算出答案"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_var">
+          <field name="NAME">x</field>
+          <value name="VALUE"><shadow type="math_number"><field name="NUM">12</field></shadow></value>
+          <next>
+            <block type="maker_set_var">
+              <field name="NAME">y</field>
+              <value name="VALUE"><shadow type="math_number"><field name="NUM">7</field></shadow></value>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT">
+                    <block type="maker_add">
+                      <value name="A"><block type="maker_get_var"><field name="NAME">x</field></block></value>
+                      <value name="B"><block type="maker_get_var"><field name="NAME">y</field></block></value>
+                    </block>
+                  </value>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT">
+                        <block type="maker_sub">
+                          <value name="A"><block type="maker_get_var"><field name="NAME">x</field></block></value>
+                          <value name="B"><block type="maker_get_var"><field name="NAME">y</field></block></value>
+                        </block>
+                      </value>
                     </block>
                   </next>
                 </block>
