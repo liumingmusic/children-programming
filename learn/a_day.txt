@@ -1,0 +1,54 @@
+1:"$Sreact.fragment"
+2:I[39756,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"default"]
+3:I[37457,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"default"]
+5:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+6:"$Sreact.suspense"
+9:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"ViewportBoundary"]
+b:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"MetadataBoundary"]
+d:I[68027,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"default",1]
+:HL["/children-programming/_next/static/chunks/0gx160xvg6dw9.css","style"]
+0:{"P":null,"c":["","learn","a_day"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["id","a_day","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/0gx160xvg6dw9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/14mrh2-p_w84d.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col font-sans","children":["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":["$L4",[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/23ma0uimsaloj.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3lg_44fzpzb82.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2gjp08922ji80.js","async":true,"nonce":"$undefined"}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],{},null,false,null]},null,false,"$@8"]},null,false,"$@8"]},null,false,null],["$","$1","h",{"children":[null,["$","$L9",null,{"children":"$La"}],["$","div",null,{"hidden":true,"children":["$","$Lb",null,{"children":["$","$6",null,{"name":"Next.Metadata","children":"$Lc"}]}]}],null]}],false]],"m":"$undefined","G":["$d",[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/0gx160xvg6dw9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ivgai0tNA5ttVTt_ec6mk"}
+e:[]
+8:"$We"
+f:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/23ma0uimsaloj.js","/children-programming/_next/static/chunks/3lg_44fzpzb82.js","/children-programming/_next/static/chunks/2gjp08922ji80.js"],"default"]
+10:T6e0,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_scene">
+          <field name="SCENE">day</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">早上好！太阳升起啦</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+              <next>
+                <block type="maker_set_scene">
+                  <field name="SCENE">school</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">去学校学编程</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                      <next>
+                        <block type="maker_set_scene">
+                          <field name="SCENE">night</field>
+                          <next>
+                            <block type="maker_say">
+                              <value name="TEXT"><shadow type="text"><field name="TEXT">晚上回家睡觉</field></shadow></value>
+                              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>4:["$","$Lf",null,{"project":{"slug":"a_day","category":"story","title":"跟着二零过一天","ageGroup":"6-8 岁","description":"切换不同场景，用编程讲完二零从早到晚的一天。","missionBrief":"用场景切换，给小伙伴讲讲二零的一天：早上在明亮的白天醒来，白天去学校学编程，晚上回到夜晚的家睡觉。","erLingHint":"① 拖绿色「当开始运行」；② 放「切换场景 白天」+「说 早上好！太阳升起啦」；③ 放「切换场景 学校」+「说 去学校学编程」，再「切换场景 夜晚」+「说 晚上回家睡觉」。点运行过一天！","steps":[{"id":1,"title":"用「当开始运行」事件启动程序"},{"id":2,"title":"切换至少两个场景，讲完一天的经过"},{"id":3,"title":"点运行，跟二零过一天"}],"defaultXml":"$10","cast":["sanqi"]}}]
+a:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+11:I[27201,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"IconMark"]
+7:null
+c:[["$","title","0",{"children":"造物星球 - 和二零一起，把想法种成作品"}],["$","meta","1",{"name":"description","content":"免费、无广告、项目驱动的少儿编程学习平台"}],["$","link","2",{"rel":"icon","href":"/children-programming/sun-parrot.svg"}],["$","$L11","3",{}]]

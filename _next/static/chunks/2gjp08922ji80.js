@@ -1,4 +1,4 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,30684,51494,94757,e=>{"use strict";let t=[{id:"stage-6-8",ageRange:"6-8 岁",name:"图形化积木启蒙",tagline:"拖拽彩色积木，让二零动起来、画图案、做小游戏。",status:"open",projectSlugs:["hello","flag","stone","shapeL","home","maze","arrow","zigzag","treasure","dance","frame","square","triangle","pentagon","spin","stairs","wave","spiral","fence","windmill","pickfruit","star5","flower","rainbow","snowflake","mandala","concentric","connectdot","house","letter","checkerboard","click_jump","click_color","click_dialog","two_events","click_play_dialog","auto_patrol","key_forward","edge_bounce","size_toggle","expression_shake","if_touch_star","if_edge_turn","if_red_stop","click_left_right","collect3","random_branch","odd_even","size_threshold","avoid_obstacle","escape_badguy","stars","maze_exit","collect_apples","light_lanterns","collect_rainbow","treasure_map","escort","traffic_police","dodge_clouds","memory_match","play_doremi","twinkle","drum_beat","random_note","loop_melody","pitch_by_click","pitch_by_move","chord","birthday","compose","count10","count_apples","compare_size","add_sub","shape_names","symmetry","multiplication","clock","geometry_puzzle","calculator"]},{id:"stage-9-12",ageRange:"9-12 岁",name:"代码初探",tagline:"从积木过渡到 JavaScript，做小工具与互动游戏。",status:"soon",projectSlugs:[]},{id:"stage-13-16",ageRange:"13-16 岁",name:"进阶工坊",tagline:"用 Python 与网页技术，完成属于自己的独立项目。",status:"soon",projectSlugs:[]}];e.s(["stages",0,t],51494);let a={"stage-6-8":[{id:"seq",name:"基础序列与方向",shortTag:"序列",description:"用「前进 / 转向」让二零按指令移动，先打好程序顺序的基础。"},{id:"loop",name:"循环与重复",shortTag:"循环",description:"用「重复执行」省去重复步骤，画出整齐的图形。"},{id:"draw",name:"画笔与几何艺术",shortTag:"绘图",description:"落笔 + 循环，画出彩虹、星星、花朵等美丽图案。"},{id:"event",name:"事件与互动",shortTag:"事件",description:"用「当点击 / 当开始」让程序响应外界动作。"},{id:"cond",name:"条件判断",shortTag:"条件",description:"用「如果…那么」让二零根据情况做不同选择。"},{id:"game",name:"收集与闯关游戏",shortTag:"游戏",description:"结合移动、判定与收集，做成好玩的小游戏。"},{id:"story",name:"故事与动画",shortTag:"故事",description:"让二零说话、表演，编排小动画和故事。"},{id:"music",name:"音乐与节奏",shortTag:"音乐",description:"用积木弹奏旋律，感受编程与节奏的结合。"},{id:"math",name:"数学启蒙",shortTag:"数学",description:"在玩中认识数数、图形、对称与规律。"},{id:"science",name:"自然科学模拟",shortTag:"科学",description:"模拟昼夜、四季、生长等自然现象。"},{id:"pbl",name:"综合创意 / 毕业项目",shortTag:"综合",description:"把学到的本领组合起来，做出属于自己的作品。"}],"stage-9-12":[{id:"fn",name:"函数与自定义积木",shortTag:"函数",description:"把重复的动作打包成自己的积木，学会抽象。"},{id:"var",name:"变量与状态",shortTag:"变量",description:"用变量记录分数、步数、状态，让程序记住东西。"},{id:"multi",name:"多角色与协作",shortTag:"多角色",description:"让多个角色一起表演、对话、协作。"},{id:"key",name:"键盘与操控游戏",shortTag:"键盘",description:"用方向键控制角色，做可操控的小游戏。"},{id:"music",name:"音乐创作",shortTag:"音乐",description:"用积木创作旋律与节奏。"},{id:"math",name:"数学与逻辑进阶",shortTag:"数学",description:"乘法表、质数、坐标绘图等进阶数学。"},{id:"list",name:"列表与数据",shortTag:"列表",description:"用列表管理一组有序的数据。"},{id:"game",name:"综合小游戏",shortTag:"游戏",description:"贪吃蛇、井字棋、猜数字等综合小游戏。"},{id:"story",name:"交互绘本与故事",shortTag:"故事",description:"可点击、可分支的互动绘本。"},{id:"science",name:"科学探究",shortTag:"科学",description:"昼夜、四季、水循环等科学模拟。"}],"stage-13-16":[{id:"js",name:"文本代码过渡",shortTag:"JS",description:"从积木平滑过渡到 JavaScript 文本代码。"},{id:"algo",name:"算法与数据结构",shortTag:"算法",description:"排序、查找、递归等算法思维。"},{id:"phys",name:"物理与模拟",shortTag:"物理",description:"自由落体、碰撞、重力等物理模拟。"},{id:"dataviz",name:"数据可视化",shortTag:"数据",description:"用图表把数据画出来。"},{id:"creative",name:"创意编程",shortTag:"创意",description:"分形、粒子、生成艺术等创意作品。"},{id:"web",name:"网页 / 小游戏开发",shortTag:"Web",description:"用 DOM 与画布做网页和小游戏。"},{id:"ai",name:"人工智能启蒙",shortTag:"AI",description:"决策树、分类器、聊天机器人等 AI 直觉。"},{id:"capstone",name:"毕业项目",shortTag:"毕业",description:"综合运用，完成属于自己的完整作品。"}]},l=[{slug:"hello",category:"seq",title:"二零，打个招呼！",ageGroup:"6-8 岁",description:"用积木让二零移动并说出第一句话。",missionBrief:"二零刚来到造物星球，它想飞到舞台中央，跟大家说声「你好」。你能帮它写出第一个程序吗？",erLingHint:"① 先从积木区拖一个绿色「当开始运行」事件到工作区；② 把黄色「移动」积木拖进它的里面；③ 再拖一个紫色「说」积木接在后面，输入想说的话；④ 点「运行」！卡住时点右上角「看示范」照着学。",steps:[{id:1,title:"让二零移动"},{id:2,title:"让二零说话"},{id:3,title:"点击运行看到效果"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,30684,51494,94757,e=>{"use strict";let t=[{id:"stage-6-8",ageRange:"6-8 岁",name:"图形化积木启蒙",tagline:"拖拽彩色积木，让二零动起来、画图案、做小游戏。",status:"open",projectSlugs:["hello","flag","stone","shapeL","home","maze","arrow","zigzag","treasure","dance","frame","square","triangle","pentagon","spin","stairs","wave","spiral","fence","windmill","pickfruit","star5","flower","rainbow","snowflake","mandala","concentric","connectdot","house","letter","checkerboard","click_jump","click_color","click_dialog","two_events","click_play_dialog","auto_patrol","key_forward","edge_bounce","size_toggle","expression_shake","if_touch_star","if_edge_turn","if_red_stop","click_left_right","collect3","random_branch","odd_even","size_threshold","avoid_obstacle","escape_badguy","stars","maze_exit","collect_apples","light_lanterns","collect_rainbow","treasure_map","escort","traffic_police","dodge_clouds","memory_match","play_doremi","twinkle","drum_beat","random_note","loop_melody","pitch_by_click","pitch_by_move","chord","birthday","compose","count10","count_apples","compare_size","add_sub","shape_names","symmetry","multiplication","clock","geometry_puzzle","calculator","self_intro","expression","freeze","animal_sports","word_chain","birthday_party","good_night","two_talk","a_day","magic_show"]},{id:"stage-9-12",ageRange:"9-12 岁",name:"代码初探",tagline:"从积木过渡到 JavaScript，做小工具与互动游戏。",status:"soon",projectSlugs:[]},{id:"stage-13-16",ageRange:"13-16 岁",name:"进阶工坊",tagline:"用 Python 与网页技术，完成属于自己的独立项目。",status:"soon",projectSlugs:[]}];e.s(["stages",0,t],51494);let a={"stage-6-8":[{id:"seq",name:"基础序列与方向",shortTag:"序列",description:"用「前进 / 转向」让二零按指令移动，先打好程序顺序的基础。"},{id:"loop",name:"循环与重复",shortTag:"循环",description:"用「重复执行」省去重复步骤，画出整齐的图形。"},{id:"draw",name:"画笔与几何艺术",shortTag:"绘图",description:"落笔 + 循环，画出彩虹、星星、花朵等美丽图案。"},{id:"event",name:"事件与互动",shortTag:"事件",description:"用「当点击 / 当开始」让程序响应外界动作。"},{id:"cond",name:"条件判断",shortTag:"条件",description:"用「如果…那么」让二零根据情况做不同选择。"},{id:"game",name:"收集与闯关游戏",shortTag:"游戏",description:"结合移动、判定与收集，做成好玩的小游戏。"},{id:"story",name:"故事与动画",shortTag:"故事",description:"让二零说话、表演，编排小动画和故事。"},{id:"music",name:"音乐与节奏",shortTag:"音乐",description:"用积木弹奏旋律，感受编程与节奏的结合。"},{id:"math",name:"数学启蒙",shortTag:"数学",description:"在玩中认识数数、图形、对称与规律。"},{id:"science",name:"自然科学模拟",shortTag:"科学",description:"模拟昼夜、四季、生长等自然现象。"},{id:"pbl",name:"综合创意 / 毕业项目",shortTag:"综合",description:"把学到的本领组合起来，做出属于自己的作品。"}],"stage-9-12":[{id:"fn",name:"函数与自定义积木",shortTag:"函数",description:"把重复的动作打包成自己的积木，学会抽象。"},{id:"var",name:"变量与状态",shortTag:"变量",description:"用变量记录分数、步数、状态，让程序记住东西。"},{id:"multi",name:"多角色与协作",shortTag:"多角色",description:"让多个角色一起表演、对话、协作。"},{id:"key",name:"键盘与操控游戏",shortTag:"键盘",description:"用方向键控制角色，做可操控的小游戏。"},{id:"music",name:"音乐创作",shortTag:"音乐",description:"用积木创作旋律与节奏。"},{id:"math",name:"数学与逻辑进阶",shortTag:"数学",description:"乘法表、质数、坐标绘图等进阶数学。"},{id:"list",name:"列表与数据",shortTag:"列表",description:"用列表管理一组有序的数据。"},{id:"game",name:"综合小游戏",shortTag:"游戏",description:"贪吃蛇、井字棋、猜数字等综合小游戏。"},{id:"story",name:"交互绘本与故事",shortTag:"故事",description:"可点击、可分支的互动绘本。"},{id:"science",name:"科学探究",shortTag:"科学",description:"昼夜、四季、水循环等科学模拟。"}],"stage-13-16":[{id:"js",name:"文本代码过渡",shortTag:"JS",description:"从积木平滑过渡到 JavaScript 文本代码。"},{id:"algo",name:"算法与数据结构",shortTag:"算法",description:"排序、查找、递归等算法思维。"},{id:"phys",name:"物理与模拟",shortTag:"物理",description:"自由落体、碰撞、重力等物理模拟。"},{id:"dataviz",name:"数据可视化",shortTag:"数据",description:"用图表把数据画出来。"},{id:"creative",name:"创意编程",shortTag:"创意",description:"分形、粒子、生成艺术等创意作品。"},{id:"web",name:"网页 / 小游戏开发",shortTag:"Web",description:"用 DOM 与画布做网页和小游戏。"},{id:"ai",name:"人工智能启蒙",shortTag:"AI",description:"决策树、分类器、聊天机器人等 AI 直觉。"},{id:"capstone",name:"毕业项目",shortTag:"毕业",description:"综合运用，完成属于自己的完整作品。"}]},l=[{slug:"hello",category:"seq",title:"二零，打个招呼！",ageGroup:"6-8 岁",description:"用积木让二零移动并说出第一句话。",missionBrief:"二零刚来到造物星球，它想飞到舞台中央，跟大家说声「你好」。你能帮它写出第一个程序吗？",erLingHint:"① 先从积木区拖一个绿色「当开始运行」事件到工作区；② 把黄色「移动」积木拖进它的里面；③ 再拖一个紫色「说」积木接在后面，输入想说的话；④ 点「运行」！卡住时点右上角「看示范」照着学。",steps:[{id:1,title:"让二零移动"},{id:2,title:"让二零说话"},{id:3,title:"点击运行看到效果"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
       <block type="maker_when_start" x="60" y="60">
         <statement name="STACK">
           <block type="maker_move">
@@ -2106,4 +2106,246 @@
         </block>
       </statement>
     </block>
-  </xml>`}];e.s(["CATEGORIES",0,a,"projects",0,l],94757);let m=new Set(["light_lanterns","treasure_map","escort"]);for(let e of l){if(m.has(e.slug))continue;if(e.stars)for(let t of e.stars)t.x=-t.x;let t=e.scene?.marks;if(t)for(let e of t)e.x=-e.x;let a=e.scene?.clouds;if(a)for(let e of a)e.x=-e.x}function o(e){return l.find(t=>t.slug===e)}function n(e){let a=t.find(t=>t.id===e);return a?a.projectSlugs.map(e=>o(e)).filter(e=>!!e):[]}e.s(["getCategoryLabel",0,function(e){for(let t of Object.keys(a)){let l=a[t].find(t=>t.id===e);if(l)return l.shortTag}return e},"getNextProject",0,function(e){for(let a of t){let t=n(a.id),l=t.findIndex(t=>t.slug===e);if(l>=0&&l<t.length-1)return t[l+1]}},"getProject",0,o,"getStageOfProject",0,function(e){return t.find(t=>t.projectSlugs.includes(e))},"getStageProjects",0,n],30684)}]);
+  </xml>`},{slug:"self_intro",category:"story",title:"二零的自我介绍",ageGroup:"6-8 岁",description:"让二零开口介绍自己，认识这位小太阳鹦鹉伙伴。",missionBrief:"造物星球来了一位新朋友——小太阳鹦鹉「二零」。请写一个程序：当开始运行时，让二零说出自己的名字，再说说自己的爱好。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面放一个紫色「说 你好！我是小太阳鹦鹉二零 2 秒」；③ 接一个「说 我最喜欢在造物星球上编程啦！」。点运行，听二零介绍自己！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"让二零说出自己的名字和爱好"},{id:3,title:"点运行，看二零介绍自己"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">你好！我是小太阳鹦鹉二零</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">我最喜欢在造物星球上编程啦！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"expression",category:"story",title:"表情变变变",ageGroup:"6-8 岁",description:"用「设置表情」积木，让二零一会儿开心、一会儿惊讶。",missionBrief:"二零是个表情丰富的小鹦鹉。写一个程序：当开始运行时，让二零先变成「开心」，说一句话，再变成「惊讶」，说另一句话。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面放粉色「让二零表情变成 开心」，接「说 今天真开心！」；③ 再放「让二零表情变成 惊讶」，接「说 哇，有惊喜！」。点运行看表情变化！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"用「设置表情」积木让二零换表情"},{id:3,title:"点运行，看表情变来变去"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_expression">
+          <field name="EXPR">happy</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">今天真开心！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+              <next>
+                <block type="maker_set_expression">
+                  <field name="EXPR">surprised</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">哇，有惊喜！</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"freeze",category:"story",title:"木头人游戏",ageGroup:"6-8 岁",description:"让二零一边跑一边玩「我们都是木头人」的口令游戏。",missionBrief:"大家来玩木头人！写一个程序：当开始运行时，让二零先跑几步，然后停下大声说「我们都是木头人，不许说话不许动！」。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面放黄色「移动 60 步」让二零跑起来；③ 接紫色「说 我们都是木头人，不许说话不许动！ 2 秒」。点运行玩一局木头人！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"让二零先跑动再停下说「不许动」"},{id:3,title:"点运行，玩一局木头人"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_move">
+          <value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">我们都是木头人，不许说话不许动！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"animal_sports",category:"story",title:"动物运动会",ageGroup:"6-8 岁",description:"用「重复执行」让二零一圈圈跑起来，参加动物运动会。",missionBrief:"造物星球举办动物运动会！写一个程序：当开始运行时，让二零先喊一声「运动会开始啦！」，再用「重复执行」一圈圈跑起来。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面先放「说 运动会开始啦！」；③ 接「重复执行 4 次」，循环里放「移动 50 步」。点运行，看二零参赛！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"让二零跑起来参加比赛（移动 + 重复）"},{id:3,title:"点运行，看运动会开幕"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">运动会开始啦！</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">50</field></shadow></value>
+                </block>
+              </statement>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"word_chain",category:"story",title:"词语接龙",ageGroup:"6-8 岁",description:"让二零玩词语接龙，一个接一个说出相关的词。",missionBrief:"词语接龙游戏：前一个词的最后一个字，是后一个词的开头。写一个程序：当开始运行时，让二零连续说出至少两个词（比如「苹果 → 果实 → 实力」）。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面连放三个紫色「说」，分别输入「苹果」「果实」「实力」；③ 点运行，听二零接龙！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"让二零连续说出至少两个词来接龙"},{id:3,title:"点运行，听二零接龙"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">苹果</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">果实</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><shadow type="text"><field name="TEXT">实力</field></shadow></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"birthday_party",category:"story",title:"生日派对",ageGroup:"6-8 岁",description:"切换到派对场景，让二零送上生日祝福。",missionBrief:"今天是谁的生日？写一个程序：当开始运行时，先切换到一个明亮的场景，再让二零大声送上生日祝福。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面先放「切换场景 白天」，再放「说 生日快乐！」；③ 接「说 大家一起吃蛋糕吧！」。点运行庆祝！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"切换到一个派对场景并送上生日祝福"},{id:3,title:"点运行，一起庆祝"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_scene">
+          <field name="SCENE">day</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">生日快乐！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><shadow type="text"><field name="TEXT">大家一起吃蛋糕吧！</field></shadow></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"good_night",category:"story",title:"晚安故事",ageGroup:"6-8 岁",description:"切换到夜晚场景，让二零道一声晚安。",missionBrief:"夜深了，星星出来了。写一个程序：当开始运行时，切换到夜晚场景，让二零轻声说晚安，再换上「睡觉」表情。",erLingHint:"① 拖一个绿色「当开始运行」；② 里面先放「切换场景 夜晚」；③ 放「说 月亮出来了，该睡觉啦」，再「让二零表情变成 睡觉」，接「说 晚安，明天见！」。点运行听晚安！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"切换到夜晚场景并说晚安"},{id:3,title:"点运行，听二零道晚安"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_scene">
+          <field name="SCENE">night</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">月亮出来了，该睡觉啦</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+              <next>
+                <block type="maker_set_expression">
+                  <field name="EXPR">sleepy</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">晚安，明天见！</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`},{slug:"two_talk",category:"story",title:"两个伙伴的对话",ageGroup:"6-8 岁",description:"用「控制角色」积木，让二零和三七你一句我一句聊起来。",missionBrief:"二零的好朋友三七（玄凤鹦鹉）来啦！写一个程序：当开始运行时，让二零先说话，再用「控制角色」切换到三七让它回话，最后切回二零再说一句。",erLingHint:"① 拖绿色「当开始运行」；② 放「控制角色 二零」+「说 三七，你来啦！」；③ 放「控制角色 三七」+「说 二零，今天玩什么？」，再「控制角色 二零」+「说 我们来编程吧！」。点运行看对话！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"用「控制角色」积木让两个伙伴都开口说话"},{id:3,title:"点运行，看二零和三七聊天"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_control_actor">
+          <field name="ACTOR">erling</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">三七，你来啦！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+              <next>
+                <block type="maker_control_actor">
+                  <field name="ACTOR">sanqi</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">二零，今天玩什么？</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                      <next>
+                        <block type="maker_control_actor">
+                          <field name="ACTOR">erling</field>
+                          <next>
+                            <block type="maker_say">
+                              <value name="TEXT"><shadow type="text"><field name="TEXT">我们来编程吧！</field></shadow></value>
+                              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,cast:["sanqi"]},{slug:"a_day",category:"story",title:"跟着二零过一天",ageGroup:"6-8 岁",description:"切换不同场景，用编程讲完二零从早到晚的一天。",missionBrief:"用场景切换，给小伙伴讲讲二零的一天：早上在明亮的白天醒来，白天去学校学编程，晚上回到夜晚的家睡觉。",erLingHint:"① 拖绿色「当开始运行」；② 放「切换场景 白天」+「说 早上好！太阳升起啦」；③ 放「切换场景 学校」+「说 去学校学编程」，再「切换场景 夜晚」+「说 晚上回家睡觉」。点运行过一天！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"切换至少两个场景，讲完一天的经过"},{id:3,title:"点运行，跟二零过一天"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_scene">
+          <field name="SCENE">day</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">早上好！太阳升起啦</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+              <next>
+                <block type="maker_set_scene">
+                  <field name="SCENE">school</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">去学校学编程</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                      <next>
+                        <block type="maker_set_scene">
+                          <field name="SCENE">night</field>
+                          <next>
+                            <block type="maker_say">
+                              <value name="TEXT"><shadow type="text"><field name="TEXT">晚上回家睡觉</field></shadow></value>
+                              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,cast:["sanqi"]},{slug:"magic_show",category:"story",title:"神奇魔术秀",ageGroup:"6-8 岁",description:"用「隐藏角色 / 显示角色」积木，让三七变没又变回来。",missionBrief:"魔术师二零要表演魔术！写一个程序：当开始运行时，让二零先喊一声，然后让伙伴三七「藏起来」，再「变出来」。",erLingHint:"① 拖绿色「当开始运行」；② 放「说 看我变魔术！」，再放「隐藏角色 三七」+「说 三七不见啦！」；③ 放「显示角色 三七」+「说 三七又回来啦！」。点运行看魔术！",steps:[{id:1,title:"用「当开始运行」事件启动程序"},{id:2,title:"让一个伙伴先藏起来再变出来（隐藏 + 显示）"},{id:3,title:"点运行，看神奇的魔术"}],defaultXml:`<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">看我变魔术！</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+          <next>
+            <block type="maker_hide_actor">
+              <field name="ACTOR">sanqi</field>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><shadow type="text"><field name="TEXT">三七不见啦！</field></shadow></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                  <next>
+                    <block type="maker_show_actor">
+                      <field name="ACTOR">sanqi</field>
+                      <next>
+                        <block type="maker_say">
+                          <value name="TEXT"><shadow type="text"><field name="TEXT">三七又回来啦！</field></shadow></value>
+                          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,cast:["sanqi"]}];e.s(["CATEGORIES",0,a,"projects",0,l],94757);let m=new Set(["light_lanterns","treasure_map","escort"]);for(let e of l){if(m.has(e.slug))continue;if(e.stars)for(let t of e.stars)t.x=-t.x;let t=e.scene?.marks;if(t)for(let e of t)e.x=-e.x;let a=e.scene?.clouds;if(a)for(let e of a)e.x=-e.x}function o(e){return l.find(t=>t.slug===e)}function n(e){let a=t.find(t=>t.id===e);return a?a.projectSlugs.map(e=>o(e)).filter(e=>!!e):[]}e.s(["getCategoryLabel",0,function(e){for(let t of Object.keys(a)){let l=a[t].find(t=>t.id===e);if(l)return l.shortTag}return e},"getNextProject",0,function(e){for(let a of t){let t=n(a.id),l=t.findIndex(t=>t.slug===e);if(l>=0&&l<t.length-1)return t[l+1]}},"getProject",0,o,"getStageOfProject",0,function(e){return t.find(t=>t.projectSlugs.includes(e))},"getStageProjects",0,n],30684)}]);

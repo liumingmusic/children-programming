@@ -1,0 +1,31 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/23ma0uimsaloj.js","/children-programming/_next/static/chunks/3lg_44fzpzb82.js","/children-programming/_next/static/chunks/2gjp08922ji80.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T476,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_expression">
+          <field name="EXPR">happy</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">今天真开心！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+              <next>
+                <block type="maker_set_expression">
+                  <field name="EXPR">surprised</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">哇，有惊喜！</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"expression","category":"story","title":"表情变变变","ageGroup":"6-8 岁","description":"用「设置表情」积木，让二零一会儿开心、一会儿惊讶。","missionBrief":"二零是个表情丰富的小鹦鹉。写一个程序：当开始运行时，让二零先变成「开心」，说一句话，再变成「惊讶」，说另一句话。","erLingHint":"① 拖一个绿色「当开始运行」；② 里面放粉色「让二零表情变成 开心」，接「说 今天真开心！」；③ 再放「让二零表情变成 惊讶」，接「说 哇，有惊喜！」。点运行看表情变化！","steps":[{"id":1,"title":"用「当开始运行」事件启动程序"},{"id":2,"title":"用「设置表情」积木让二零换表情"},{"id":3,"title":"点运行，看表情变来变去"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/23ma0uimsaloj.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3lg_44fzpzb82.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2gjp08922ji80.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ivgai0tNA5ttVTt_ec6mk"}
+6:null
