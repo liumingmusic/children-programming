@@ -1,7 +1,7 @@
 1:"$Sreact.fragment"
-2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/23ma0uimsaloj.js","/children-programming/_next/static/chunks/3lg_44fzpzb82.js","/children-programming/_next/static/chunks/2gjp08922ji80.js"],"default"]
-8:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
-9:"$Sreact.suspense"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/1at6fp9qef0vj.js","/children-programming/_next/static/chunks/1zf-n7fxmy4oc.js","/children-programming/_next/static/chunks/1aiosw0o-g-_w.js","/children-programming/_next/static/chunks/1qgm6qrp-wifi.js"],"default"]
+9:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+a:"$Sreact.suspense"
 3:T1d5b,<xml xmlns="https://developers.google.com/blockly/xml">
       <block type="maker_when_start" x="60" y="60">
         <statement name="STACK">
@@ -92,9 +92,10 @@
           </block>
         </statement>
       </block>
-    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"dance","category":"seq","title":"按指令跳舞","ageGroup":"6-8 岁","description":"用移动和转向，给二零编一段方块舞。","missionBrief":"音乐响起来🎵！给二零下一串「移动 + 右转」的指令，看它转出一段可爱的方块舞步吧。","erLingHint":"① 绿色「当开始运行」里放「落笔」；② 重复放「移动」和「右转」（比如 8 次），每次转一个小角度；③ 二零就会转着圈跳舞，最后「抬笔」。点「运行」看舞步。","steps":[{"id":1,"title":"让二零动起来"},{"id":2,"title":"用转向跳出舞步"},{"id":3,"title":"运行看跳舞"}],"defaultXml":"$3","scene":{"marks":[{"x":"$-0","y":0,"emoji":"💃","label":"跳舞"}]}}}],["$L4","$L5","$L6"],"$L7"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ivgai0tNA5ttVTt_ec6mk"}
-4:["$","script","script-0",{"src":"/children-programming/_next/static/chunks/23ma0uimsaloj.js","async":true}]
-5:["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3lg_44fzpzb82.js","async":true}]
-6:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2gjp08922ji80.js","async":true}]
-7:["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]
-a:null
+    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"dance","category":"seq","title":"按指令跳舞","ageGroup":"6-8 岁","description":"用移动和转向，给二零编一段方块舞。","missionBrief":"音乐响起来🎵！给二零下一串「移动 + 右转」的指令，看它转出一段可爱的方块舞步吧。","erLingHint":"① 绿色「当开始运行」里放「落笔」；② 重复放「移动」和「右转」（比如 8 次），每次转一个小角度；③ 二零就会转着圈跳舞，最后「抬笔」。点「运行」看舞步。","steps":[{"id":1,"title":"让二零动起来"},{"id":2,"title":"用转向跳出舞步"},{"id":3,"title":"运行看跳舞"}],"defaultXml":"$3","scene":{"marks":[{"x":"$-0","y":0,"emoji":"💃","label":"跳舞"}]}}}],["$L4","$L5","$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"WHubBVLoiOXNSzsqebgvf"}
+4:["$","script","script-0",{"src":"/children-programming/_next/static/chunks/1at6fp9qef0vj.js","async":true}]
+5:["$","script","script-1",{"src":"/children-programming/_next/static/chunks/1zf-n7fxmy4oc.js","async":true}]
+6:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/1aiosw0o-g-_w.js","async":true}]
+7:["$","script","script-3",{"src":"/children-programming/_next/static/chunks/1qgm6qrp-wifi.js","async":true}]
+8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
+b:null

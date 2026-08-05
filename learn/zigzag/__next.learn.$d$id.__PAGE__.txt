@@ -1,7 +1,7 @@
 1:"$Sreact.fragment"
-2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/23ma0uimsaloj.js","/children-programming/_next/static/chunks/3lg_44fzpzb82.js","/children-programming/_next/static/chunks/2gjp08922ji80.js"],"default"]
-6:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
-7:"$Sreact.suspense"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/1at6fp9qef0vj.js","/children-programming/_next/static/chunks/1zf-n7fxmy4oc.js","/children-programming/_next/static/chunks/1aiosw0o-g-_w.js","/children-programming/_next/static/chunks/1qgm6qrp-wifi.js"],"default"]
+7:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
 3:Tad5,<xml xmlns="https://developers.google.com/blockly/xml">
       <block type="maker_when_start" x="60" y="60">
         <statement name="STACK">
@@ -48,7 +48,8 @@
           </block>
         </statement>
       </block>
-    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"zigzag","category":"seq","title":"折线探险","ageGroup":"6-8 岁","description":"画出一条上下折返的折线探险路线。","missionBrief":"造物星球有一条 zigzag 小路。指挥二零一会上、一会下，画出一条弯弯折折的探险路线吧！","erLingHint":"① 绿色「当开始运行」里放「落笔」；②「移动」、「右转」交替使用，让路线一会上、一会下；③ 重复几次「移动 + 右转」画出折线，最后「抬笔」。点「运行」看折线。","steps":[{"id":1,"title":"让二零落笔画线"},{"id":2,"title":"画出上下折返的折线"},{"id":3,"title":"运行看折线图案"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/23ma0uimsaloj.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3lg_44fzpzb82.js","async":true}],"$L4"],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ivgai0tNA5ttVTt_ec6mk"}
-4:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2gjp08922ji80.js","async":true}]
-5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
-8:null
+    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"zigzag","category":"seq","title":"折线探险","ageGroup":"6-8 岁","description":"画出一条上下折返的折线探险路线。","missionBrief":"造物星球有一条 zigzag 小路。指挥二零一会上、一会下，画出一条弯弯折折的探险路线吧！","erLingHint":"① 绿色「当开始运行」里放「落笔」；②「移动」、「右转」交替使用，让路线一会上、一会下；③ 重复几次「移动 + 右转」画出折线，最后「抬笔」。点「运行」看折线。","steps":[{"id":1,"title":"让二零落笔画线"},{"id":2,"title":"画出上下折返的折线"},{"id":3,"title":"运行看折线图案"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/1at6fp9qef0vj.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/1zf-n7fxmy4oc.js","async":true}],"$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"WHubBVLoiOXNSzsqebgvf"}
+4:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/1aiosw0o-g-_w.js","async":true}]
+5:["$","script","script-3",{"src":"/children-programming/_next/static/chunks/1qgm6qrp-wifi.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

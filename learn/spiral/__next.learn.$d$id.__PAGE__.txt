@@ -1,7 +1,7 @@
 1:"$Sreact.fragment"
-2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/23ma0uimsaloj.js","/children-programming/_next/static/chunks/3lg_44fzpzb82.js","/children-programming/_next/static/chunks/2gjp08922ji80.js"],"default"]
-8:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
-9:"$Sreact.suspense"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/1at6fp9qef0vj.js","/children-programming/_next/static/chunks/1zf-n7fxmy4oc.js","/children-programming/_next/static/chunks/1aiosw0o-g-_w.js","/children-programming/_next/static/chunks/1qgm6qrp-wifi.js"],"default"]
+9:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+a:"$Sreact.suspense"
 3:Tbbb,<xml xmlns="https://developers.google.com/blockly/xml">
       <block type="maker_when_start" x="60" y="60">
         <statement name="STACK">
@@ -50,9 +50,10 @@
           </block>
         </statement>
       </block>
-    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"spiral","category":"loop","title":"螺旋线","ageGroup":"6-8 岁","description":"用几段循环让二零画出越转越大的螺旋。","missionBrief":"蜗牛壳是螺旋形的！帮二零把几段「重复执行」拼起来，每一步走得更远，画出一条螺旋线吧。","erLingHint":"① 绿色「当开始运行」里放「落笔」；② 放 4 个「重复执行 8 次」，里面的「移动」步数分别用 10、20、30、40，每次都「右转 15 度」；③ 最后「抬笔」；④ 点「运行」看螺旋。","steps":[{"id":1,"title":"让二零落笔开始"},{"id":2,"title":"用多段循环画出螺旋"},{"id":3,"title":"运行看到螺旋线"}],"defaultXml":"$3"}}],["$L4","$L5","$L6"],"$L7"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ivgai0tNA5ttVTt_ec6mk"}
-4:["$","script","script-0",{"src":"/children-programming/_next/static/chunks/23ma0uimsaloj.js","async":true}]
-5:["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3lg_44fzpzb82.js","async":true}]
-6:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2gjp08922ji80.js","async":true}]
-7:["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]
-a:null
+    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"spiral","category":"loop","title":"螺旋线","ageGroup":"6-8 岁","description":"用几段循环让二零画出越转越大的螺旋。","missionBrief":"蜗牛壳是螺旋形的！帮二零把几段「重复执行」拼起来，每一步走得更远，画出一条螺旋线吧。","erLingHint":"① 绿色「当开始运行」里放「落笔」；② 放 4 个「重复执行 8 次」，里面的「移动」步数分别用 10、20、30、40，每次都「右转 15 度」；③ 最后「抬笔」；④ 点「运行」看螺旋。","steps":[{"id":1,"title":"让二零落笔开始"},{"id":2,"title":"用多段循环画出螺旋"},{"id":3,"title":"运行看到螺旋线"}],"defaultXml":"$3"}}],["$L4","$L5","$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"WHubBVLoiOXNSzsqebgvf"}
+4:["$","script","script-0",{"src":"/children-programming/_next/static/chunks/1at6fp9qef0vj.js","async":true}]
+5:["$","script","script-1",{"src":"/children-programming/_next/static/chunks/1zf-n7fxmy4oc.js","async":true}]
+6:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/1aiosw0o-g-_w.js","async":true}]
+7:["$","script","script-3",{"src":"/children-programming/_next/static/chunks/1qgm6qrp-wifi.js","async":true}]
+8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
+b:null
