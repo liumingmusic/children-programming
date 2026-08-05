@@ -7,6 +7,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: "星球任务", href: "/missions" },
   { label: "星球游乐场", href: "/playground" },
+  { label: "造物工坊", href: "/studio" },
   { label: "组件库", href: "/toolbox" },
   { label: "作品花园", href: "/gallery" },
   { label: "家长入口", href: "/parent" },

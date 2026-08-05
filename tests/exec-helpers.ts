@@ -5,9 +5,22 @@ import { vi } from "vitest";
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
-import { Runtime, type StageState } from "@/lib/runtime";
+import { Runtime, type StageState, type Species } from "@/lib/runtime";
 import { computeSteps } from "@/lib/steps";
-import { getProject } from "@/courses";
+import { getProject, type CourseProject } from "@/courses";
+
+// 伙伴角色元数据（与 Runtime 的 companions 构造一致；仅需 id→species/name 映射）。
+// 新增伙伴角色时在此补一条即可，exec 测试会自动把 project.cast 里的角色实例化出来。
+const CAST_SPECIES: Record<string, { species: Species; name: string }> = {
+  sanqi: { species: "sanqi", name: "三七" },
+};
+function companionsFor(project: CourseProject) {
+  return (project.cast ?? []).map((id) => ({
+    id,
+    species: (CAST_SPECIES[id]?.species ?? "erling") as Species,
+    name: CAST_SPECIES[id]?.name ?? id,
+  }));
+}
 
 // 用「真实 Blockly」把 defaultXml 转成 JS（和线上运行时同一套代码生成）
 export function genCode(xml: string): string {
@@ -48,7 +61,7 @@ export async function runDemo(slug: string, initialStars: [] | undefined = []) {
   const logs: string[] = [];
   const rt = new Runtime(480, 360, (s: StageState) => {
     logs.push(...s.log);
-  }, initialStars);
+  }, initialStars, { companions: companionsFor(project) });
   rt.setScripts({ whenStart: code, whenStageClicked: "" });
   await rt.handleRunStart();
   const finalState = rt.getState();
@@ -122,7 +135,7 @@ export async function runDemoFull(slug: string) {
       logs.push(...s.log);
     },
     initialStars,
-    { hazards, clouds }
+    { hazards, clouds, companions: companionsFor(project) }
   );
   rt.setScripts({ whenStart, whenStageClicked, whenKeyPressed });
   await rt.handleRunStart();

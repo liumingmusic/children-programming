@@ -35,7 +35,12 @@ export interface Cloud {
   r: number;
 }
 
+export type Species = "erling" | "sanqi";
+
 export interface ActorState {
+  id: string;
+  species: Species;
+  name: string;
   x: number;
   y: number;
   angle: number; // degrees, 0 points right
@@ -45,12 +50,27 @@ export interface ActorState {
   size: number;
   /** 角色表情，用于「变表情」类项目；渲染时切换脸型。 */
   expression?: "normal" | "happy" | "angry" | "surprised" | "sleepy";
+  /** 是否可见（「显示/隐藏角色」积木控制；变魔术项目用）。 */
+  visible: boolean;
+}
+
+/** 舞台场景（多场景切换，分类7·故事「一天的生活」用）。仅作背景区分，不影响坐标。 */
+export interface SceneDef {
+  id: string;
+  label: string;
+  /** 背景渐变（CSS），由 StagePlayer 渲染。 */
+  bg: string;
 }
 
 export interface StageState {
   width: number;
   height: number;
+  /** 主角色（二零）的便捷引用，向后兼容现有 81 项目与渲染层。= actors[0]。 */
   actor: ActorState;
+  /** 全部角色（含二零与伙伴）。多角色项目（分类7）会含 三七。 */
+  actors: ActorState[];
+  /** 当前激活的场景（切换场景积木设置）。 */
+  scene?: SceneDef;
   penPaths: PenPath[];
   currentPath: PenPath | null;
   penColor: number; // hue 0-360
@@ -174,7 +194,11 @@ function pitchFromX(x: number, width: number): number {
   return SCALE[idx];
 }
 
-type Action =
+// 每个动作在「入队（eval 期间）」时就捕获当时「当前控制角色」的 id，
+// 否则 controlActor 在 eval 阶段同步切换 currentActorId，而 await 动作（say/move…）
+// 在 eval 之后才逐条执行，全部会看到 eval 结束时的 currentActorId，导致多角色项目里
+// 「后用三七说的 / 走的」全错绑到二零身上（见 two_talk 的真实运行日志）。
+type Action = { actorId?: string } & (
   | { type: "move"; steps: number; duration: number }
   | { type: "turn"; degrees: number; duration: number }
   | { type: "goto"; x: number; y: number; duration: number }
@@ -194,7 +218,8 @@ type Action =
   | { type: "playRandomNote" }
   | { type: "playToneByMouseX" }
   | { type: "playToneByActorX" }
-  | { type: "playChord"; notes: string[] };
+  | { type: "playChord"; notes: string[] }
+);
 
 export type Script = {
   whenStart: string;
@@ -207,6 +232,32 @@ const DEFAULT_STARS: Star[] = [
   { id: 2, x: -140, y: -60, collected: false },
   { id: 3, x: -80, y: 110, collected: false },
 ];
+
+/** 多场景背景（分类7·故事「一天的生活」切换场景用）。键即切换场景积木的参数。 */
+export const SCENES: Record<string, SceneDef> = {
+  day: { id: "day", label: "白天·操场", bg: "linear-gradient(#1B3A6B, #2E5C9E)" },
+  bedroom: { id: "bedroom", label: "卧室", bg: "linear-gradient(#2A2350, #4A3A7A)" },
+  school: { id: "school", label: "学校", bg: "linear-gradient(#143B3A, #2C6B63)" },
+  park: { id: "park", label: "公园", bg: "linear-gradient(#173A2A, #2E6B4A)" },
+  night: { id: "night", label: "夜晚·星空", bg: "linear-gradient(#0B1C3F, #162B55)" },
+};
+
+/** 构造一个角色初始状态。 */
+function makeActor(id: string, species: Species, name: string, x = 0, y = 0, angle = 270): ActorState {
+  return {
+    id,
+    species,
+    name,
+    x,
+    y,
+    angle,
+    message: null,
+    messageUntil: 0,
+    size: 1,
+    expression: "normal",
+    visible: true,
+  };
+}
 
 export class Runtime {
   private actions: Action[] = [];
@@ -223,13 +274,22 @@ export class Runtime {
   private initialClouds: Cloud[];
   private vars: Record<string, number> = {};
   private cloudRaf: number | null = null;
+  /** 当前被「控制角色」积木选中的角色 id；默认二零，保证旧项目行为不变。 */
+  private currentActorId: string = "erling";
+  /** 当前处于「落笔」状态的角色 id（画笔路径归属于落笔的那位角色）。默认二零。 */
+  private drawingActorId: string = "erling";
 
   constructor(
     width: number,
     height: number,
     onChange: (state: StageState) => void,
     initialStars?: Star[],
-    opts?: { hazards?: Hazard[]; clouds?: Cloud[] }
+    opts?: {
+      hazards?: Hazard[];
+      clouds?: Cloud[];
+      /** 额外的伙伴角色（如 三七）；二零始终存在。 */
+      companions?: { id: string; species: Species; name: string }[];
+    }
   ) {
     this.width = width;
     this.height = height;
@@ -240,18 +300,15 @@ export class Runtime {
     this.hazards = opts?.hazards ? opts.hazards.map((h) => ({ ...h })) : [];
     this.initialClouds = opts?.clouds ? opts.clouds.map((c) => ({ ...c })) : [];
     this.clouds = this.initialClouds.map((c) => ({ ...c }));
+    const actors: ActorState[] = [makeActor("erling", "erling", "二零")];
+    for (const c of opts?.companions ?? []) {
+      actors.push(makeActor(c.id, c.species, c.name));
+    }
     this.state = {
       width,
       height,
-      actor: {
-        x: 0,
-        y: 0,
-        angle: 270,
-        message: null,
-        messageUntil: 0,
-        size: 1,
-        expression: "normal",
-      },
+      actor: actors[0],
+      actors,
       penPaths: [],
       currentPath: null,
       penColor: 0,
@@ -270,27 +327,83 @@ export class Runtime {
 
   reset() {
     this.actions = [];
-    this.state.actor = {
-      x: 0,
-      y: 0,
-      angle: 270,
-      message: null,
-      messageUntil: 0,
-      size: 1,
-      expression: "normal",
-    };
+    for (const a of this.state.actors) {
+      a.x = 0;
+      a.y = 0;
+      a.angle = 270;
+      a.message = null;
+      a.messageUntil = 0;
+      a.size = 1;
+      a.expression = "normal";
+      a.visible = true;
+    }
+    this.currentActorId = "erling";
+    this.drawingActorId = "erling";
     this.vars = {};
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.penColor = 0;
     this.state.penSize = DEFAULT_PEN_SIZE;
     this.state.penDown = false;
+    this.state.scene = undefined;
     this.state.stars = this.initialStars.map((s) => ({ ...s }));
     this.clouds = this.initialClouds.map((c) => ({ ...c }));
     this.state.clouds = this.initialClouds.map((c) => ({ x: c.x, y: c.y, r: c.r }));
     this.state.running = false;
     this.state.log = [];
     this.runningType = null;
+    this.emit();
+  }
+
+  // --- 多角色支持（分类7·故事）：动作默认作用于「当前控制角色」，旧项目恒为二零 ---
+  private currentActor(): ActorState {
+    return this.state.actors.find((a) => a.id === this.currentActorId) ?? this.state.actors[0];
+  }
+
+  private findActor(id: string): ActorState | undefined {
+    return this.state.actors.find((a) => a.id === id);
+  }
+
+  private actorName(id: string): string {
+    return this.findActor(id)?.name ?? id;
+  }
+
+  /** 切换后续积木作用的角色（「控制角色」积木）。 */
+  controlActor(id: string) {
+    if (this.findActor(id)) {
+      this.currentActorId = id;
+      this.log(`[系统] 切换到控制角色 ${this.actorName(id)}`);
+    }
+    this.emit();
+  }
+
+  /** 显示一个角色（「显示角色」积木，变魔术用）。 */
+  showActor(id: string) {
+    const a = this.findActor(id);
+    if (a) {
+      a.visible = true;
+      this.log(`[系统] ${a.name} 出现了`);
+    }
+    this.emit();
+  }
+
+  /** 隐藏一个角色（「隐藏角色」积木，变魔术用）。 */
+  hideActor(id: string) {
+    const a = this.findActor(id);
+    if (a) {
+      a.visible = false;
+      this.log(`[系统] ${a.name} 藏起来了`);
+    }
+    this.emit();
+  }
+
+  /** 切换舞台场景（「切换场景」积木，一天的生活用）。 */
+  setScene(sceneId: string) {
+    const scene = SCENES[sceneId];
+    if (scene) {
+      this.state.scene = scene;
+      this.log(`[系统] 场景切换到 ${scene.label}`);
+    }
     this.emit();
   }
 
@@ -318,7 +431,7 @@ export class Runtime {
   // 关键：不能在执行生成代码（eval）时立刻改状态，否则 penUp 会在 move
   // 真正播放前把笔画提交、抬起画笔，导致一条线都画不出来。
   penDown() {
-    this.actions.push({ type: "penDown" });
+    this.actions.push({ type: "penDown", actorId: this.currentActorId });
     this.log("[系统] 画笔落下");
   }
 
@@ -346,12 +459,12 @@ export class Runtime {
   // --- Size (actor scale) ---
   setSize(size: number) {
     const s = Math.max(0.2, Math.min(5, size));
-    this.actions.push({ type: "setSize", size: s });
+    this.actions.push({ type: "setSize", size: s, actorId: this.currentActorId });
     this.log("[系统] 二零大小设置");
   }
 
   changeSize(delta: number) {
-    this.actions.push({ type: "changeSize", delta });
+    this.actions.push({ type: "changeSize", delta, actorId: this.currentActorId });
     this.log("[系统] 二零大小改变");
   }
 
@@ -360,8 +473,8 @@ export class Runtime {
   touchingEdge(): boolean {
     const margin = 30;
     return (
-      Math.abs(this.state.actor.x) > this.width / 2 - margin ||
-      Math.abs(this.state.actor.y) > this.height / 2 - margin
+      Math.abs(this.currentActor().x) > this.width / 2 - margin ||
+      Math.abs(this.currentActor().y) > this.height / 2 - margin
     );
   }
 
@@ -377,12 +490,12 @@ export class Runtime {
 
   /** 当前角色大小倍数（用于「阈值 / 大小」类条件判断）。 */
   getSize(): number {
-    return this.state.actor.size;
+    return this.currentActor().size;
   }
 
   /** 设置角色表情（用于「变表情」类项目）。 */
   setExpression(name: "normal" | "happy" | "angry" | "surprised" | "sleepy") {
-    this.state.actor.expression = name;
+    this.currentActor().expression = name;
     this.log("[系统] 二零换上了新表情");
     this.emit();
   }
@@ -431,8 +544,8 @@ export class Runtime {
   touchingMark(kind: string): boolean {
     return this.hazards.some((h) => {
       if (h.kind !== kind) return false;
-      const dx = this.state.actor.x - h.x;
-      const dy = this.state.actor.y - h.y;
+      const dx = this.currentActor().x - h.x;
+      const dy = this.currentActor().y - h.y;
       return Math.sqrt(dx * dx + dy * dy) < h.r + 30;
     });
   }
@@ -440,8 +553,8 @@ export class Runtime {
   /** 角色是否碰到任意一朵乌云。 */
   touchingCloud(): boolean {
     return this.clouds.some((c) => {
-      const dx = this.state.actor.x - c.x;
-      const dy = this.state.actor.y - c.y;
+      const dx = this.currentActor().x - c.x;
+      const dy = this.currentActor().y - c.y;
       return Math.sqrt(dx * dx + dy * dy) < c.r + 25;
     });
   }
@@ -474,28 +587,28 @@ export class Runtime {
 
   // --- Queued actions ---
   move(steps: number) {
-    this.actions.push({ type: "move", steps, duration: Math.abs(steps) * 4 });
+    this.actions.push({ type: "move", steps, duration: Math.abs(steps) * 4, actorId: this.currentActorId });
   }
 
   turn(degrees: number) {
-    this.actions.push({ type: "turn", degrees, duration: Math.abs(degrees) * 4 });
+    this.actions.push({ type: "turn", degrees, duration: Math.abs(degrees) * 4, actorId: this.currentActorId });
   }
 
   goto(x: number, y: number) {
-    this.actions.push({ type: "goto", x, y, duration: 500 });
+    this.actions.push({ type: "goto", x, y, duration: 500, actorId: this.currentActorId });
   }
 
   gotoMouse() {
-    this.actions.push({ type: "gotoMouse", duration: 600 });
+    this.actions.push({ type: "gotoMouse", duration: 600, actorId: this.currentActorId });
   }
 
   gotoStar(index: number) {
-    this.actions.push({ type: "gotoStar", index, duration: 600 });
+    this.actions.push({ type: "gotoStar", index, duration: 600, actorId: this.currentActorId });
   }
 
   say(text: string | number, seconds: number) {
     const t = text == null ? "" : String(text);
-    this.actions.push({ type: "say", text: t, duration: seconds * 1000 });
+    this.actions.push({ type: "say", text: t, duration: seconds * 1000, actorId: this.currentActorId });
   }
 
   wait(seconds: number) {
@@ -524,7 +637,7 @@ export class Runtime {
   }
 
   playToneByActorX() {
-    this.actions.push({ type: "playToneByActorX" });
+    this.actions.push({ type: "playToneByActorX", actorId: this.currentActorId });
     this.log("[音频] 按二零位置弹音");
   }
 
@@ -537,8 +650,8 @@ export class Runtime {
   touchingStar(): boolean {
     return this.state.stars.some((star) => {
       if (star.collected) return false;
-      const dx = this.state.actor.x - star.x;
-      const dy = this.state.actor.y - star.y;
+      const dx = this.currentActor().x - star.x;
+      const dy = this.currentActor().y - star.y;
       return Math.sqrt(dx * dx + dy * dy) < 35;
     });
   }
@@ -546,8 +659,8 @@ export class Runtime {
   collectNearbyStars() {
     this.state.stars.forEach((star, index) => {
       if (!star.collected) {
-        const dx = this.state.actor.x - star.x;
-        const dy = this.state.actor.y - star.y;
+        const dx = this.currentActor().x - star.x;
+        const dy = this.currentActor().y - star.y;
         if (Math.sqrt(dx * dx + dy * dy) < 35) {
           this.collectStar(index);
         }
@@ -574,7 +687,7 @@ export class Runtime {
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.penDown = false;
-    this.state.actor.size = 1;
+    for (const a of this.state.actors) a.size = 1;
     this.state.stars = this.initialStars.map((s) => ({ ...s }));
   }
 
@@ -671,8 +784,9 @@ export class Runtime {
 
   private startCurrentPath() {
     if (this.state.penDown) {
+      const d = this.findActor(this.drawingActorId) ?? this.currentActor();
       this.state.currentPath = {
-        points: [{ x: this.state.actor.x, y: this.state.actor.y }],
+        points: [{ x: d.x, y: d.y }],
         color: `hsl(${this.state.penColor % 360}, 80%, 60%)`,
         width: this.state.penSize,
       };
@@ -681,27 +795,30 @@ export class Runtime {
 
   private recordPenPosition() {
     if (this.state.penDown && this.state.currentPath) {
-      this.state.currentPath.points.push({ x: this.state.actor.x, y: this.state.actor.y });
+      const d = this.findActor(this.drawingActorId) ?? this.currentActor();
+      this.state.currentPath.points.push({ x: d.x, y: d.y });
     }
   }
 
   private performAction(action: Action): Promise<void> {
+    // 解析「动作所属角色」：优先用入队时捕获的 actorId，否则回退到当前控制角色。
+    const actor = this.findActor(action.actorId ?? this.currentActorId) ?? this.currentActor();
     return new Promise((resolve) => {
       switch (action.type) {
         case "move": {
-          this.log("[系统] 二零开始移动");
-          const rad = (this.state.actor.angle * Math.PI) / 180;
+          this.log(`[系统] ${actor.name}开始移动`);
+          const rad = (actor.angle * Math.PI) / 180;
           // 渲染坐标世界 Y 轴朝上（toScreen 用 ch/2 - wy），故世界位移的 Y 分量取负，
           // 使「脸朝的方向 == 移动方向」：angle=270(朝上) 时 dy=-sin(270)*steps=+steps → 世界 Y 增大=向上。
           const dx = action.steps * Math.cos(rad);
           const dy = -action.steps * Math.sin(rad);
           this.animateValue(
-            { x: this.state.actor.x, y: this.state.actor.y },
-            { x: this.state.actor.x + dx, y: this.state.actor.y + dy },
+            { x: actor.x, y: actor.y },
+            { x: actor.x + dx, y: actor.y + dy },
             action.duration,
             (v) => {
-              this.state.actor.x = v.x;
-              this.state.actor.y = v.y;
+              actor.x = v.x;
+              actor.y = v.y;
               this.recordPenPosition();
               this.emit();
             },
@@ -713,14 +830,14 @@ export class Runtime {
           break;
         }
         case "turn": {
-          this.log("[系统] 二零开始转向");
-          const startAngle = this.state.actor.angle;
+          this.log(`[系统] ${actor.name}开始转向`);
+          const startAngle = actor.angle;
           this.animateValue(
             { a: startAngle },
             { a: startAngle + action.degrees },
             action.duration,
             (v) => {
-              this.state.actor.angle = v.a;
+              actor.angle = v.a;
               this.emit();
             },
             resolve
@@ -728,14 +845,14 @@ export class Runtime {
           break;
         }
         case "goto": {
-          this.log("[系统] 二零移动到指定位置");
+          this.log(`[系统] ${actor.name}移动到指定位置`);
           this.animateValue(
-            { x: this.state.actor.x, y: this.state.actor.y },
+            { x: actor.x, y: actor.y },
             { x: action.x, y: action.y },
             action.duration,
             (v) => {
-              this.state.actor.x = v.x;
-              this.state.actor.y = v.y;
+              actor.x = v.x;
+              actor.y = v.y;
               this.recordPenPosition();
               this.emit();
             },
@@ -747,14 +864,14 @@ export class Runtime {
           break;
         }
         case "gotoMouse": {
-          this.log("[系统] 二零飞向鼠标位置");
+          this.log(`[系统] ${actor.name}飞向鼠标位置`);
           this.animateValue(
-            { x: this.state.actor.x, y: this.state.actor.y },
+            { x: actor.x, y: actor.y },
             { x: this.mouse.x, y: this.mouse.y },
             action.duration,
             (v) => {
-              this.state.actor.x = v.x;
-              this.state.actor.y = v.y;
+              actor.x = v.x;
+              actor.y = v.y;
               this.recordPenPosition();
               this.emit();
             },
@@ -771,14 +888,14 @@ export class Runtime {
             resolve();
             break;
           }
-          this.log("[系统] 二零飞向星星");
+          this.log(`[系统] ${actor.name}飞向星星`);
           this.animateValue(
-            { x: this.state.actor.x, y: this.state.actor.y },
+            { x: actor.x, y: actor.y },
             { x: star.x, y: star.y },
             action.duration,
             (v) => {
-              this.state.actor.x = v.x;
-              this.state.actor.y = v.y;
+              actor.x = v.x;
+              actor.y = v.y;
               this.recordPenPosition();
               this.emit();
             },
@@ -790,12 +907,12 @@ export class Runtime {
           break;
         }
         case "say": {
-          this.state.actor.message = action.text;
-          this.state.actor.messageUntil = Date.now() + action.duration;
-          this.log(`[二零] ${action.text}`);
+          actor.message = action.text;
+          actor.messageUntil = Date.now() + action.duration;
+          this.log(`[${actor.name}] ${action.text}`);
           this.emit();
           setTimeout(() => {
-            this.state.actor.message = null;
+            actor.message = null;
             this.emit();
             resolve();
           }, action.duration);
@@ -830,7 +947,7 @@ export class Runtime {
           break;
         }
         case "playToneByActorX": {
-          const freq = pitchFromX(this.state.actor.x, this.width);
+          const freq = pitchFromX(actor.x, this.width);
           this.playAndWait(freq, BEAT_MS).then(() => resolve());
           break;
         }
@@ -847,9 +964,11 @@ export class Runtime {
           break;
         }
         case "penDown": {
+          this.drawingActorId = action.actorId ?? this.currentActorId;
           this.state.penDown = true;
+          const d = this.findActor(this.drawingActorId) ?? this.currentActor();
           this.state.currentPath = {
-            points: [{ x: this.state.actor.x, y: this.state.actor.y }],
+            points: [{ x: d.x, y: d.y }],
             color: `hsl(${this.state.penColor % 360}, 80%, 60%)`,
             width: this.state.penSize,
           };
@@ -889,13 +1008,13 @@ export class Runtime {
           break;
         }
         case "setSize": {
-          this.state.actor.size = action.size;
+          actor.size = action.size;
           this.emit();
           resolve();
           break;
         }
         case "changeSize": {
-          this.state.actor.size = Math.max(0.2, Math.min(5, this.state.actor.size + action.delta));
+          actor.size = Math.max(0.2, Math.min(5, actor.size + action.delta));
           this.emit();
           resolve();
           break;

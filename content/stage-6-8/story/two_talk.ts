@@ -1,0 +1,56 @@
+import type { CourseProject } from "@/courses";
+
+export const twoTalkProject: CourseProject = {
+  slug: "two_talk",
+  category: "story",
+  title: "两个伙伴的对话",
+  ageGroup: "6-8 岁",
+  description: "用「控制角色」积木，让二零和三七你一句我一句聊起来。",
+  missionBrief:
+    "二零的好朋友三七（玄凤鹦鹉）来啦！写一个程序：当开始运行时，让二零先说话，再用「控制角色」切换到三七让它回话，最后切回二零再说一句。",
+  erLingHint:
+    "① 拖绿色「当开始运行」；② 放「控制角色 二零」+「说 三七，你来啦！」；③ 放「控制角色 三七」+「说 二零，今天玩什么？」，再「控制角色 二零」+「说 我们来编程吧！」。点运行看对话！",
+  steps: [
+    { id: 1, title: "用「当开始运行」事件启动程序" },
+    { id: 2, title: "用「控制角色」积木让两个伙伴都开口说话" },
+    { id: 3, title: "点运行，看二零和三七聊天" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_control_actor">
+          <field name="ACTOR">erling</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">三七，你来啦！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+              <next>
+                <block type="maker_control_actor">
+                  <field name="ACTOR">sanqi</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">二零，今天玩什么？</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                      <next>
+                        <block type="maker_control_actor">
+                          <field name="ACTOR">erling</field>
+                          <next>
+                            <block type="maker_say">
+                              <value name="TEXT"><shadow type="text"><field name="TEXT">我们来编程吧！</field></shadow></value>
+                              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+  cast: ["sanqi"],
+};

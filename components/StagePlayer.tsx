@@ -107,6 +107,109 @@ function drawFace(ctx: CanvasRenderingContext2D, expr: string | undefined) {
   }
 }
 
+/** 画二零（小太阳鹦鹉）的本体（不含脸，脸由 drawFace 统一画）。局部坐标：本体朝「上」(-y)。 */
+function drawErlingBody(ctx: CanvasRenderingContext2D) {
+  // 尾羽
+  ctx.fillStyle = "#0F6E56";
+  ctx.beginPath();
+  ctx.moveTo(0, 28);
+  ctx.lineTo(-12, 52);
+  ctx.lineTo(0, 44);
+  ctx.lineTo(12, 52);
+  ctx.closePath();
+  ctx.fill();
+
+  // 翅膀
+  ctx.fillStyle = "#EF9F27";
+  ctx.beginPath();
+  ctx.ellipse(24, 4, 13, 9, -0.3, 0, Math.PI * 2);
+  ctx.ellipse(-24, 4, 13, 9, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 身体
+  ctx.fillStyle = "#F5C4B3";
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 26, 32, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 肚皮
+  ctx.fillStyle = "#FADBD1";
+  ctx.beginPath();
+  ctx.ellipse(0, 8, 16, 20, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 头
+  ctx.fillStyle = "#F5C4B3";
+  ctx.beginPath();
+  ctx.arc(0, -28, 20, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 头冠
+  ctx.fillStyle = "#EF9F27";
+  ctx.beginPath();
+  ctx.moveTo(-6, -44);
+  ctx.quadraticCurveTo(0, -56, 6, -44);
+  ctx.lineTo(2, -38);
+  ctx.lineTo(-2, -38);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/** 画三七（玄凤鹦鹉 cockatiel）的本体：灰蓝身 + 奶黄尖冠 + 橙脸颊点 + 长尾，与二零同家族但明显区分。 */
+function drawSanqiBody(ctx: CanvasRenderingContext2D) {
+  // 长尾（灰）
+  ctx.fillStyle = "#64748B";
+  ctx.beginPath();
+  ctx.moveTo(0, 24);
+  ctx.lineTo(-8, 62);
+  ctx.lineTo(0, 52);
+  ctx.lineTo(8, 62);
+  ctx.closePath();
+  ctx.fill();
+
+  // 翅膀（略深灰）
+  ctx.fillStyle = "#475569";
+  ctx.beginPath();
+  ctx.ellipse(22, 4, 12, 9, -0.3, 0, Math.PI * 2);
+  ctx.ellipse(-22, 4, 12, 9, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 身体（灰蓝）
+  ctx.fillStyle = "#64748B";
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 24, 30, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 肚皮（浅灰）
+  ctx.fillStyle = "#CBD5E1";
+  ctx.beginPath();
+  ctx.ellipse(0, 8, 15, 19, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 头（灰）
+  ctx.fillStyle = "#64748B";
+  ctx.beginPath();
+  ctx.arc(0, -26, 19, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 黄色尖冠（向后上方）
+  ctx.fillStyle = "#FBBF24";
+  ctx.beginPath();
+  ctx.moveTo(-4, -42);
+  ctx.quadraticCurveTo(0, -58, 4, -42);
+  ctx.lineTo(2, -36);
+  ctx.lineTo(-2, -36);
+  ctx.closePath();
+  ctx.fill();
+
+  // 橙脸颊点（玄凤标志）
+  ctx.fillStyle = "#F97316";
+  ctx.beginPath();
+  ctx.arc(13, -22, 5, 0, Math.PI * 2);
+  ctx.arc(-13, -22, 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 interface View {
   scale: number;
   /** 内容包围盒中心（世界坐标） */
@@ -164,12 +267,35 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
       }));
     }
 
-    // Background gradient
+    // Background gradient（支持「切换场景」：有场景时用场景背景色）
     const gradient = ctx.createLinearGradient(0, 0, 0, ch);
-    gradient.addColorStop(0, "#0B1C3F");
-    gradient.addColorStop(1, "#162B55");
+    if (state.scene?.bg) {
+      const m = state.scene.bg.match(/linear-gradient\(([^)]+)\)/);
+      const cols = m ? m[1].split(",").map((s) => s.trim()).filter(Boolean) : null;
+      if (cols && cols.length >= 2) {
+        gradient.addColorStop(0, cols[0]);
+        gradient.addColorStop(1, cols[1]);
+      } else {
+        gradient.addColorStop(0, "#0B1C3F");
+        gradient.addColorStop(1, "#162B55");
+      }
+    } else {
+      gradient.addColorStop(0, "#0B1C3F");
+      gradient.addColorStop(1, "#162B55");
+    }
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, cw, ch);
+
+    // 场景标签（左上角，切场景后提示当前场景）
+    if (state.scene?.label) {
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.font = '13px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(`📍 ${state.scene.label}`, 10, 10);
+      ctx.restore();
+    }
 
     // Draw stars
     starsRef.current.forEach((star) => {
@@ -339,70 +465,27 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
       });
     }
 
-    // 说话气泡（先画，位于角色之上）
-    if (state.actor.message) {
-      const a = toScreen(state.actor.x, state.actor.y);
-      drawSpeechBubble(ctx, a.x, a.y, state.actor.message, cw, ch);
+    // 每个角色：先画说话气泡（位于角色之上），再按物种画角色本体
+    for (const act of state.actors) {
+      if (!act.visible) continue;
+      if (act.message) {
+        const a = toScreen(act.x, act.y);
+        drawSpeechBubble(ctx, a.x, a.y, act.message, cw, ch);
+      }
     }
-
-    // 角色「二零」（位置用变换 + 自身旋转；尺寸用固定 ACTOR_SCALE，不随相机缩放，避免盖住笔迹）
-    // 角色本体默认朝「上」(局部 -y)。runtime 的 angle 约定：0=朝右(+x)、90=朝下(+y、270=朝上，屏幕坐标 y 向下)。
-    // 初始 angle=270（朝上），渲染旋转用 angle+90° 让「脸朝的方向」对齐「移动方向」；左转=angle-90 故头朝左、往左走。
-    const actor = toScreen(state.actor.x, state.actor.y);
-    const angleRad = ((state.actor.angle + 90) * Math.PI) / 180;
-    ctx.save();
-    ctx.translate(actor.x, actor.y);
-    ctx.scale(ACTOR_SCALE * (state.actor.size ?? 1), ACTOR_SCALE * (state.actor.size ?? 1));
-    ctx.rotate(angleRad);
-
-    // 尾羽
-    ctx.fillStyle = "#0F6E56";
-    ctx.beginPath();
-    ctx.moveTo(0, 28);
-    ctx.lineTo(-12, 52);
-    ctx.lineTo(0, 44);
-    ctx.lineTo(12, 52);
-    ctx.closePath();
-    ctx.fill();
-
-    // 翅膀
-    ctx.fillStyle = "#EF9F27";
-    ctx.beginPath();
-    ctx.ellipse(24, 4, 13, 9, -0.3, 0, Math.PI * 2);
-    ctx.ellipse(-24, 4, 13, 9, 0.3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 身体
-    ctx.fillStyle = "#F5C4B3";
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 26, 32, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 肚皮
-    ctx.fillStyle = "#FADBD1";
-    ctx.beginPath();
-    ctx.ellipse(0, 8, 16, 20, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 头
-    ctx.fillStyle = "#F5C4B3";
-    ctx.beginPath();
-    ctx.arc(0, -28, 20, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 头冠
-    ctx.fillStyle = "#EF9F27";
-    ctx.beginPath();
-    ctx.moveTo(-6, -44);
-    ctx.quadraticCurveTo(0, -56, 6, -44);
-    ctx.lineTo(2, -38);
-    ctx.lineTo(-2, -38);
-    ctx.closePath();
-    ctx.fill();
-
-    drawFace(ctx, state.actor.expression);
-
-    ctx.restore();
+    for (const act of state.actors) {
+      if (!act.visible) continue;
+      const a = toScreen(act.x, act.y);
+      const angleRad = ((act.angle + 90) * Math.PI) / 180;
+      ctx.save();
+      ctx.translate(a.x, a.y);
+      ctx.scale(ACTOR_SCALE * (act.size ?? 1), ACTOR_SCALE * (act.size ?? 1));
+      ctx.rotate(angleRad);
+      if (act.species === "sanqi") drawSanqiBody(ctx);
+      else drawErlingBody(ctx);
+      drawFace(ctx, act.expression);
+      ctx.restore();
+    }
   }, [state, zoom, scene]);
 
   return (

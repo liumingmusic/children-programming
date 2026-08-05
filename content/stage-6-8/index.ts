@@ -80,6 +80,16 @@ import { multiplicationProject } from "./math/multiplication";
 import { clockProject } from "./math/clock";
 import { geometryPuzzleProject } from "./math/geometry_puzzle";
 import { calculatorProject } from "./math/calculator";
+import { selfIntroProject } from "./story/self_intro";
+import { expressionProject } from "./story/expression";
+import { freezeProject } from "./story/freeze";
+import { animalSportsProject } from "./story/animal_sports";
+import { wordChainProject } from "./story/word_chain";
+import { birthdayPartyProject } from "./story/birthday_party";
+import { goodNightProject } from "./story/good_night";
+import { twoTalkProject } from "./story/two_talk";
+import { aDayProject } from "./story/a_day";
+import { magicShowProject } from "./story/magic_show";
 
 export const seqProjects: CourseProject[] = [helloProject, flagProject, stoneProject, shapeLProject, homeProject, mazeProject, arrowProject, zigzagProject, treasureProject, danceProject, frameProject];
 export const loopProjects: CourseProject[] = [squareProject, triangleProject, pentagonProject, spinProject, stairsProject, waveProject, spiralProject, fenceProject, windmillProject, pickfruitProject];
@@ -89,8 +99,9 @@ export const condProjects: CourseProject[] = [ifTouchStarProject, ifEdgeTurnProj
 export const gameProjects: CourseProject[] = [starsProject, mazeExitProject, collectApplesProject, lightLanternsProject, collectRainbowProject, treasureMapProject, escortProject, trafficPoliceProject, dodgeCloudsProject, memoryMatchProject];
 export const musicProjects: CourseProject[] = [playDoremiProject, twinkleProject, drumBeatProject, randomNoteProject, loopMelodyProject, pitchByClickProject, pitchByMoveProject, chordProject, birthdayProject, composeProject];
 export const mathProjects: CourseProject[] = [count10Project, countApplesProject, compareSizeProject, addSubProject, shapeNamesProject, symmetryProject, multiplicationProject, clockProject, geometryPuzzleProject, calculatorProject];
+export const storyProjects: CourseProject[] = [selfIntroProject, expressionProject, freezeProject, animalSportsProject, wordChainProject, birthdayPartyProject, goodNightProject, twoTalkProject, aDayProject, magicShowProject];
 
-/** 全 81 项目，按 projectSlugs 规范顺序：seq→loop→draw→event→cond→game→music→math。
+/** 全 91 项目，按 projectSlugs 规范顺序：seq→loop→draw→event→cond→game→music→math→story。
  * 运行时的 MIRROR 坐标镜像、getProject、闯关路径等逻辑对本文件导出的对象照常生效。 */
 export const stage6Projects: CourseProject[] = [
   ...seqProjects,
@@ -101,4 +112,5 @@ export const stage6Projects: CourseProject[] = [
   ...gameProjects,
   ...musicProjects,
   ...mathProjects,
+  ...storyProjects,
 ];

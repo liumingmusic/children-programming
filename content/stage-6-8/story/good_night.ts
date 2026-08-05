@@ -1,0 +1,44 @@
+import type { CourseProject } from "@/courses";
+
+export const goodNightProject: CourseProject = {
+  slug: "good_night",
+  category: "story",
+  title: "晚安故事",
+  ageGroup: "6-8 岁",
+  description: "切换到夜晚场景，让二零道一声晚安。",
+  missionBrief:
+    "夜深了，星星出来了。写一个程序：当开始运行时，切换到夜晚场景，让二零轻声说晚安，再换上「睡觉」表情。",
+  erLingHint:
+    "① 拖一个绿色「当开始运行」；② 里面先放「切换场景 夜晚」；③ 放「说 月亮出来了，该睡觉啦」，再「让二零表情变成 睡觉」，接「说 晚安，明天见！」。点运行听晚安！",
+  steps: [
+    { id: 1, title: "用「当开始运行」事件启动程序" },
+    { id: 2, title: "切换到夜晚场景并说晚安" },
+    { id: 3, title: "点运行，听二零道晚安" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_scene">
+          <field name="SCENE">night</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">月亮出来了，该睡觉啦</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+              <next>
+                <block type="maker_set_expression">
+                  <field name="EXPR">sleepy</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">晚安，明天见！</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

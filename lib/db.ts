@@ -199,6 +199,27 @@ export async function getTimeStats(): Promise<TimeStats> {
   return { totalSeconds, todaySeconds, byProject, last7Days };
 }
 
+// ---- 分类11·PBL 综合（造物工坊）：自由创作的本地存取 ----
+// 自由创作作品以 `free:` 前缀的 slug 保存，与课程项目（slug 为课程 id）区分开，
+// 避免污染「作品花园」的已保存课程进度，也便于在工坊内单独列出/删除。
+export const FREE_PREFIX = "free:";
+// 自动保存草稿槽：工坊当前画布实时防抖写入此槽，刷新/离开后再回来不丢工作；
+// 它不算「作品」，getAllFreeProjects 会排除它。
+export const FREE_DRAFT_SLUG = "free:draft";
+
+/** 取所有「自由创作」命名作品（造物工坊本地保存）。不含自动保存草稿。 */
+export async function getAllFreeProjects(): Promise<Project[]> {
+  const all = await getAllProjects();
+  return all.filter((p) => p.slug.startsWith(FREE_PREFIX) && p.slug !== FREE_DRAFT_SLUG);
+}
+
+/** 删除单个作品（自由创作 / 课程项目通用）：移除 xml / meta / 进度三处 key。 */
+export async function deleteProject(slug: string): Promise<void> {
+  del(K_XML(slug));
+  del(K_META(slug));
+  del(K_PROG(slug));
+}
+
 // 测试用：清空本应用占用的所有本地存储 key
 export async function clearStore(): Promise<void> {
   const s = ls();

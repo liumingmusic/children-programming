@@ -7,7 +7,12 @@ import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
 import StagePlayer from "@/components/StagePlayer";
 import DemoOverlay from "@/components/DemoOverlay";
 import ErLingAvatar from "@/components/ErLingAvatar";
-import { Runtime, StageState, type Hazard, type Cloud } from "@/lib/runtime";
+import { Runtime, StageState, type Hazard, type Cloud, type Species } from "@/lib/runtime";
+
+/** 伙伴角色元数据：cast id → 物种与名字。新增伙伴角色在此登记。 */
+const CAST_META: Record<string, { id: string; species: Species; name: string }> = {
+  sanqi: { id: "sanqi", species: "sanqi", name: "三七" },
+};
 import type { CourseProject } from "@/courses";
 import MemoryGame from "@/components/MemoryGame";
 import { getNextProject, getStageOfProject, getProject } from "@/courses";
@@ -34,7 +39,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [stageState, setStageState] = useState<StageState>({
     width: STAGE_WIDTH,
     height: STAGE_HEIGHT,
-    actor: { x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1 },
+    actor: { id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true },
+    actors: [{ id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true }],
     penPaths: [],
     currentPath: null,
     penColor: 0,
@@ -146,6 +152,9 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           kind: m.kind as "obstacle" | "badguy",
         })) as Hazard[],
       clouds: (project.scene?.clouds ?? []) as Cloud[],
+      companions: (project.cast ?? [])
+        .map((id) => CAST_META[id])
+        .filter((c): c is { id: string; species: Species; name: string } => Boolean(c)),
     });
     runtimeRef.current = runtime;
 

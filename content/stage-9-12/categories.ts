@@ -11,4 +11,5 @@ export const stage9Categories: ProjectCategory[] = [
     { id: "game", name: "综合小游戏", shortTag: "游戏", description: "贪吃蛇、井字棋、猜数字等综合小游戏。" },
     { id: "story", name: "交互绘本与故事", shortTag: "故事", description: "可点击、可分支的互动绘本。" },
     { id: "science", name: "科学探究", shortTag: "科学", description: "昼夜、四季、水循环等科学模拟。" },
+    { id: "pbl", name: "自由创作工坊", shortTag: "自由创作", description: "不限题目，自由搭积木创作你的作品，保存到本地随时回看展示。" },
 ];

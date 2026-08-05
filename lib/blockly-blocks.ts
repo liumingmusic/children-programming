@@ -51,6 +51,11 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_sub", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 8 } } }, B: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
     { kind: "block" as const, type: "maker_mul", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 3 } } }, B: { shadow: { type: "math_number", fields: { NUM: 4 } } } } },
     { kind: "block" as const, type: "maker_div", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 12 } } }, B: { shadow: { type: "math_number", fields: { NUM: 3 } } } } },
+    // ---- 故事与角色（分类 7）----
+    { kind: "block" as const, type: "maker_control_actor", fields: { ACTOR: "erling" } },
+    { kind: "block" as const, type: "maker_show_actor", fields: { ACTOR: "sanqi" } },
+    { kind: "block" as const, type: "maker_hide_actor", fields: { ACTOR: "sanqi" } },
+    { kind: "block" as const, type: "maker_set_scene", fields: { SCENE: "day" } },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -638,6 +643,82 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+    // ---- 故事与角色（分类 7）：多角色 / 显隐 / 多场景 ----
+    maker_control_actor: {
+      init() {
+        this.appendDummyInput()
+          .appendField("控制角色")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["二零", "erling"],
+              ["三七", "sanqi"],
+            ]),
+            "ACTOR"
+          );
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("让后面的积木作用于指定的角色（二零或三七）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_show_actor: {
+      init() {
+        this.appendDummyInput()
+          .appendField("显示角色")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["二零", "erling"],
+              ["三七", "sanqi"],
+            ]),
+            "ACTOR"
+          );
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("让一个角色出现在舞台上（变魔术等用）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_hide_actor: {
+      init() {
+        this.appendDummyInput()
+          .appendField("隐藏角色")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["二零", "erling"],
+              ["三七", "sanqi"],
+            ]),
+            "ACTOR"
+          );
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("让一个角色从舞台上消失（变魔术等用）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_set_scene: {
+      init() {
+        this.appendDummyInput()
+          .appendField("切换场景")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["白天·操场", "day"],
+              ["卧室", "bedroom"],
+              ["学校", "school"],
+              ["公园", "park"],
+              ["夜晚·星空", "night"],
+            ]),
+            "SCENE"
+          );
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("把舞台背景切换成不同的场景。");
+        this.setHelpUrl("");
+      },
+    },
   });
 
   // Hat block: when start runs the stack and then ends
@@ -855,5 +936,21 @@ export function registerCustomBlocks() {
     const n2 = JSON.stringify(block.getFieldValue("N2"));
     const n3 = JSON.stringify(block.getFieldValue("N3"));
     return `__runtime.playChord([${n1}, ${n2}, ${n3}]);\n`;
+  };
+  javascriptGenerator.forBlock["maker_control_actor"] = (block) => {
+    const actor = JSON.stringify(block.getFieldValue("ACTOR"));
+    return `__runtime.controlActor(${actor});\n`;
+  };
+  javascriptGenerator.forBlock["maker_show_actor"] = (block) => {
+    const actor = JSON.stringify(block.getFieldValue("ACTOR"));
+    return `__runtime.showActor(${actor});\n`;
+  };
+  javascriptGenerator.forBlock["maker_hide_actor"] = (block) => {
+    const actor = JSON.stringify(block.getFieldValue("ACTOR"));
+    return `__runtime.hideActor(${actor});\n`;
+  };
+  javascriptGenerator.forBlock["maker_set_scene"] = (block) => {
+    const scene = JSON.stringify(block.getFieldValue("SCENE"));
+    return `__runtime.setScene(${scene});\n`;
   };
 }

@@ -57,9 +57,16 @@ describe("CompletionModal 完成弹窗", () => {
     expect(btn.getAttribute("href")).toContain("/learn/play_doremi");
   });
 
-  it("calculator 是阶段最后一个项目，不显示「挑战下一个」", () => {
-    render(<CompletionModal open onClose={() => {}} project={getProject("calculator")!} />);
+  it("magic_show 是阶段最后一个项目，不显示「挑战下一个」", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("magic_show")!} />);
     expect(screen.queryByRole("link", { name: /挑战下一个/ })).toBeNull();
+  });
+
+  it("calculator 不再是最后一个项目，显示「挑战下一个：二零的自我介绍」并指向 /learn/self_intro", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("calculator")!} />);
+    const btn = screen.getByRole("link", { name: /挑战下一个/ }) as HTMLAnchorElement;
+    expect(btn).toHaveTextContent("二零的自我介绍");
+    expect(btn.getAttribute("href")).toContain("/learn/self_intro");
   });
 
   it("compose 不再是最后一个项目，显示「挑战下一个：数数 1 到 10」并指向 /learn/count10", () => {

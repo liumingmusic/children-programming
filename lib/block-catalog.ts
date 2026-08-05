@@ -15,6 +15,7 @@ export type BlockCategory =
   | "运算"
   | "变量"
   | "声音"
+  | "角色"
   | "特殊";
 
 export type BlockShape = "hat" | "statement" | "reporter" | "boolean" | "special";
@@ -52,6 +53,7 @@ export const CATEGORY_COLORS: Record<BlockCategory, string> = {
   运算: "#D98C3F",
   变量: "#9B6CC9",
   声音: "#B45EC9",
+  角色: "#3FA796",
   特殊: "#C0566B",
 };
 
@@ -65,6 +67,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   "运算",
   "变量",
   "声音",
+  "角色",
   "特殊",
 ];
 
@@ -601,6 +604,56 @@ export const BLOCK_CATALOG: BlockDoc[] = [
     purpose: "每次运行从 do~ti 里随机挑一个音弹出来，让旋律每次都不一样，充满惊喜。",
     usage: "放在「重复执行」里，就能生成一段随机的小曲子。",
     example: "重复 5 次 ▸ 随机弹一个音",
+    stages: ["stage-6-8"],
+  },
+
+  // —— 角色（分类 7 · 故事）——
+  {
+    id: "maker_control_actor",
+    label: "控制角色",
+    category: "角色",
+    color: 110,
+    shape: "statement",
+    parts: [T("控制角色"), D(["二零", "三七"])],
+    purpose: "切换「后面积木」要指挥的角色（二零或三七）。放到一串动作前面，这串动作就作用在选中的角色身上。",
+    usage: "先「控制角色 二零」讲完二零的话，再「控制角色 三七」讲三七的话，就能让两只鹦鹉对起话来。",
+    example: "控制角色 二零 ▸ 说「你好」 ▸ 控制角色 三七 ▸ 说「你好呀」",
+    stages: ["stage-6-8"],
+  },
+  {
+    id: "maker_show_actor",
+    label: "显示角色",
+    category: "角色",
+    color: 110,
+    shape: "statement",
+    parts: [T("显示角色"), D(["二零", "三七"])],
+    purpose: "让一个角色出现在舞台上（默认就在）。常配合「隐藏角色」做「变魔术」：先藏起来，再突然出现。",
+    usage: "选好要显示的角色即可；和「隐藏角色」成对使用。",
+    example: "显示角色 三七",
+    stages: ["stage-6-8"],
+  },
+  {
+    id: "maker_hide_actor",
+    label: "隐藏角色",
+    category: "角色",
+    color: 110,
+    shape: "statement",
+    parts: [T("隐藏角色"), D(["二零", "三七"])],
+    purpose: "让一个角色从舞台消失。配合「显示角色」可做出「凭空出现 / 消失」的魔术效果。",
+    usage: "选好要隐藏的角色；舞台上看不见它，但程序仍能控制它。",
+    example: "隐藏角色 三七",
+    stages: ["stage-6-8"],
+  },
+  {
+    id: "maker_set_scene",
+    label: "切换场景",
+    category: "角色",
+    color: 110,
+    shape: "statement",
+    parts: [T("切换场景"), D(["白天·操场", "卧室", "学校", "公园", "夜晚·星空"])],
+    purpose: "把舞台背景换成不同的场景（白天/卧室/学校/公园/夜晚），让故事更有地点感。",
+    usage: "选好场景即可；可在一段对话前后切换，讲述「一天的生活」这类多地点故事。",
+    example: "切换场景 卧室 ▸ 说「该起床啦」 ▸ 切换场景 学校 ▸ 说「上学去」",
     stages: ["stage-6-8"],
   },
 

@@ -22,6 +22,8 @@ export interface CourseProject {
   stars?: { x: number; y: number }[];
   /** 特殊项目类型：memory=独立翻牌小游戏（不走 Blockly 积木，由专门组件实现）。 */
   component?: "memory";
+  /** 角色阵容：除默认「二零」外，还上场的伙伴角色 id 列表（如 ["sanqi"]）。Runtime 据此实例化额外角色。 */
+  cast?: string[];
 }
 
 /** 舞台上的装饰标记（纯展示用，例如小旗子、宝藏箱、石头、箭头）。 */

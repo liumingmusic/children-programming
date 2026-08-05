@@ -1,0 +1,44 @@
+import type { CourseProject } from "@/courses";
+
+export const expressionProject: CourseProject = {
+  slug: "expression",
+  category: "story",
+  title: "表情变变变",
+  ageGroup: "6-8 岁",
+  description: "用「设置表情」积木，让二零一会儿开心、一会儿惊讶。",
+  missionBrief:
+    "二零是个表情丰富的小鹦鹉。写一个程序：当开始运行时，让二零先变成「开心」，说一句话，再变成「惊讶」，说另一句话。",
+  erLingHint:
+    "① 拖一个绿色「当开始运行」；② 里面放粉色「让二零表情变成 开心」，接「说 今天真开心！」；③ 再放「让二零表情变成 惊讶」，接「说 哇，有惊喜！」。点运行看表情变化！",
+  steps: [
+    { id: 1, title: "用「当开始运行」事件启动程序" },
+    { id: 2, title: "用「设置表情」积木让二零换表情" },
+    { id: 3, title: "点运行，看表情变来变去" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_expression">
+          <field name="EXPR">happy</field>
+          <next>
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">今天真开心！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+              <next>
+                <block type="maker_set_expression">
+                  <field name="EXPR">surprised</field>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT"><shadow type="text"><field name="TEXT">哇，有惊喜！</field></shadow></value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

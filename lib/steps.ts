@@ -47,6 +47,13 @@ const MATH_SLUGS = [
   "symmetry", "multiplication", "clock", "geometry_puzzle", "calculator",
 ];
 
+/** 分类 7 · 故事与动画（全 10 项，slug 顺序与 projectSlugs 一致）。
+ * 后 3 项（two_talk / a_day / magic_show）带伙伴角色 cast:["sanqi"]，用到「控制角色 / 切换场景 / 隐藏 / 显示」积木。 */
+const STORY_SLUGS = [
+  "self_intro", "expression", "freeze", "animal_sports", "word_chain",
+  "birthday_party", "good_night", "two_talk", "a_day", "magic_show",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -378,6 +385,57 @@ export function computeSteps(
         else if (id === 2) done = hasArith;
         else if (id === 3) done = finished;
       }
+    } else if (STORY_SLUGS.includes(project.slug)) {
+      // 故事与动画（分类 7）：基于真实 JS 标记 / 运行日志判定「说话 / 表情 / 场景 / 控制角色 / 显隐 / 移动」。
+      // 完成判定以「步骤」为准（无 stars / 无 goalMarks，isGoalAchieved 回退为 true）。
+      const finished = logs.includes("[系统] 程序执行完毕");
+      const startFired = logs.some((l) => l.includes("开始执行程序"));
+      const sayCount = countMark(code, "__runtime.say(");
+      const hasMove = code.includes("__runtime.move");
+      const hasLoop = /for\s*\(|while\s*\(/.test(code);
+      const sceneCount = countMark(code, "__runtime.setScene(");
+      const controlCount = countMark(code, "__runtime.controlActor(");
+      const hasHide = code.includes("__runtime.hideActor(");
+      const hasShow = code.includes("__runtime.showActor(");
+      const hasExpression = code.includes("__runtime.setExpression(");
+      if (
+        project.slug === "self_intro" ||
+        project.slug === "word_chain" ||
+        project.slug === "freeze"
+      ) {
+        // 自我介绍 / 词语接龙 / 木头人：用「当开始运行」+「说」（木头人额外要移动）。
+        if (id === 1) done = startFired;
+        else if (id === 2) done = project.slug === "freeze" ? (hasMove && sayCount >= 1) : sayCount >= 1;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "expression") {
+        if (id === 1) done = startFired;
+        else if (id === 2) done = hasExpression;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "animal_sports") {
+        if (id === 1) done = startFired;
+        else if (id === 2) done = hasLoop && hasMove;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "birthday_party" || project.slug === "good_night") {
+        // 生日派对 / 晚安：用「当开始运行」+「切换场景」+「说」。
+        if (id === 1) done = startFired;
+        else if (id === 2) done = sceneCount >= 1 && sayCount >= 1;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "two_talk") {
+        // 两角色对话：必须「控制角色」切换且两个伙伴都开口（至少 2 句说）。
+        if (id === 1) done = startFired;
+        else if (id === 2) done = controlCount >= 1 && sayCount >= 2;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "a_day") {
+        // 一天的生活：切换至少两个场景讲完一天。
+        if (id === 1) done = startFired;
+        else if (id === 2) done = sceneCount >= 2;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "magic_show") {
+        // 变魔术：先「隐藏角色」再「显示角色」。
+        if (id === 1) done = startFired;
+        else if (id === 2) done = hasHide && hasShow;
+        else if (id === 3) done = finished;
+      }
     }
     return { ...step, done };
   });
@@ -676,6 +734,49 @@ export function coach(slug: string, stepId: number): string {
     if (stepId === 1) return "先放「把变量 x 设为 12」「把变量 y 设为 7」，把两个数字存进变量。";
     if (stepId === 2) return "「说」的数字口接上「加」或「减」积木，左右都放进「变量 x」「变量 y」，二零就当小计算器。";
     if (stepId === 3) return "点「运行」，听二零算出答案！";
+  }
+  if (STORY_SLUGS.includes(slug)) {
+    if (stepId === 1) return "先拖一个绿色「当开始运行」，把积木放进去，程序才会启动哦～";
+    if (slug === "self_intro") {
+      if (stepId === 2) return "在「当开始运行」里放紫色「说」，输入你的名字和爱好，二零就开口介绍自己啦！";
+      if (stepId === 3) return "点「运行」，听二零说出自己的故事！";
+    }
+    if (slug === "expression") {
+      if (stepId === 2) return "放粉色「让二零表情变成」积木，选开心或惊讶，再接「说」，二零的表情就会变来变去。";
+      if (stepId === 3) return "点「运行」，看二零生动的表情表演！";
+    }
+    if (slug === "freeze") {
+      if (stepId === 2) return "先放黄色「移动」让二零跑起来，再接紫色「说 我们都是木头人」，就完成口令啦！";
+      if (stepId === 3) return "点「运行」，玩一局木头人游戏！";
+    }
+    if (slug === "animal_sports") {
+      if (stepId === 2) return "先「说 运动会开始啦」，再用「重复执行」包住「移动」让二零一圈圈跑起来。";
+      if (stepId === 3) return "点「运行」，看动物运动会开幕！";
+    }
+    if (slug === "word_chain") {
+      if (stepId === 2) return "连放两个以上的紫色「说」，分别输入接龙的词（比如 苹果→果实→实力）。";
+      if (stepId === 3) return "点「运行」，听二零玩词语接龙！";
+    }
+    if (slug === "birthday_party") {
+      if (stepId === 2) return "先放「切换场景 白天」，再放「说 生日快乐！」和「说 大家一起吃蛋糕吧！」。";
+      if (stepId === 3) return "点「运行」，一起给小伙伴庆祝！";
+    }
+    if (slug === "good_night") {
+      if (stepId === 2) return "先「切换场景 夜晚」，再「说 月亮出来了」，最后「让二零表情变成 睡觉」并说晚安。";
+      if (stepId === 3) return "点「运行」，听二零温柔地道晚安！";
+    }
+    if (slug === "two_talk") {
+      if (stepId === 2) return "用「控制角色 二零」说一句，再「控制角色 三七」说一句，来回切换两个伙伴就聊起来啦！";
+      if (stepId === 3) return "点「运行」，看二零和三七你一句我一句！";
+    }
+    if (slug === "a_day") {
+      if (stepId === 2) return "多放几个「切换场景」（白天 / 学校 / 夜晚），每个场景接一句「说」，讲完一整天的故事。";
+      if (stepId === 3) return "点「运行」，跟二零过完充实的一天！";
+    }
+    if (slug === "magic_show") {
+      if (stepId === 2) return "先「说 看我变魔术」，再「隐藏角色 三七」接「说 不见啦」，最后「显示角色 三七」接「说 又回来啦」！";
+      if (stepId === 3) return "点「运行」，看神奇的魔术秀！";
+    }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
 }

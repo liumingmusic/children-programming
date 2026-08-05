@@ -4,26 +4,27 @@ import { useEffect, useRef, useState } from "react";
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
-import { Runtime, type StageState, type Hazard, type Cloud, type Species } from "@/lib/runtime";
+import { Runtime, type StageState, type Species } from "@/lib/runtime";
 import StagePlayer from "@/components/StagePlayer";
+import { X, Play } from "lucide-react";
 
-/** 伙伴角色元数据：cast id → 物种与名字。新增伙伴角色在此登记。 */
+/** 伙伴角色元数据：与 StudioClient / LearnPageClient 保持一致。 */
 const CAST_META: Record<string, { id: string; species: Species; name: string }> = {
   sanqi: { id: "sanqi", species: "sanqi", name: "三七" },
 };
-import { X, Play } from "lucide-react";
-import type { CourseProject } from "@/courses";
 
 /**
- * 「看示范」浮层：只读展示参考答案积木 + 独立舞台「运行示范」。
- * 关键：完全不触碰学生主画布——关闭浮层即回到学生自己的作品，原样保留。
- * 与旧实现（把主工作区替换成示范再还原）相比，避免了「我的积木去哪了」的困惑。
+ * 「回放」浮层：用一份已保存的 xml 独立运行，完全不触碰学生当前编辑画布。
+ * 关键：与 DemoOverlay 同理——另起一个只读 Blockly 工作区 + 独立 Runtime，
+ * 关闭浮层后编辑区原样保留（草稿不会被回放的作品覆盖）。
  */
-export default function DemoOverlay({
-  project,
+export default function StudioReplayOverlay({
+  xml,
+  title,
   onClose,
 }: {
-  project: CourseProject;
+  xml: string;
+  title: string;
   onClose: () => void;
 }) {
   const blocklyDiv = useRef<HTMLDivElement>(null);
@@ -45,8 +46,6 @@ export default function DemoOverlay({
     });
     wsRef.current = ws;
 
-    // Blockly 注入后必须校正一次尺寸：浮层挂载瞬间父容器可能尚未完成布局，
-    // 若不 resize，workSpace 会停在 0×0，积木被渲染到不可见区域 → 表现为「参考答案页面空白」。
     const layout = () => {
       try {
         ws.resize();
@@ -57,34 +56,22 @@ export default function DemoOverlay({
     };
     requestAnimationFrame(layout);
 
-    if (project.defaultXml) {
+    if (xml) {
       try {
-        const dom = Blockly.utils.xml.textToDom(project.defaultXml);
+        const dom = Blockly.utils.xml.textToDom(xml);
         Blockly.Xml.domToWorkspace(dom, ws);
-        // 加载完积木后再次居中，确保参考答案完整可见
         requestAnimationFrame(() => ws.scrollCenter());
       } catch (e) {
-        console.error("Failed to load demo XML", e);
+        console.error("Failed to load replay XML", e);
       }
     }
 
-    const initialStars = project.stars
-      ? project.stars.map((s, i) => ({ id: i + 1, x: s.x, y: s.y, collected: false }))
-      : undefined;
-    const hazards = (project.scene?.marks ?? [])
-      .filter((m) => m.kind === "obstacle" || m.kind === "badguy")
-      .map((m) => ({ x: m.x, y: m.y, r: 32, kind: m.kind as "obstacle" | "badguy" })) as Hazard[];
-    const clouds = (project.scene?.clouds ?? []) as Cloud[];
-    const companions = (project.cast ?? [])
-      .map((id) => CAST_META[id])
-      .filter((c): c is { id: string; species: Species; name: string } => Boolean(c));
-    const rt = new Runtime(
-      480,
-      360,
-      (s) => setState(s),
-      initialStars,
-      { hazards, clouds, companions }
-    );
+    const companions = Object.values(CAST_META).map((c) => ({
+      id: c.id,
+      species: c.species,
+      name: c.name,
+    }));
+    const rt = new Runtime(480, 360, (s) => setState(s), [], { companions });
     runtimeRef.current = rt;
 
     return () => {
@@ -93,14 +80,13 @@ export default function DemoOverlay({
       wsRef.current = null;
       runtimeRef.current = null;
     };
-  }, [project]);
+  }, [xml]);
 
   const handleRun = async () => {
     const ws = wsRef.current;
     const rt = runtimeRef.current;
     if (!ws || !rt || running) return;
-    // 关键：每次运行前先把运行时重置到初始状态（角色位置/朝向/大小、星星、笔迹全部复位），
-    // 否则会从上一次运行的终点接着跑、大小/位置逐次累积，表现为「越跑越远、无限放大」。
+    // 每次运行前重置：避免从上一次终点接着跑、大小/位置逐次累积。
     rt.reset();
     setRunning(true);
     javascriptGenerator.init(ws);
@@ -114,7 +100,6 @@ export default function DemoOverlay({
       else if (b.type === "maker_when_key_pressed")
         whenKeyPressed.push({ key: b.getFieldValue("KEY") || "up", code: code + "\n" });
     }
-    // finish() 负责补上变量/函数声明等前导代码，必须传入已生成的 code 并采用返回值
     whenStart = javascriptGenerator.finish(whenStart);
     whenStageClicked = javascriptGenerator.finish(whenStageClicked);
     whenKeyPressed.forEach((k) => (k.code = javascriptGenerator.finish(k.code)));
@@ -153,29 +138,27 @@ export default function DemoOverlay({
         <div className="border-b border-black/5 px-6 py-4">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E1F5EE] text-sm">
-              📺
+              🎬
             </span>
-            <h3 className="text-lg font-medium text-[#04342C]">示范模式（参考答案 · 只读）</h3>
+            <h3 className="text-lg font-medium text-[#04342C]">回放：{title}</h3>
           </div>
           <p className="mt-1.5 text-sm text-[#5F5E5A]">
-            这是官方参考答案，可以照着搭一遍。你的作品在背后原样保留，关闭浮层就回到你的画布。
+            这是你保存的作品回放，原样运行一遍。你的画布在背后保留，关闭浮层就回到编辑区。
           </p>
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-6 md:flex-row">
-          {/* 参考答案积木（只读） */}
           <div className="flex min-h-0 flex-1 flex-col">
-            <p className="mb-2 shrink-0 text-xs font-medium text-[#444441]">参考答案积木</p>
+            <p className="mb-2 shrink-0 text-xs font-medium text-[#444441]">作品积木</p>
             <div className="h-[440px] w-full shrink-0 overflow-hidden rounded-xl border border-black/10 bg-[#F1EFE8]">
               <div ref={blocklyDiv} className="h-full w-full" />
             </div>
           </div>
 
-          {/* 演示舞台 */}
           <div className="flex min-h-0 flex-1 flex-col">
             <p className="mb-2 text-xs font-medium text-[#444441]">运行效果</p>
             <div className="flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-black/10 bg-[#E6F1FB] p-2">
-              {state && <StagePlayer state={state} scene={project.scene} />}
+              {state && <StagePlayer state={state} scene={undefined} />}
             </div>
             <button
               onClick={handleRun}
@@ -183,14 +166,10 @@ export default function DemoOverlay({
               className="mt-3 inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-[#0F6E56] px-6 text-sm font-medium text-white shadow-sm hover:bg-[#085041] disabled:opacity-50"
             >
               <Play className="h-4 w-4" />
-              {running ? "运行中..." : "运行示范"}
+              {running ? "运行中..." : "运行回放"}
             </button>
           </div>
         </div>
-
-        {!project.defaultXml && (
-          <p className="px-6 pb-4 text-sm text-[#8A8880]">该关卡暂无可参考的示范。</p>
-        )}
       </div>
     </div>
   );
