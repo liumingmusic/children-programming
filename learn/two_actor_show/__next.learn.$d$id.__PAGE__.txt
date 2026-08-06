@@ -1,0 +1,52 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/1at6fp9qef0vj.js","/children-programming/_next/static/chunks/3_pnauf65h1yd.js","/children-programming/_next/static/chunks/2bfxh7iag7vxm.js","/children-programming/_next/static/chunks/3gq0v33saadnn.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T928,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_control_actor">
+          <field name="ACTOR">erling</field>
+          <next>
+            <block type="maker_set_expression">
+              <field name="EXPR">happy</field>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><shadow type="text"><field name="TEXT">大家好，我是二零！</field></shadow></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                  <next>
+                    <block type="maker_control_actor">
+                      <field name="ACTOR">sanqi</field>
+                      <next>
+                        <block type="maker_set_expression">
+                          <field name="EXPR">happy</field>
+                          <next>
+                            <block type="maker_say">
+                              <value name="TEXT"><shadow type="text"><field name="TEXT">我是三七，今天我们来演戏！</field></shadow></value>
+                              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1.5</field></shadow></value>
+                              <next>
+                                <block type="maker_set_scene">
+                                  <field name="SCENE">day</field>
+                                  <next>
+                                    <block type="maker_say">
+                                      <value name="TEXT"><shadow type="text"><field name="TEXT">第一幕：造物星球的早晨</field></shadow></value>
+                                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                                    </block>
+                                  </next>
+                                </block>
+                              </next>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"two_actor_show","category":"pbl","title":"双角色小剧场","ageGroup":"6-8 岁","description":"让二零和三七一起上台，切换场景、变换表情、你一句我一句演一出戏。","missionBrief":"把故事和表演组合起来！写一个程序：当开始运行时，先让二零变个表情说句话，再用「控制角色」切换到三七让它也表演，最后「切换场景」并说一句，讲完这一幕。","erLingHint":"① 绿色「当开始运行」里放「控制角色 二零」+「让二零表情变成 开心」+「说 大家好」；② 放「控制角色 三七」+「让三七表情变成 开心」+「说 我是三七」；③ 最后「切换场景 白天」+「说 第一幕结束」。点运行看两个伙伴演戏！","steps":[{"id":1,"title":"用「当开始运行」启动小剧场"},{"id":2,"title":"让两个伙伴都出场、变表情、开口说话"},{"id":3,"title":"切换场景讲完一段故事"}],"cast":["sanqi"],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/1at6fp9qef0vj.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3_pnauf65h1yd.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2bfxh7iag7vxm.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/3gq0v33saadnn.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"25NU44oNS30kahjEHNxi6"}
+6:null
