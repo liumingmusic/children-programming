@@ -65,7 +65,7 @@ export interface SceneDef {
 // ============ 时间轴 / 粒子 / 颜色（分类 10 · 科学）============
 // 时间轴是「时钟驱动状态场」模型，与现有「事件→动作队列」模型互斥，
 // 故做成 Runtime 内嵌的独立 TimelineEngine 子系统，由 CourseProject.timeline 标志切换，
-// 旧 91 项目（action 队列模式）完全不受影响。
+// 旧 101 项目（action 队列模式）完全不受影响。
 
 /** 单个粒子（雨滴 / 雪花 / 火山岩浆点）。世界坐标，每帧按 dt*speed 推进。 */
 export interface Particle {
