@@ -100,6 +100,10 @@ import { seedGrowProject } from "./science/seed_grow";
 import { earthSunProject } from "./science/earth_sun";
 import { foodChainProject } from "./science/food_chain";
 import { moonPhaseProject } from "./science/moon_phase";
+import { singingPictureProject } from "./pbl/singing_picture";
+import { twoActorShowProject } from "./pbl/two_actor_show";
+import { mySolarSystemProject } from "./pbl/my_solar_system";
+import { interactiveBookProject } from "./pbl/interactive_book";
 
 export const seqProjects: CourseProject[] = [helloProject, flagProject, stoneProject, shapeLProject, homeProject, mazeProject, arrowProject, zigzagProject, treasureProject, danceProject, frameProject];
 export const loopProjects: CourseProject[] = [squareProject, triangleProject, pentagonProject, spinProject, stairsProject, waveProject, spiralProject, fenceProject, windmillProject, pickfruitProject];
@@ -112,7 +116,17 @@ export const mathProjects: CourseProject[] = [count10Project, countApplesProject
 export const storyProjects: CourseProject[] = [selfIntroProject, expressionProject, freezeProject, animalSportsProject, wordChainProject, birthdayPartyProject, goodNightProject, twoTalkProject, aDayProject, magicShowProject];
 export const scienceProjects: CourseProject[] = [dayNightProject, rainProject, snowProject, volcanoProject, colorWheelProject, rainbowBridgeProject, seedGrowProject, earthSunProject, foodChainProject, moonPhaseProject];
 
-/** 全 101 项目，按 projectSlugs 规范顺序：seq→loop→draw→event→cond→game→music→math→story→science。
+/** 分类 11 · 综合创意 / 毕业项目（pbl）：把前面学到的多种本领组合成总结性作品。
+ * 目前 4 个：会唱歌的画（画笔+音乐+循环）、双角色小剧场（故事双角色+表情+场景）、
+ * 我的太阳系（科学时间轴公转+大小变化）、互动绘本游戏（事件+条件+收集）。 */
+export const pblProjects: CourseProject[] = [
+  singingPictureProject,
+  twoActorShowProject,
+  mySolarSystemProject,
+  interactiveBookProject,
+];
+
+/** 全 105 项目，按 projectSlugs 规范顺序：seq→loop→draw→event→cond→game→music→math→story→science→pbl。
  * 运行时的 MIRROR 坐标镜像、getProject、闯关路径等逻辑对本文件导出的对象照常生效。 */
 export const stage6Projects: CourseProject[] = [
   ...seqProjects,
@@ -125,4 +139,5 @@ export const stage6Projects: CourseProject[] = [
   ...mathProjects,
   ...storyProjects,
   ...scienceProjects,
+  ...pblProjects,
 ];

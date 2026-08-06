@@ -65,6 +65,17 @@ const SCIENCE_SLUGS = [
   "rainbow_bridge", "seed_grow", "earth_sun", "food_chain", "moon_phase",
 ];
 
+/** 分类 11 · 综合创意 / 毕业项目（pbl，全 4 项，slug 顺序与 projectSlugs 一致）。
+ * 这些是「总结性作品」，每个都把前面多个分类的本领组合起来：
+ *  - singing_picture 会唱歌的画：画笔（落笔/循环/移动/转向）+ 音乐（弹奏音符）
+ *  - two_actor_show 双角色小剧场：故事双角色（控制角色/表情/场景/说话）
+ *  - my_solar_system 我的太阳系：科学时间轴（公转轨道 + 大小 tween + 当时间到达说）
+ *  - interactive_book 互动绘本游戏：事件（点击）+ 条件（碰到星星）+ 收集（飞向星星）
+ * 判定同样基于真实 JS 标记，不依赖积木类型名。完成判定以「步骤」为准（各项目无目标标记判定需求）。 */
+const PBL_SLUGS = [
+  "singing_picture", "two_actor_show", "my_solar_system", "interactive_book",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -505,6 +516,43 @@ export function computeSteps(
         else if (id === 2) done = hasAddTrack && hasWhenAt;
         else if (id === 3) done = hasTimeline && hasAddTrack;
       }
+    } else if (PBL_SLUGS.includes(project.slug)) {
+      // 分类 11 · 综合创意 / 毕业项目：每个项目组合多种本领，判定基于真实 JS 标记。
+      const finished = logs.includes("[系统] 程序执行完毕");
+      const startFired = logs.some((l) => l.includes("开始执行程序"));
+      const clickFired = logs.some((l) => l.includes("舞台被点击"));
+      const sayCount = countMark(code, "__runtime.say(");
+      const controlCount = countMark(code, "__runtime.controlActor(");
+      const hasExpression = code.includes("__runtime.setExpression(");
+      const sceneCount = countMark(code, "__runtime.setScene(");
+      const audioCount = countAudio(code);
+      // 时间轴相关标记（my_solar_system 用）：与 SCIENCE 分支同套真实标记
+      const hasTimeline = code.includes("__runtime.timeline.reset(10)");
+      const hasAddTrack = code.includes("__runtime.timeline.addTrack(");
+      const hasTween = code.includes('type: "tween"');
+      const hasOrbit = code.includes('type: "orbit"');
+      const hasWhenAt = code.includes('type: "whenAt"');
+      if (project.slug === "singing_picture") {
+        // 会唱歌的画：落笔 + 循环画图案 + 弹奏至少 3 个音符
+        if (id === 1) done = code.includes("__runtime.penDown()");
+        else if (id === 2) done = hasLoop && code.includes("__runtime.move") && code.includes("__runtime.turn");
+        else if (id === 3) done = audioCount >= 3;
+      } else if (project.slug === "two_actor_show") {
+        // 双角色小剧场：启动 + 两个伙伴都出场表演（控制角色+说话+表情）+ 切换场景讲完
+        if (id === 1) done = startFired;
+        else if (id === 2) done = controlCount >= 1 && sayCount >= 2 && hasExpression;
+        else if (id === 3) done = sceneCount >= 1 && finished;
+      } else if (project.slug === "my_solar_system") {
+        // 我的太阳系：时间轴公转 + 大小 tween + 当时间到达解说
+        if (id === 1) done = hasTimeline && hasOrbit;
+        else if (id === 2) done = hasAddTrack && hasTween;
+        else if (id === 3) done = hasTimeline && hasAddTrack && hasWhenAt;
+      } else if (project.slug === "interactive_book") {
+        // 互动绘本游戏：点击事件 + 条件判断（碰到星星）+ 收集所有星星
+        if (id === 1) done = clickFired;
+        else if (id === 2) done = code.includes("__runtime.touchingStar()") && code.includes("__runtime.gotoStar");
+        else if (id === 3) done = logs.some((log) => log.includes("所有星星都收集完了")) || finished;
+      }
     }
     return { ...step, done };
   });
@@ -897,6 +945,28 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 1) return "用橙色「当时间轴开始」，放「让月亮的显示程度从 0.15 渐变到 1」，月牙会慢慢变圆。";
       if (stepId === 2) return "加「当时间到 1 秒 让二零说 我从弯弯的月牙变成圆圆的满月」，讲清月相变化。";
       if (stepId === 3) return "点「运行」播放时间轴，看月亮的脸变化吧！";
+    }
+  }
+  if (PBL_SLUGS.includes(slug)) {
+    if (slug === "singing_picture") {
+      if (stepId === 1) return "先放绿色「落笔」，二零才会画出线来。";
+      if (stepId === 2) return "把「移动」和「右转」都放进「重复执行」里面，二零才能一圈圈画出正方形。";
+      if (stepId === 3) return "在画画之后接 3 个紫色「弹奏音符」（do、re、mi），二零就边画边唱啦！";
+    }
+    if (slug === "two_actor_show") {
+      if (stepId === 1) return "先拖一个绿色「当开始运行」，把积木放进去，小剧场就开场了～";
+      if (stepId === 2) return "用「控制角色 二零」让它变表情、说话，再用「控制角色 三七」让三七也表演，两个伙伴都出来才热闹。";
+      if (stepId === 3) return "最后加一个「切换场景」并说一句，讲完这一幕，点运行看两个伙伴演戏！";
+    }
+    if (slug === "my_solar_system") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，里面放「让 二零 绕舞台中心转 1 圈」，它就会绕着太阳画圈。";
+      if (stepId === 2) return "再放「让 二零 的大小 从 0.6 渐变到 1」，地球会一边转一边长大。";
+      if (stepId === 3) return "加「当时间到 1 秒 让二零说 地球转一圈就是一年，大约365天」，点运行播放时间轴看公转！";
+    }
+    if (slug === "interactive_book") {
+      if (stepId === 1) return "先拖一个蓝色「当舞台被点击」事件，点舞台才会触发互动。";
+      if (stepId === 2) return "在事件里放「如果 碰到星星 那么 说 找到星星啦」，再接三个「飞向星星 1/2/3 号」收集起来。";
+      if (stepId === 3) return "点「运行」后点一下舞台，二零会收集完所有星星并说「绘本讲完啦」，这本互动绘本就完成咯！";
     }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";

@@ -1,0 +1,53 @@
+import type { CourseProject } from "@/courses";
+
+export const mySolarSystemProject: CourseProject = {
+  slug: "my_solar_system",
+  category: "pbl",
+  title: "我的太阳系",
+  ageGroup: "6-8 岁",
+  description: "用时间轴让地球绕着太阳公转，并讲出「转一圈就是一年」的科学秘密。",
+  missionBrief:
+    "太阳在中间，地球绕着它转，转一圈就是一年（大约 365 天）。写一个程序：当开始运行（时间轴）时，让二零（当作地球）「绕舞台中心转 1 圈」，再让它的「大小从 0.6 渐变到 1」，并在第 1 秒让二零说「地球转一圈就是一年，大约 365 天」。点运行，用进度条看地球公转！",
+  erLingHint:
+    "① 拖橙色「当开始运行（时间轴）」，里面放「让 二零 绕舞台中心转 1 圈（0~8 秒）」；② 再放「让 二零 的大小 从 0.6 到 1（0~8 秒）」；③ 放「当时间到达 1 秒 让 二零 说 地球转一圈就是一年，大约365天 持续 3 秒」。点运行看太阳系！",
+  steps: [
+    { id: 1, title: "用「当开始运行（时间轴）」让地球绕太阳转" },
+    { id: 2, title: "让地球的大小随时间慢慢变化" },
+    { id: 3, title: "到某个时刻说出公转的解说，点运行看效果" },
+  ],
+  timeline: true,
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start_tl" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_orbit">
+          <field name="ACTOR">erling</field>
+          <field name="LOOPS">1</field>
+          <field name="T0">0</field>
+          <field name="T1">8</field>
+          <next>
+            <block type="maker_tween_prop">
+              <field name="ACTOR">erling</field>
+              <field name="PROP">size</field>
+              <field name="A">0.6</field>
+              <field name="B">1</field>
+              <field name="T0">0</field>
+              <field name="T1">8</field>
+              <next>
+                <block type="maker_when_at_say">
+                  <field name="ACTOR">erling</field>
+                  <field name="T">1</field>
+                  <value name="TEXT">
+                    <shadow type="text">
+                      <field name="TEXT">地球转一圈就是一年，大约365天</field>
+                    </shadow>
+                  </value>
+                  <field name="SECONDS">3</field>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

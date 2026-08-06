@@ -1,0 +1,61 @@
+import type { CourseProject } from "@/courses";
+
+export const interactiveBookProject: CourseProject = {
+  slug: "interactive_book",
+  category: "pbl",
+  title: "互动绘本游戏",
+  ageGroup: "6-8 岁",
+  description: "点击舞台互动，用条件判断收集星星，讲完一本会互动的小绘本。",
+  missionBrief:
+    "做一本会互动的绘本！写一个程序：当舞台被点击时，先用「如果…那么」判断「碰到星星」，那么里说「找到星星啦」，再让二零依次飞向 3 颗星星把它们都收集起来，最后说「绘本讲完啦！」。",
+  erLingHint:
+    "① 蓝色「当舞台被点击」里放「如果 碰到星星 那么 说 找到星星啦」；② 接着放三个「飞向星星 1 / 2 / 3 号」收集；③ 最后「说 绘本讲完啦！」。点运行后点一下舞台，看二零收集星星讲完故事！",
+  steps: [
+    { id: 1, title: "用「当舞台被点击」事件启动互动" },
+    { id: 2, title: "用「如果…那么」判断并飞去收集星星" },
+    { id: 3, title: "集齐所有星星，讲完这本互动绘本" },
+  ],
+  stars: [
+    { x: 0, y: 0 },
+    { x: 120, y: -60 },
+    { x: -120, y: -60 },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_stage_clicked" x="40" y="40">
+      <statement name="STACK">
+        <block type="controls_if">
+          <value name="IF0">
+            <block type="maker_touching_star"></block>
+          </value>
+          <statement name="DO0">
+            <block type="maker_say">
+              <value name="TEXT"><shadow type="text"><field name="TEXT">找到星星啦！</field></shadow></value>
+              <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+            </block>
+          </statement>
+          <next>
+            <block type="maker_goto_star">
+              <value name="INDEX"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              <next>
+                <block type="maker_goto_star">
+                  <value name="INDEX"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                  <next>
+                    <block type="maker_goto_star">
+                      <value name="INDEX"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+                      <next>
+                        <block type="maker_say">
+                          <value name="TEXT"><shadow type="text"><field name="TEXT">绘本讲完啦！</field></shadow></value>
+                          <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};
