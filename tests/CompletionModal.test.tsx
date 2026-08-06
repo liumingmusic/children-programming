@@ -57,8 +57,15 @@ describe("CompletionModal 完成弹窗", () => {
     expect(btn.getAttribute("href")).toContain("/learn/play_doremi");
   });
 
-  it("magic_show 是阶段最后一个项目，不显示「挑战下一个」", () => {
+  it("magic_show 不再是最后一个项目，显示「挑战下一个：昼夜更替」并指向 /learn/day_night", () => {
     render(<CompletionModal open onClose={() => {}} project={getProject("magic_show")!} />);
+    const btn = screen.getByRole("link", { name: /挑战下一个/ }) as HTMLAnchorElement;
+    expect(btn).toHaveTextContent("昼夜更替");
+    expect(btn.getAttribute("href")).toContain("/learn/day_night");
+  });
+
+  it("moon_phase 是阶段最后一个项目，不显示「挑战下一个」", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("moon_phase")!} />);
     expect(screen.queryByRole("link", { name: /挑战下一个/ })).toBeNull();
   });
 

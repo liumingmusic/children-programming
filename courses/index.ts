@@ -22,6 +22,9 @@ export interface CourseProject {
   stars?: { x: number; y: number }[];
   /** 特殊项目类型：memory=独立翻牌小游戏（不走 Blockly 积木，由专门组件实现）。 */
   component?: "memory";
+  /** 时间轴模式（分类10·科学）：走 Runtime 的独立时间轴子系统（时钟驱动状态场），
+   * 而非默认的「事件→动作队列」。积木生成 __runtime.timeline 轨道，由时钟统一推进。 */
+  timeline?: boolean;
   /** 角色阵容：除默认「二零」外，还上场的伙伴角色 id 列表（如 ["sanqi"]）。Runtime 据此实例化额外角色。 */
   cast?: string[];
 }

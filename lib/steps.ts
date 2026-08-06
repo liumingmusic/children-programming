@@ -54,6 +54,17 @@ const STORY_SLUGS = [
   "birthday_party", "good_night", "two_talk", "a_day", "magic_show",
 ];
 
+/** 分类 10 · 自然科学模拟（全 10 项，slug 顺序与 projectSlugs 一致）。
+ * 全部走「时间轴引擎」模式（project.timeline = true），由 runtime.timeline 驱动：
+ *  - day_night / rainbow_bridge / seed_grow / moon_phase / earth_sun / food_chain 用 tween / orbit 轨道；
+ *  - rain / snow / volcano 用粒子发射轨道（rain/snow/lava）；
+ *  - color_wheel 用 maker_mix_color 颜色混合 reporter。
+ * 判定基于真实 JS 标记（__runtime.timeline.reset/addTrack/timelineMix），非积木类型名。 */
+const SCIENCE_SLUGS = [
+  "day_night", "rain", "snow", "volcano", "color_wheel",
+  "rainbow_bridge", "seed_grow", "earth_sun", "food_chain", "moon_phase",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -436,6 +447,64 @@ export function computeSteps(
         else if (id === 2) done = hasHide && hasShow;
         else if (id === 3) done = finished;
       }
+    } else if (SCIENCE_SLUGS.includes(project.slug)) {
+      // 自然科学模拟（分类 10）：基于真实 JS 标记判定「用了时间轴的哪种能力」。
+      // 时间轴模式（project.timeline=true）由 runtime.timeline 驱动；完成判定以「步骤」为准。
+      const hasTimeline = code.includes("__runtime.timeline.reset(10)");
+      const hasAddTrack = code.includes("__runtime.timeline.addTrack(");
+      const hasTween = code.includes('type: "tween"');
+      const hasOrbit = code.includes('type: "orbit"');
+      const hasParticle = code.includes('type: "particles"');
+      const hasWhenAt = code.includes('type: "whenAt"');
+      const hasMixColor = code.includes("__runtime.timelineMix(");
+      if (project.slug === "day_night") {
+        // 昼夜更替：背景明暗 tween + 当时间到达说一句话
+        if (id === 1) done = hasTimeline && hasTween;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "rain") {
+        if (id === 1) done = hasTimeline && hasParticle;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "snow") {
+        if (id === 1) done = hasTimeline && hasParticle;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "volcano") {
+        if (id === 1) done = hasTimeline && hasParticle;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "color_wheel") {
+        // 神奇的调色盘：用 maker_mix_color 混合两种颜色并说出来
+        if (id === 1) done = hasTimeline && hasMixColor;
+        else if (id === 2) done = hasAddTrack && hasWhenAt && hasMixColor;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "rainbow_bridge") {
+        // 彩虹桥：左右位置 tween + 当时间到达说一句话
+        if (id === 1) done = hasTimeline && hasTween;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "seed_grow") {
+        // 种子长大了：大小 + 上下位置 tween
+        if (id === 1) done = hasTimeline && hasTween;
+        else if (id === 2) done = countMark(code, 'type: "tween"') >= 2;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "earth_sun") {
+        // 地球绕着太阳转：公转轨道
+        if (id === 1) done = hasTimeline && hasOrbit;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "food_chain") {
+        // 食物链大冒险：三七移动 tween + 二零当时间到达说一句话
+        if (id === 1) done = hasTimeline && hasTween;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "moon_phase") {
+        // 月亮的脸：显示程度（alpha）tween 从弯月到满月
+        if (id === 1) done = hasTimeline && hasTween;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      }
     }
     return { ...step, done };
   });
@@ -776,6 +845,58 @@ export function coach(slug: string, stepId: number): string {
     if (slug === "magic_show") {
       if (stepId === 2) return "先「说 看我变魔术」，再「隐藏角色 三七」接「说 不见啦」，最后「显示角色 三七」接「说 又回来啦」！";
       if (stepId === 3) return "点「运行」，看神奇的魔术秀！";
+    }
+  }
+  if (SCIENCE_SLUGS.includes(slug)) {
+    if (slug === "day_night") {
+      if (stepId === 1) return "用橙色「当时间轴开始」开头，里面放「让背景明暗从 0 渐变到 220」，天空就会由亮变暗。";
+      if (stepId === 2) return "再加「当时间到 5 秒 让二零说 天黑了」，时间走到那一刻就会自动冒出对话。";
+      if (stepId === 3) return "点「运行」，用下方时间轴控件播放，看白天慢慢变成黑夜！";
+    }
+    if (slug === "rain") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，里面放「让天空下起雨」（设置下雨的时间段和密度）。";
+      if (stepId === 2) return "加「当时间到 1 秒 让二零说 下雨啦」，提醒大家带伞。";
+      if (stepId === 3) return "点「运行」播放时间轴，看雨点落下来吧！";
+    }
+    if (slug === "snow") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，里面放「让天空下起雪」（雪花比雨点更慢更轻柔）。";
+      if (stepId === 2) return "加「当时间到 1 秒 让二零说 下雪了」，世界就变白了。";
+      if (stepId === 3) return "点「运行」播放时间轴，看雪花飘落吧！";
+    }
+    if (slug === "volcano") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，里面放「让火山喷发」（橙红色岩浆向上飞）。";
+      if (stepId === 2) return "加「当时间到 1 秒 让二零说 快躲远一点」，提醒注意安全。";
+      if (stepId === 3) return "点「运行」播放时间轴，看火山喷发吧！";
+    }
+    if (slug === "color_wheel") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，在「当时间到 1 秒 让二零说」里，文字嵌套一个紫色「混合颜色」积木（比如 红 与 黄）。";
+      if (stepId === 2) return "再多加几句「当时间到达」，分别混合 黄与蓝、红与蓝，二零会说出得到的颜色名字。";
+      if (stepId === 3) return "点「运行」播放时间轴，看调色盘变出不同颜色！";
+    }
+    if (slug === "rainbow_bridge") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，放「让二零的左右位置从 -160 渐变到 160」，它会从左边走到右边。";
+      if (stepId === 2) return "加「当时间到 8 秒 让二零说 看，彩虹出来啦」，走完就出现彩虹。";
+      if (stepId === 3) return "点「运行」播放时间轴，看二零架起彩虹桥！";
+    }
+    if (slug === "seed_grow") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，放「让种子大小从 0.1 渐变到 1」，小种子会慢慢长大。";
+      if (stepId === 2) return "再加一条「让种子的上下位置从 -80 渐变到 0」，让它从土里钻出来。";
+      if (stepId === 3) return "点「运行」播放时间轴，看种子发芽长大！";
+    }
+    if (slug === "earth_sun") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，放「让地球绕中心转 1 圈」，它就会绕着太阳画圈。";
+      if (stepId === 2) return "加「当时间到 1 秒 让二零说 我绕太阳转一圈就是一年」，讲清公转的意义。";
+      if (stepId === 3) return "点「运行」播放时间轴，看地球公转吧！";
+    }
+    if (slug === "food_chain") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，放「让三七的左右位置从 160 渐变到 -40」，虫子会自己走过来。";
+      if (stepId === 2) return "加「当时间到 4 秒 让二零说 虫子和我都被小鸟吃掉了」，讲食物链的关系。";
+      if (stepId === 3) return "点「运行」播放时间轴，看食物链大冒险！";
+    }
+    if (slug === "moon_phase") {
+      if (stepId === 1) return "用橙色「当时间轴开始」，放「让月亮的显示程度从 0.15 渐变到 1」，月牙会慢慢变圆。";
+      if (stepId === 2) return "加「当时间到 1 秒 让二零说 我从弯弯的月牙变成圆圆的满月」，讲清月相变化。";
+      if (stepId === 3) return "点「运行」播放时间轴，看月亮的脸变化吧！";
     }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";

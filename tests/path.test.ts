@@ -33,8 +33,8 @@ describe("闯关路径（lib/path）", () => {
     expect(path.linearOrder.slice(0, 3)).toEqual(["hello", "flag", "stone"]);
     expect(path.linearOrder).toContain("square"); // loop 在 seq 之后
     expect(path.linearOrder.indexOf("square")).toBeGreaterThan(path.linearOrder.indexOf("frame"));
-    // 总数 = 91（原 61 + 音乐分类 10 项 + 数学分类 10 项 + 故事分类 10 项）
-    expect(path.linearOrder.length).toBe(91);
+    // 总数 = 101（原 61 + 音乐/数学/故事/科学 各 10 项）
+    expect(path.linearOrder.length).toBe(101);
   });
 
   it("getUnlockedSet：空进度时只有第一关解锁", () => {
@@ -57,7 +57,7 @@ describe("闯关路径（lib/path）", () => {
     const path = getStagePath(STAGE);
     const all = new Set(path.linearOrder);
     const unlocked = getUnlockedSet(path.linearOrder, all);
-    expect(unlocked.size).toBe(91);
+    expect(unlocked.size).toBe(101);
   });
 
   it("getUnlockedSet：已完成的关卡永远解锁（兼容乱序完成造成的空洞）", () => {

@@ -56,6 +56,16 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_show_actor", fields: { ACTOR: "sanqi" } },
     { kind: "block" as const, type: "maker_hide_actor", fields: { ACTOR: "sanqi" } },
     { kind: "block" as const, type: "maker_set_scene", fields: { SCENE: "day" } },
+    // ---- 科学探究（分类 10）· 时间轴 / 粒子 / 颜色 ----
+    { kind: "block" as const, type: "maker_when_start_tl" },
+    { kind: "block" as const, type: "maker_tween_prop", fields: { ACTOR: "erling", PROP: "y", A: "0", B: "-100", T0: "0", T1: "5" } },
+    { kind: "block" as const, type: "maker_orbit", fields: { ACTOR: "erling", LOOPS: "1", T0: "0", T1: "6" } },
+    { kind: "block" as const, type: "maker_when_at_say", fields: { ACTOR: "erling", T: "3", TEXT: "看，变化发生了！", SECONDS: "2" } },
+    { kind: "block" as const, type: "maker_when_at_scene", fields: { T: "4", SCENE: "day" } },
+    { kind: "block" as const, type: "maker_emit_rain", fields: { T0: "0", T1: "8", RATE: "20", SMIN: "120", SMAX: "200" } },
+    { kind: "block" as const, type: "maker_emit_snow", fields: { T0: "0", T1: "8", RATE: "15", SMIN: "40", SMAX: "80" } },
+    { kind: "block" as const, type: "maker_emit_lava", fields: { T0: "0", T1: "8", RATE: "25", SMIN: "120", SMAX: "200" } },
+    { kind: "block" as const, type: "maker_mix_color", fields: { C1: "红", C2: "黄" } },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -719,6 +729,216 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+
+    // ---- 科学探究（分类 10）· 时间轴 / 粒子 / 颜色 ----
+    // 时间轴模型：所有科学积木生成一个「轨道」加到 __runtime.timeline，
+    // 由时钟统一推进，与旧的动作队列（move/say…）完全隔离。
+    maker_when_start_tl: {
+      init() {
+        this.appendDummyInput().appendField("当开始运行（时间轴）");
+        this.appendStatementInput("STACK").setCheck(null);
+        this.setColour(20);
+        this.setTooltip("科学模拟的开始事件。把时间轴积木（属性变化 / 发射粒子 / 定时说话）放进这里。");
+        this.setHelpUrl("");
+        this.setNextStatement(false);
+        this.setPreviousStatement(false);
+      },
+    },
+    maker_tween_prop: {
+      init() {
+        this.appendDummyInput()
+          .appendField("让")
+          .appendField(new Blockly.FieldDropdown([["二零", "erling"], ["三七", "sanqi"]]), "ACTOR")
+          .appendField("的")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["上下位置", "y"],
+              ["左右位置", "x"],
+              ["大小", "size"],
+              ["朝向", "angle"],
+              ["显示程度", "alpha"],
+              ["角色染色", "actorHue"],
+              ["背景明暗", "bgHue"],
+            ]),
+            "PROP"
+          )
+          .appendField("从")
+          .appendField(new Blockly.FieldNumber(0, -400, 400, 0.01), "A")
+          .appendField("到")
+          .appendField(new Blockly.FieldNumber(0, -400, 400, 0.01), "B");
+        this.appendDummyInput()
+          .appendField("在")
+          .appendField(new Blockly.FieldNumber(0, 0, 60, 0.5), "T0")
+          .appendField("~")
+          .appendField(new Blockly.FieldNumber(5, 0, 60, 0.5), "T1")
+          .appendField("秒");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(20);
+        this.setTooltip("在时间轴上，让某角色的某个属性平滑地从 A 变到 B。用于生长、移动、变色等。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_orbit: {
+      init() {
+        this.appendDummyInput()
+          .appendField("让")
+          .appendField(new Blockly.FieldDropdown([["二零", "erling"], ["三七", "sanqi"]]), "ACTOR")
+          .appendField("绕舞台中心转")
+          .appendField(new Blockly.FieldNumber(1, 0.25, 8, 0.25), "LOOPS")
+          .appendField("圈");
+        this.appendDummyInput()
+          .appendField("在")
+          .appendField(new Blockly.FieldNumber(0, 0, 60, 0.5), "T0")
+          .appendField("~")
+          .appendField(new Blockly.FieldNumber(6, 0, 60, 0.5), "T1")
+          .appendField("秒");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(20);
+        this.setTooltip("让角色绕舞台中心做椭圆公转，模拟地球绕太阳等天体运动。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_when_at_say: {
+      init() {
+        this.appendDummyInput()
+          .appendField("当时间到达")
+          .appendField(new Blockly.FieldNumber(3, 0, 60, 0.5), "T")
+          .appendField("秒，让")
+          .appendField(new Blockly.FieldDropdown([["二零", "erling"], ["三七", "sanqi"]]), "ACTOR")
+          .appendField("说");
+        this.appendValueInput("TEXT").setCheck("String").appendField("");
+        this.appendDummyInput()
+          .appendField("持续")
+          .appendField(new Blockly.FieldNumber(2, 0.5, 10, 0.5), "SECONDS")
+          .appendField("秒");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(20);
+        this.setTooltip("到某个时刻，让角色冒出一句话做解说。用于科学现象旁白。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_when_at_scene: {
+      init() {
+        this.appendDummyInput()
+          .appendField("当时间到达")
+          .appendField(new Blockly.FieldNumber(4, 0, 60, 0.5), "T")
+          .appendField("秒，切换场景")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["白天·操场", "day"],
+              ["卧室", "bedroom"],
+              ["学校", "school"],
+              ["公园", "park"],
+              ["夜晚·星空", "night"],
+            ]),
+            "SCENE"
+          );
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(20);
+        this.setTooltip("到某个时刻，把舞台背景切换成另一个场景。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_emit_rain: {
+      init() {
+        this.appendDummyInput().appendField("开始下雨（雨滴下落）");
+        this.appendDummyInput()
+          .appendField("从")
+          .appendField(new Blockly.FieldNumber(0, 0, 60, 0.5), "T0")
+          .appendField("到")
+          .appendField(new Blockly.FieldNumber(8, 0, 60, 0.5), "T1")
+          .appendField("秒，每秒")
+          .appendField(new Blockly.FieldNumber(20, 1, 100, 1), "RATE")
+          .appendField("滴，速度")
+          .appendField(new Blockly.FieldNumber(160, 40, 400, 10), "SMIN")
+          .appendField("~")
+          .appendField(new Blockly.FieldNumber(220, 40, 400, 10), "SMAX");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(210);
+        this.setTooltip("在一段时间里持续从天上落下雨滴（粒子系统）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_emit_snow: {
+      init() {
+        this.appendDummyInput().appendField("开始下雪（雪花飘落）");
+        this.appendDummyInput()
+          .appendField("从")
+          .appendField(new Blockly.FieldNumber(0, 0, 60, 0.5), "T0")
+          .appendField("到")
+          .appendField(new Blockly.FieldNumber(8, 0, 60, 0.5), "T1")
+          .appendField("秒，每秒")
+          .appendField(new Blockly.FieldNumber(15, 1, 100, 1), "RATE")
+          .appendField("片，速度")
+          .appendField(new Blockly.FieldNumber(40, 10, 200, 10), "SMIN")
+          .appendField("~")
+          .appendField(new Blockly.FieldNumber(80, 10, 200, 10), "SMAX");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(210);
+        this.setTooltip("在一段时间里持续飘落雪花（粒子系统）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_emit_lava: {
+      init() {
+        this.appendDummyInput().appendField("火山喷发（岩浆喷出）");
+        this.appendDummyInput()
+          .appendField("从")
+          .appendField(new Blockly.FieldNumber(0, 0, 60, 0.5), "T0")
+          .appendField("到")
+          .appendField(new Blockly.FieldNumber(8, 0, 60, 0.5), "T1")
+          .appendField("秒，每秒")
+          .appendField(new Blockly.FieldNumber(25, 1, 100, 1), "RATE")
+          .appendField("颗，速度")
+          .appendField(new Blockly.FieldNumber(120, 40, 400, 10), "SMIN")
+          .appendField("~")
+          .appendField(new Blockly.FieldNumber(220, 40, 400, 10), "SMAX");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(20);
+        this.setTooltip("在一段时间里从底部中央喷出岩浆粒子，模拟火山喷发。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_mix_color: {
+      init() {
+        this.appendDummyInput()
+          .appendField("混合颜色")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["红", "红"], ["橙", "橙"], ["黄", "黄"], ["绿", "绿"],
+              ["蓝", "蓝"], ["紫", "紫"], ["粉", "粉"], ["白", "白"],
+            ]),
+            "C1"
+          )
+          .appendField("与")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["红", "红"], ["橙", "橙"], ["黄", "黄"], ["绿", "绿"],
+              ["蓝", "蓝"], ["紫", "紫"], ["粉", "粉"], ["白", "白"],
+            ]),
+            "C2"
+          );
+        this.setInputsInline(true);
+        this.setOutput(true, "String");
+        this.setColour(60);
+        this.setTooltip("把两种颜色混合，得到一个新颜色名（如红+黄=橙）。可接进「说」展示。");
+        this.setHelpUrl("");
+      },
+    },
   });
 
   // Hat block: when start runs the stack and then ends
@@ -952,5 +1172,86 @@ export function registerCustomBlocks() {
   javascriptGenerator.forBlock["maker_set_scene"] = (block) => {
     const scene = JSON.stringify(block.getFieldValue("SCENE"));
     return `__runtime.setScene(${scene});\n`;
+  };
+
+  // ---- 科学探究（分类 10）· 时间轴 / 粒子 / 颜色 生成器 ----
+  javascriptGenerator.forBlock["maker_when_start_tl"] = (block, generator) => {
+    const stack = generator.statementToCode(block, "STACK");
+    // reset 必须在所有 addTrack 之前，先清轨道与时长，再让 STACK 里的轨道积木补回来
+    return `__runtime.timeline.reset(10);\n${stack}`;
+  };
+
+  javascriptGenerator.forBlock["maker_tween_prop"] = (block) => {
+    const actor = JSON.stringify(block.getFieldValue("ACTOR"));
+    const prop = block.getFieldValue("PROP");
+    const a = block.getFieldValue("A");
+    const b = block.getFieldValue("B");
+    const t0 = block.getFieldValue("T0");
+    const t1 = block.getFieldValue("T1");
+    const targetKind =
+      prop === "y" ? "actorY"
+      : prop === "x" ? "actorX"
+      : prop === "size" ? "actorSize"
+      : prop === "angle" ? "actorAngle"
+      : prop === "alpha" ? "actorAlpha"
+      : prop === "bgHue" ? "bgHue"
+      : "actorHue";
+    return `__runtime.timeline.addTrack({ type: "tween", target: { kind: "${targetKind}", actorId: ${actor} }, t0: ${t0}, t1: ${t1}, a: ${a}, b: ${b} });\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_orbit"] = (block) => {
+    const actor = JSON.stringify(block.getFieldValue("ACTOR"));
+    const loops = block.getFieldValue("LOOPS");
+    const t0 = block.getFieldValue("T0");
+    const t1 = block.getFieldValue("T1");
+    // 绕舞台中心（0,0）做椭圆公转，rx=160 ry=110 给一个明显的轨道
+    return `__runtime.timeline.addTrack({ type: "orbit", actorId: ${actor}, cx: 0, cy: 0, rx: 160, ry: 110, t0: ${t0}, t1: ${t1}, loops: ${loops} });\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_when_at_say"] = (block, generator) => {
+    const actor = JSON.stringify(block.getFieldValue("ACTOR"));
+    const t = block.getFieldValue("T");
+    const seconds = block.getFieldValue("SECONDS");
+    const text = generator.valueToCode(block, "TEXT", Order.ATOMIC) || '""';
+    return `__runtime.timeline.addTrack({ type: "whenAt", t: ${t}, action: { kind: "say", actorId: ${actor}, text: ${text}, seconds: ${seconds} } });\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_when_at_scene"] = (block) => {
+    const t = block.getFieldValue("T");
+    const scene = JSON.stringify(block.getFieldValue("SCENE"));
+    return `__runtime.timeline.addTrack({ type: "whenAt", t: ${t}, action: { kind: "setScene", sceneId: ${scene} } });\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_emit_rain"] = (block) => {
+    const t0 = block.getFieldValue("T0");
+    const t1 = block.getFieldValue("T1");
+    const rate = block.getFieldValue("RATE");
+    const smin = block.getFieldValue("SMIN");
+    const smax = block.getFieldValue("SMAX");
+    return `__runtime.timeline.addTrack({ type: "particles", kind: "rain", tStart: ${t0}, tEnd: ${t1}, rate: ${rate}, speedMin: ${smin}, speedMax: ${smax}, color: "rgba(120,170,255,0.9)" });\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_emit_snow"] = (block) => {
+    const t0 = block.getFieldValue("T0");
+    const t1 = block.getFieldValue("T1");
+    const rate = block.getFieldValue("RATE");
+    const smin = block.getFieldValue("SMIN");
+    const smax = block.getFieldValue("SMAX");
+    return `__runtime.timeline.addTrack({ type: "particles", kind: "snow", tStart: ${t0}, tEnd: ${t1}, rate: ${rate}, speedMin: ${smin}, speedMax: ${smax}, color: "rgba(255,255,255,0.95)" });\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_emit_lava"] = (block) => {
+    const t0 = block.getFieldValue("T0");
+    const t1 = block.getFieldValue("T1");
+    const rate = block.getFieldValue("RATE");
+    const smin = block.getFieldValue("SMIN");
+    const smax = block.getFieldValue("SMAX");
+    return `__runtime.timeline.addTrack({ type: "particles", kind: "lava", tStart: ${t0}, tEnd: ${t1}, rate: ${rate}, speedMin: ${smin}, speedMax: ${smax}, color: "rgba(255,120,40,0.95)" });\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_mix_color"] = (block) => {
+    const c1 = JSON.stringify(block.getFieldValue("C1"));
+    const c2 = JSON.stringify(block.getFieldValue("C2"));
+    return [`__runtime.timelineMix(${c1}, ${c2})`, Order.FUNCTION_CALL];
   };
 }

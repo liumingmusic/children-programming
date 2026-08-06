@@ -205,8 +205,31 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     setGeneratedCode(code);
 
     if (!code.trim()) {
-      setHint("二零还没收到指令呢～先拖一个「当开始运行」绿色事件，把积木放进去，再点运行吧！");
+      setHint(
+        project.timeline
+          ? "二零还没收到指令呢～先拖一个「当开始运行（时间轴）」积木，把时间轴积木放进去，再点运行吧！"
+          : "二零还没收到指令呢～先拖一个「当开始运行」绿色事件，把积木放进去，再点运行吧！"
+      );
       setTimeout(() => setHint(null), 4000);
+      return;
+    }
+
+    // ===== 分类10·科学：时间轴模式（走 Runtime 独立时间轴子系统，与动作队列隔离）=====
+    if (project.timeline) {
+      runtime.reset();
+      setSaveStatus("idle");
+      runtime.runTimelineCode(code);
+      // 时间轴项目：运行即「播放科学现象」，步骤判定只看是否搭出了预期轨道（见 steps.ts SCIENCE_SLUGS）
+      const finalLogs = runtimeRef.current?.getState().log ?? [];
+      const st = computeSteps(project, code, finalLogs);
+      if (!st.every((s) => s.done)) {
+        const firstUndone = st.find((s) => !s.done);
+        if (firstUndone) {
+          setHint(coach(project.slug, firstUndone.id));
+          return;
+        }
+      }
+      setHint(null);
       return;
     }
 
@@ -294,10 +317,14 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   }, []);
 
   const handleReset = useCallback(() => {
+    if (project.timeline) {
+      runtimeRef.current?.timeline.pause();
+      runtimeRef.current?.timeline.seek(0);
+    }
     runtimeRef.current?.reset();
     setSaveStatus("idle");
     flashResetToast("舞台已重置，可以重新运行");
-  }, [flashResetToast]);
+  }, [flashResetToast, project.timeline]);
 
   // 「清空积木」：彻底清掉学生工作区（破坏性，需二次确认），满足「重来」诉求
   const handleClearBlocks = useCallback(() => {
@@ -533,7 +560,20 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
               <div className="flex flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
                 <h2 className="mb-2 text-sm font-medium text-[#04342C]">舞台预览</h2>
                 <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#E6F1FB]">
-                  <StagePlayer state={stageState} scene={project.scene} onStageClick={handleStageClick} />
+                  <StagePlayer
+                    state={stageState}
+                    scene={project.scene}
+                    onStageClick={handleStageClick}
+                    onTimeline={
+                      project.timeline
+                        ? {
+                            onPlayPause: () => runtimeRef.current?.timeline.togglePlay(),
+                            onSeek: (t: number) => runtimeRef.current?.timeline.seek(t),
+                            onSpeed: (s: number) => runtimeRef.current?.timeline.setSpeed(s),
+                          }
+                        : undefined
+                    }
+                  />
                 </div>
               </div>
 

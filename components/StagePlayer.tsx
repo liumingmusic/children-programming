@@ -8,6 +8,12 @@ interface StagePlayerProps {
   state: StageState;
   scene?: ProjectScene;
   onStageClick?: (x: number, y: number) => void;
+  /** 时间轴控件回调（仅当 state.timeline 存在时由上层传入并显示控件）。 */
+  onTimeline?: {
+    onPlayPause: () => void;
+    onSeek: (t: number) => void;
+    onSpeed: (s: number) => void;
+  };
 }
 
 // 二零在画布中的固定屏幕尺寸（不再跟随相机自适应缩放 scale，避免小图形时被放大到 300px+ 盖住笔迹）。
@@ -217,7 +223,7 @@ interface View {
   cy: number;
 }
 
-export default function StagePlayer({ state, scene, onStageClick }: StagePlayerProps) {
+export default function StagePlayer({ state, scene, onStageClick, onTimeline }: StagePlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const starsRef = useRef<{ x: number; y: number; r: number; alpha: number; twinkle: number }[]>([]);
@@ -267,9 +273,17 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
       }));
     }
 
-    // Background gradient（支持「切换场景」：有场景时用场景背景色）
+    // Background gradient（支持「切换场景」与「时间轴背景色相 bgHue」）
     const gradient = ctx.createLinearGradient(0, 0, 0, ch);
-    if (state.scene?.bg) {
+    // 时间轴科学项目：用 bgHue（0=白昼浅蓝 → 240=夜晚深蓝）实时插值背景，呈现昼夜/四季渐变
+    const bgHue = (state as unknown as { bgHue?: number }).bgHue;
+    if (typeof bgHue === "number") {
+      const k = Math.max(0, Math.min(1, bgHue / 240));
+      const topL = 62 - k * 38;
+      const botL = 46 - k * 36;
+      gradient.addColorStop(0, `hsl(${bgHue}, 58%, ${topL}%)`);
+      gradient.addColorStop(1, `hsl(${bgHue}, 64%, ${botL}%)`);
+    } else if (state.scene?.bg) {
       const m = state.scene.bg.match(/linear-gradient\(([^)]+)\)/);
       const cols = m ? m[1].split(",").map((s) => s.trim()).filter(Boolean) : null;
       if (cols && cols.length >= 2) {
@@ -486,6 +500,43 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
       drawFace(ctx, act.expression);
       ctx.restore();
     }
+
+    // 粒子层（分类10·科学：雨 / 雪 / 火山岩浆）。世界坐标 -> 屏幕坐标绘制。
+    const parts = state.particles;
+    if (parts && parts.length) {
+      ctx.save();
+      for (const p of parts) {
+        const sp = toScreen(p.x, p.y);
+        if (p.kind === "rain") {
+          // 雨：细长斜线，方向由速度决定
+          const dx = (p.vx / Math.max(1, Math.abs(p.vy))) * 8;
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(sp.x, sp.y);
+          ctx.lineTo(sp.x + dx, sp.y + 8);
+          ctx.stroke();
+        } else if (p.kind === "snow") {
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // 火山岩浆：发光圆点，随 age 淡出
+          const fade = Math.max(0.2, 1 - p.age / p.life);
+          ctx.globalAlpha = fade;
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          ctx.shadowBlur = 0;
+        }
+      }
+      ctx.restore();
+    }
   }, [state, zoom, scene]);
 
   return (
@@ -530,6 +581,53 @@ export default function StagePlayer({ state, scene, onStageClick }: StagePlayerP
           适应
         </button>
       </div>
+
+      {/* 时间轴控件（分类10·科学）：播放/暂停 + 变速 + 可拖动进度条 + 当前/总时长 */}
+      {(() => {
+        const tl = state.timeline;
+        if (!tl || !onTimeline) return null;
+        return (
+          <div
+            className="absolute bottom-2 left-2 right-2 flex items-center gap-2 rounded-xl bg-black/45 px-3 py-2 text-white backdrop-blur-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={onTimeline.onPlayPause}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/90 text-sm font-bold text-[#04342C] hover:bg-white"
+              aria-label={tl.playing ? "暂停" : "播放"}
+            >
+              {tl.playing ? "⏸" : "▶"}
+            </button>
+            <span className="shrink-0 font-mono text-xs tabular-nums">
+              {tl.time.toFixed(1)}/{tl.duration.toFixed(1)}s
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={tl.duration}
+              step={0.1}
+              value={tl.time}
+              onChange={(e) => onTimeline.onSeek(parseFloat(e.target.value))}
+              className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-white/30 accent-emerald-400"
+              aria-label="时间轴进度"
+            />
+            <div className="flex shrink-0 items-center gap-1">
+              {[0.5, 1, 2].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => onTimeline.onSpeed(s)}
+                  className={`h-7 rounded-md px-2 text-xs font-medium ${
+                    tl.speed === s ? "bg-emerald-400 text-[#04342C]" : "bg-white/20 text-white hover:bg-white/30"
+                  }`}
+                  aria-label={`${s}倍速`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

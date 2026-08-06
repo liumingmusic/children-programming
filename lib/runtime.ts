@@ -62,6 +62,105 @@ export interface SceneDef {
   bg: string;
 }
 
+// ============ 时间轴 / 粒子 / 颜色（分类 10 · 科学）============
+// 时间轴是「时钟驱动状态场」模型，与现有「事件→动作队列」模型互斥，
+// 故做成 Runtime 内嵌的独立 TimelineEngine 子系统，由 CourseProject.timeline 标志切换，
+// 旧 91 项目（action 队列模式）完全不受影响。
+
+/** 单个粒子（雨滴 / 雪花 / 火山岩浆点）。世界坐标，每帧按 dt*speed 推进。 */
+export interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  /** 渲染颜色（css）。 */
+  color: string;
+  /** 渲染半径（屏幕像素）。 */
+  r: number;
+  /** 形状：雨=细长线（用 vx/vy 决定朝向）、雪=圆点、岩浆=发光圆点。 */
+  kind: "rain" | "snow" | "lava";
+  /** 已存活时间（秒），用于火山粒子淡出。 */
+  age: number;
+  /** 寿命（秒）；到寿命即从数组移除（火山用）。 */
+  life: number;
+}
+
+/** 角色可随时间的属性（Tween 轨道作用对象）。 */
+export type TweenTarget =
+  | { kind: "actorY"; actorId: string }
+  | { kind: "actorX"; actorId: string }
+  | { kind: "actorSize"; actorId: string }
+  | { kind: "actorAngle"; actorId: string }
+  | { kind: "actorAlpha"; actorId: string } // 0=隐 1=显（渐隐/渐显）
+  | { kind: "bgHue"; } // 背景色相（昼夜/四季用），0-360
+  | { kind: "actorHue"; actorId: string }; // 角色整体染色（月相等）
+
+/** 时间轴轨道：在 [t0,t1] 秒之间把某属性从 a 线性插值到 b。 */
+export interface TweenTrack {
+  type: "tween";
+  target: TweenTarget;
+  t0: number;
+  t1: number;
+  a: number;
+  b: number;
+}
+
+/** 时间轴轨道：当播放时间第一次到达 t 秒时，触发一次性动作（say/setScene/setExpression/show/hide）。 */
+export interface WhenAtTrack {
+  type: "whenAt";
+  t: number;
+  action:
+    | { kind: "say"; actorId: string; text: string; seconds: number }
+    | { kind: "setScene"; sceneId: string }
+    | { kind: "setExpression"; actorId: string; expr: string }
+    | { kind: "show"; actorId: string }
+    | { kind: "hide"; actorId: string };
+  /** 运行时：已经完成过则不再重复触发（拖动进度条回到已触发时刻时）。 */
+  fired?: boolean;
+}
+
+/** 时间轴轨道：在某时刻起持续发射粒子（雨/雪/火山）。 */
+export interface ParticleTrack {
+  type: "particles";
+  kind: "rain" | "snow" | "lava";
+  /** 开始发射的时间（秒）。 */
+  tStart: number;
+  /** 结束时间（秒）；到时停止新增粒子（已存在粒子继续运动直到出界/寿命到）。 */
+  tEnd: number;
+  /** 每秒发射数量。 */
+  rate: number;
+  /** 累计已发射数量（用于限速）。 */
+  emitted?: number;
+  /** 速度范围（用于随机化初速）。 */
+  speedMin: number;
+  speedMax: number;
+  /** 颜色（css）；火山可多色。 */
+  color: string;
+}
+
+/** 时间轴轨道：让某角色绕指定中心做椭圆公转（N 圈），用于日地月系统演示。 */
+export interface OrbitTrack {
+  type: "orbit";
+  actorId: string;
+  cx: number;
+  cy: number;
+  rx: number;
+  ry: number;
+  t0: number;
+  t1: number;
+  loops: number;
+}
+
+export type TimelineTrack = TweenTrack | WhenAtTrack | ParticleTrack | OrbitTrack;
+
+/** 时间轴对外暴露（只读）的运行时状态，供 StagePlayer 渲染控件与进度。 */
+export interface TimelineState {
+  duration: number; // 总时长（秒）
+  time: number; // 当前播放时间（秒）
+  speed: number; // 速度倍率 0.5 | 1 | 2
+  playing: boolean; // 是否正在播放
+}
+
 export interface StageState {
   width: number;
   height: number;
@@ -79,6 +178,10 @@ export interface StageState {
   stars: Star[];
   /** 当前乌云位置（会动），用于躲避类项目渲染与碰撞判定。 */
   clouds?: { x: number; y: number; r: number }[];
+  /** 时间轴子系统状态（分类10·科学）。仅当项目为 timeline 模式时存在。 */
+  timeline?: TimelineState;
+  /** 当前活跃粒子（分类10·科学：雨/雪/火山）。 */
+  particles?: Particle[];
   running: boolean;
   log: string[];
 }
@@ -259,6 +362,353 @@ function makeActor(id: string, species: Species, name: string, x = 0, y = 0, ang
   };
 }
 
+/** 颜色名 → RGB（分类10·颜色混合积木用）。保留七色 + 白/黑/橙。 */
+const COLOR_RGB: Record<string, [number, number, number]> = {
+  红: [239, 68, 68],
+  橙: [249, 115, 22],
+  黄: [250, 204, 21],
+  绿: [34, 197, 94],
+  蓝: [59, 130, 246],
+  紫: [168, 85, 247],
+  粉: [244, 114, 182],
+  白: [255, 255, 255],
+  黑: [30, 30, 30],
+  棕: [146, 94, 60],
+};
+
+/** 两个颜色按 t(0..1) 线性插值，返回 css rgb 字符串。t=0→c1，t=1→c2。 */
+export function mixColor(c1: string, c2: string, t: number): string {
+  const a = COLOR_RGB[c1] ?? COLOR_RGB["红"];
+  const b = COLOR_RGB[c2] ?? COLOR_RGB["蓝"];
+  const k = Math.max(0, Math.min(1, t));
+  const r = Math.round(a[0] + (b[0] - a[0]) * k);
+  const g = Math.round(a[1] + (b[1] - a[1]) * k);
+  const bl = Math.round(a[2] + (b[2] - a[2]) * k);
+  return `rgb(${r},${g},${bl})`;
+}
+
+/** 两个原色混合的「结果色名」（分类10·颜色混合积木用）。等比例混合的常识映射。 */
+const MIX_NAME: Record<string, string> = {
+  "红+黄": "橙", "黄+红": "橙",
+  "黄+蓝": "绿", "蓝+黄": "绿",
+  "红+蓝": "紫", "蓝+红": "紫",
+  "红+白": "粉", "白+红": "粉",
+  "蓝+白": "浅蓝", "白+蓝": "浅蓝",
+  "黄+白": "浅黄", "白+黄": "浅黄",
+};
+export function mixColorName(c1: string, c2: string): string {
+  return MIX_NAME[`${c1}+${c2}`] ?? "新颜色";
+}
+
+/**
+ * 时间轴引擎（分类10·科学）。独立于 Runtime 的 action 队列，
+ * 由「时钟驱动状态场」：每帧按 dt*speed 推进 time，重算所有轨道（Tween/WhenAt/Particle）。
+ * 持有 Runtime 引用以读写 StageState（角色位置/大小/背景色相/粒子数组），并触发 onChange 渲染。
+ */
+export class TimelineEngine {
+  private rt: Runtime;
+  private tracks: TimelineTrack[] = [];
+  private raf: number | null = null;
+  private lastTs = 0;
+  private acc = 0; // 粒子发射累加器（按秒计）
+  duration = 10;
+  time = 0;
+  speed = 1;
+  playing = false;
+  /** 累计每帧增量（用于粒子发射限速），仅记录已用时间。 */
+  private firedAt = new Set<number>();
+
+  constructor(rt: Runtime) {
+    this.rt = rt;
+  }
+
+  /** 清空并重设轨道（每次运行/重新生成积木时调用）。 */
+  reset(duration = 10) {
+    this.tracks = [];
+    this.duration = duration;
+    this.time = 0;
+    this.speed = 1;
+    this.playing = false;
+    this.acc = 0;
+    this.firedAt.clear();
+    this.stopRaf();
+    const st = this.rt.getState();
+    st.particles = [];
+    st.timeline = { duration: this.duration, time: 0, speed: 1, playing: false };
+    this.rt.notify();
+  }
+
+  /** 添加轨道（积木生成代码时调用）。 */
+  addTrack(t: TimelineTrack) {
+    this.tracks.push(t);
+    // 自动按轨道末端时间扩展总时长，避免时长写死导致轨道播不完
+    let end = 0;
+    if (t.type === "tween" || t.type === "orbit") end = Math.max(t.t0, t.t1);
+    else if (t.type === "whenAt") end = t.t;
+    else if (t.type === "particles") end = Math.max(t.tStart, t.tEnd);
+    if (end > this.duration) this.duration = Math.ceil(end);
+  }
+
+  /** 设定总时长（取所有轨道的最大末端时间）。 */
+  setDuration(d: number) {
+    this.duration = Math.max(1, d);
+  }
+
+  /** 开始播放（从头或当前位置继续）。 */
+  play() {
+    if (this.playing) return;
+    if (this.time >= this.duration) {
+      // 已到结尾，重新播放：先复位到 0 并复位所有轨道触发标记
+      this.time = 0;
+      for (const t of this.tracks) {
+        if (t.type === "whenAt") t.fired = false;
+      }
+      const st = this.rt.getState();
+      st.particles = [];
+    }
+    this.playing = true;
+    this.lastTs = performance.now();
+    this.emit();
+    this.loop();
+  }
+
+  /** 暂停。 */
+  pause() {
+    this.playing = false;
+    this.stopRaf();
+    this.emit();
+  }
+
+  togglePlay() {
+    if (this.playing) this.pause();
+    else this.play();
+  }
+
+  /** 设置速度（0.5 / 1 / 2）。 */
+  setSpeed(s: number) {
+    this.speed = s;
+    this.emit();
+  }
+
+  /** 跳转到指定时间（秒），并重算该时刻的所有轨道状态（不播放，用于拖动进度条）。 */
+  seek(t: number) {
+    this.time = Math.max(0, Math.min(this.duration, t));
+    this.applyAt(this.time);
+    this.emit();
+  }
+
+  private stopRaf() {
+    if (this.raf !== null) {
+      cancelAnimationFrame(this.raf);
+      this.raf = null;
+    }
+  }
+
+  private loop = () => {
+    if (!this.playing) return;
+    const now = performance.now();
+    const dt = Math.min(0.05, (now - this.lastTs) / 1000); // 限制单帧步长，避免卡顿后跳变
+    this.lastTs = now;
+    this.time = Math.min(this.duration, this.time + dt * this.speed);
+    this.applyAt(this.time);
+    this.emit();
+    if (this.time >= this.duration) {
+      this.playing = false;
+      this.stopRaf();
+      this.emit();
+      return;
+    }
+    this.raf = requestAnimationFrame(this.loop);
+  };
+
+  /**
+   * 计算 t 时刻的世界状态：插值 Tween、触发一次性 WhenAt、发射并推进粒子。
+   * 这是时间轴的「状态场」函数：给定 t，决定一切。
+   */
+  private applyAt(t: number) {
+    const st = this.rt.getState();
+    // 1) Tween：先按各轨道把属性设到 t 时刻的插值
+    for (const tr of this.tracks) {
+      if (tr.type !== "tween") continue;
+      const k = t <= tr.t0 ? 0 : t >= tr.t1 ? 1 : (t - tr.t0) / (tr.t1 - tr.t0);
+      const val = tr.a + (tr.b - tr.a) * k;
+      this.applyTarget(tr.target, val);
+    }
+    // 1.5) Orbit：角色绕中心做椭圆公转（按进度插值角度）
+    for (const tr of this.tracks) {
+      if (tr.type !== "orbit") continue;
+      const k = t <= tr.t0 ? 0 : t >= tr.t1 ? 1 : (t - tr.t0) / (tr.t1 - tr.t0);
+      const ang = -Math.PI / 2 + k * tr.loops * Math.PI * 2; // 从顶部开始转
+      const a = st.actors.find((x) => x.id === tr.actorId);
+      if (a) {
+        a.x = tr.cx + Math.cos(ang) * tr.rx;
+        a.y = tr.cy + Math.sin(ang) * tr.ry;
+        // 朝向：切线前进方向，angle 以 0=右 / 270=上 计
+        a.angle = (Math.atan2(Math.cos(ang) * tr.rx, Math.sin(ang) * tr.ry) * 180) / Math.PI + 90;
+      }
+    }
+    // 2) WhenAt：当 t 越过触发时刻且尚未触发，则触发一次性动作
+    for (const tr of this.tracks) {
+      if (tr.type !== "whenAt") continue;
+      if (!tr.fired && t >= tr.t) {
+        tr.fired = true;
+        this.fireWhenAt(tr);
+      } else if (tr.fired && t < tr.t) {
+        // 拖动回触发时刻之前 → 允许再次触发（重播语义）
+        tr.fired = false;
+      }
+    }
+    // 3) 粒子：发射 + 推进
+    this.updateParticles(t);
+  }
+
+  private applyTarget(target: TweenTarget, val: number) {
+    const st = this.rt.getState();
+    switch (target.kind) {
+      case "actorX": {
+        const a = st.actors.find((x) => x.id === target.actorId);
+        if (a) a.x = val;
+        break;
+      }
+      case "actorY": {
+        const a = st.actors.find((x) => x.id === target.actorId);
+        if (a) a.y = val;
+        break;
+      }
+      case "actorSize": {
+        const a = st.actors.find((x) => x.id === target.actorId);
+        if (a) a.size = val;
+        break;
+      }
+      case "actorAngle": {
+        const a = st.actors.find((x) => x.id === target.actorId);
+        if (a) a.angle = val;
+        break;
+      }
+      case "actorAlpha": {
+        const a = st.actors.find((x) => x.id === target.actorId);
+        if (a) a.visible = val >= 0.5; // alpha 0.5 以上视为可见
+        break;
+      }
+      case "actorHue": {
+        // 角色染色：存到 actors 上的临时字段（渲染层用 actor.tint 着色），无则用 penColor 复用逻辑
+        const a = st.actors.find((x) => x.id === target.actorId);
+        if (a) (a as unknown as { tint?: number }).tint = val;
+        break;
+      }
+      case "bgHue": {
+        (st as unknown as { bgHue?: number }).bgHue = val;
+        break;
+      }
+    }
+  }
+
+  private fireWhenAt(tr: WhenAtTrack) {
+    const st = this.rt.getState();
+    const act = tr.action;
+    switch (act.kind) {
+      case "say": {
+        const a = st.actors.find((x) => x.id === act.actorId);
+        if (a) {
+          a.message = act.text;
+          a.messageUntil = Date.now() + act.seconds * 1000;
+          this.rt.log(`[${a.name}] ${act.text}`);
+          setTimeout(() => {
+            a.message = null;
+            this.rt.notify();
+          }, act.seconds * 1000);
+        }
+        break;
+      }
+      case "setScene":
+        this.rt.setScene(act.sceneId);
+        break;
+      case "setExpression": {
+        const a = st.actors.find((x) => x.id === act.actorId);
+        if (a) this.rt.setExpression((act.expr ?? "normal") as unknown as "normal" | "happy" | "angry" | "surprised" | "sleepy");
+        break;
+      }
+      case "show":
+        this.rt.showActor(act.actorId);
+        break;
+      case "hide":
+        this.rt.hideActor(act.actorId);
+        break;
+    }
+  }
+
+  private updateParticles(t: number) {
+    const st = this.rt.getState();
+    const dt = 1 / 60;
+    // 发射：遍历 particle 轨道，在 [tStart,tEnd] 内按 rate 累积发射
+    for (const tr of this.tracks) {
+      if (tr.type !== "particles") continue;
+      const p = tr as ParticleTrack;
+      if (t < p.tStart || t > p.tEnd) continue;
+      p.emitted = (p.emitted ?? 0) + p.rate * dt * this.speed;
+      while ((p.emitted ?? 0) >= 1) {
+        p.emitted! -= 1;
+        st.particles!.push(this.makeParticle(p));
+      }
+    }
+    // 推进：按 dt*speed 更新每个粒子的位置/寿命，出界或到寿命则移除
+    const step = dt * this.speed;
+    const halfW = this.rt.getWidth() / 2 + 40;
+    const halfH = this.rt.getHeight() / 2 + 40;
+    const next: Particle[] = [];
+    for (const part of st.particles ?? []) {
+      part.age += step;
+      part.x += part.vx * step;
+      part.y += part.vy * step;
+      if (part.kind === "rain") {
+        part.vy -= 0; // 雨匀速下落（重力已被初速吸收，保持直线感）
+      } else if (part.kind === "snow") {
+        part.vx += Math.sin((part.age + part.x) * 3) * 6 * step; // 雪飘
+      } else if (part.kind === "lava") {
+        part.vy -= 60 * step; // 岩浆受重力
+      }
+      const out = Math.abs(part.x) > halfW || Math.abs(part.y) > halfH;
+      const dead = part.kind === "lava" && part.age > part.life;
+      if (!out && !dead) next.push(part);
+    }
+    st.particles = next;
+  }
+
+  private makeParticle(p: ParticleTrack): Particle {
+    const halfW = this.rt.getWidth() / 2;
+    if (p.kind === "rain") {
+      const x = (Math.random() * 2 - 1) * halfW;
+      const sp = p.speedMin + Math.random() * (p.speedMax - p.speedMin);
+      return { x, y: this.rt.getHeight() / 2 + 20, vx: 0, vy: -sp, color: p.color, r: 2, kind: "rain", age: 0, life: 99 };
+    }
+    if (p.kind === "snow") {
+      const x = (Math.random() * 2 - 1) * halfW;
+      const sp = p.speedMin + Math.random() * (p.speedMax - p.speedMin);
+      return { x, y: this.rt.getHeight() / 2 + 20, vx: (Math.random() * 2 - 1) * 20, vy: -sp, color: p.color, r: 2.5, kind: "snow", age: 0, life: 99 };
+    }
+    // lava：从底部中央喷发，抛物线
+    const sp = p.speedMin + Math.random() * (p.speedMax - p.speedMin);
+    const ang = -Math.PI / 2 + (Math.random() * 2 - 1) * 0.5; // 朝上、略散开
+    return {
+      x: (Math.random() * 2 - 1) * 20,
+      y: -this.rt.getHeight() / 2 + 10,
+      vx: Math.cos(ang) * sp,
+      vy: Math.sin(ang) * sp,
+      color: p.color,
+      r: 3,
+      kind: "lava",
+      age: 0,
+      life: 3,
+    };
+  }
+
+  private emit() {
+    const st = this.rt.getState();
+    st.timeline = { duration: this.duration, time: this.time, speed: this.speed, playing: this.playing };
+    this.rt.notify();
+  }
+}
+
 export class Runtime {
   private actions: Action[] = [];
   private onChange: (state: StageState) => void;
@@ -278,6 +728,8 @@ export class Runtime {
   private currentActorId: string = "erling";
   /** 当前处于「落笔」状态的角色 id（画笔路径归属于落笔的那位角色）。默认二零。 */
   private drawingActorId: string = "erling";
+  /** 时间轴子系统（分类10·科学）。所有 timeline 能力都委托给它，与 action 队列完全隔离。 */
+  public timeline: TimelineEngine;
 
   constructor(
     width: number,
@@ -316,13 +768,36 @@ export class Runtime {
       penDown: false,
       stars: this.initialStars.map((s) => ({ ...s })),
       clouds: this.initialClouds.map((c) => ({ x: c.x, y: c.y, r: c.r })),
+      particles: [],
       running: false,
       log: [],
     };
+    // 时间轴引擎：构造即初始化（与 action 队列完全隔离，旧项目不调用它的方法即无副作用）
+    this.timeline = new TimelineEngine(this);
   }
 
   getState() {
     return this.state;
+  }
+
+  /** 供时间轴引擎触发渲染（emit 为 private，这里暴露一个安全的通知入口）。 */
+  notify() {
+    this.emit();
+  }
+
+  /** 供时间轴引擎读取舞台尺寸（width/height 为 private）。 */
+  getWidth() {
+    return this.width;
+  }
+  getHeight() {
+    return this.height;
+  }
+
+  /** 颜色混合（reporter）：返回结果色名字符串（如「橙」），供「说」展示科学结论。 */
+  timelineMix(c1: string, c2: string): string {
+    const name = mixColorName(c1, c2);
+    this.log(`[科学] ${c1} + ${c2} = ${name}`);
+    return name;
   }
 
   reset() {
@@ -680,6 +1155,32 @@ export class Runtime {
   // --- Script registration ---
   setScripts(scripts: Script) {
     this.scripts = scripts;
+  }
+
+  /**
+   * 时间轴模式运行：把生成的 JS（内含 __runtime.timeline.reset/addTrack）注入执行，
+   * 再用时钟从头播放。与 action 队列的 runScript 完全隔离。
+   */
+  runTimelineCode(code: string) {
+    if (this.state.running) return;
+    this.state.running = true;
+    this.state.log = [];
+    this.emit();
+    try {
+      const wrapped = `(function(__runtime) {\n${code}\n})(__runtimeArg);`;
+      (window as unknown as Record<string, unknown>).__runtimeArg = this;
+      // eslint-disable-next-line no-eval
+      eval(wrapped);
+    } catch (e) {
+      this.log(`[系统] 时间轴程序出错：${e}`);
+    } finally {
+      delete (window as unknown as Record<string, unknown>).__runtimeArg;
+    }
+    // 轨道已加好：确保处于 t=0 初始帧，然后开始播放
+    this.timeline.seek(0);
+    this.timeline.play();
+    this.state.running = false;
+    this.emit();
   }
 
   start() {

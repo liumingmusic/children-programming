@@ -156,3 +156,36 @@ export function totalPoints(finalState: StageState): number {
 export function normAngle(a: number): number {
   return ((a % 360) + 360) % 360;
 }
+
+// 把时间轴（科学）项目的「看示范」真实跑一遍：
+// 用真实 Blockly 把 defaultXml 转成 JS，注入 runtime.runTimelineCode 执行（只加轨道、不报错），
+// 再手动 seek 到若干时间点，收集每个时刻的世界状态与最终日志。
+// 注意：时间轴播放用的是 requestAnimationFrame 主循环；本 helper 不依赖循环，
+// 而是直接 seek 驱动状态场（与线上拖动进度条同一逻辑 applyAt），从而可同步断言任意时刻。
+export async function runTimelineDemo(slug: string) {
+  const project = getProject(slug)!;
+  const code = genCode(project.defaultXml!);
+  const logs: string[] = [];
+  const rt = new Runtime(
+    480,
+    360,
+    (s: StageState) => {
+      logs.push(...s.log);
+    },
+    undefined,
+    { companions: companionsFor(project) }
+  );
+  // 注入并构建轨道（runTimelineCode 内部会 seek(0)+play()，play 走 rAF 循环——测试里 rAF 已被 stub，循环不会真实推进）
+  rt.runTimelineCode(code);
+  // 主动 seek 到各时间点，驱动状态场，把每个时刻的快照收集起来用于断言。
+  // 注意：getState() 返回的是 Runtime 内部的可变 state 引用（同一对象），
+  // 必须深拷贝每一帧，否则所有快照都会被最后一帧（t=8）覆盖。
+  const snapshots: { t: number; state: StageState }[] = [];
+  const times = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  for (const t of times) {
+    rt.timeline.seek(t);
+    snapshots.push({ t, state: JSON.parse(JSON.stringify(rt.getState())) as StageState });
+  }
+  const steps = computeSteps(project, code, logs);
+  return { code, logs, rt, snapshots, steps };
+}

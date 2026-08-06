@@ -1,0 +1,55 @@
+import type { CourseProject } from "@/courses";
+
+export const seedGrowProject: CourseProject = {
+  slug: "seed_grow",
+  category: "science",
+  title: "种子长大了",
+  ageGroup: "6-8 岁",
+  description: "一粒小种子埋进土里，慢慢发芽、长大，变成一棵小苗。",
+  missionBrief:
+    "种子喝到水、晒到太阳，就会一天天长大。写一个程序：当开始运行（时间轴）时，让二零的「大小」从 0.1 慢慢长到 1（种子→小苗），同时「上下位置」从 -80 升到 0（从土里冒出来）；并在第 4 秒让二零说「我发芽啦」。点运行，看种子怎么长大！",
+  erLingHint:
+    "① 拖一个橙色「当开始运行（时间轴）」；② 里面放「让 二零 的大小 从 0.1 到 1（在 0~8 秒）」；③ 再放「让 二零 的 上下位置 从 -80 到 0（在 0~8 秒）」；④ 放「当时间到达 4 秒，让 二零 说 我发芽啦 持续 2 秒」。点运行看种子长大！",
+  steps: [
+    { id: 1, title: "用「当开始运行（时间轴）」启动模拟" },
+    { id: 2, title: "让种子随时间变大、从土里冒出来" },
+    { id: 3, title: "让二零说出发芽了，点运行看生长过程" },
+  ],
+  timeline: true,
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start_tl" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_tween_prop">
+          <field name="ACTOR">erling</field>
+          <field name="PROP">size</field>
+          <field name="A">0.1</field>
+          <field name="B">1</field>
+          <field name="T0">0</field>
+          <field name="T1">8</field>
+          <next>
+            <block type="maker_tween_prop">
+              <field name="ACTOR">erling</field>
+              <field name="PROP">y</field>
+              <field name="A">-80</field>
+              <field name="B">0</field>
+              <field name="T0">0</field>
+              <field name="T1">8</field>
+              <next>
+                <block type="maker_when_at_say">
+                  <field name="ACTOR">erling</field>
+                  <field name="T">4</field>
+                  <value name="TEXT">
+                    <shadow type="text">
+                      <field name="TEXT">我发芽啦</field>
+                    </shadow>
+                  </value>
+                  <field name="SECONDS">2</field>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};
