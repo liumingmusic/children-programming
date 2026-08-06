@@ -129,6 +129,11 @@ function ChapterSection({
                 敬请期待
               </span>
             )}
+            {chapter.id === "pbl" && (
+              <span className="rounded-full bg-[#FAEEDA] px-2 py-0.5 text-xs font-medium text-[#412402]">
+                🎓 毕业项目
+              </span>
+            )}
           </div>
           <p className="truncate text-sm text-[#5F5E5A]">{chapter.description}</p>
         </div>
@@ -156,6 +161,15 @@ function ChapterSection({
               </p>
             </div>
           ) : (
+          <>
+          {chapter.id === "pbl" && (
+            <div className="mb-4 flex items-start gap-3 rounded-xl border border-[#EF9F27]/30 bg-[#FAF6EC] px-4 py-3 text-[#7A5A12]">
+              <span className="text-xl">🎓</span>
+              <p className="text-sm leading-relaxed">
+                这是毕业项目：把前面学过的序列、循环、绘图、音乐都组合起来，做出属于你自己的作品！
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {chapter.projects.map((p) => {
               const status = getNodeStatus(p.slug, completedSet, unlockedSet);
@@ -206,6 +220,7 @@ function ChapterSection({
               );
             })}
           </div>
+          </>
           )}
         </div>
       )}

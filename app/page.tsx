@@ -132,6 +132,29 @@ export default function Home() {
           </div>
         </section>
 
+        {/* 毕业项目引导 */}
+        <section className="px-4 py-8 sm:px-6">
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-3xl border border-[#EF9F27]/30 bg-gradient-to-br from-[#FAEEDA] to-[#FDF6E8] px-6 py-8 sm:px-10">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4">
+                <span className="text-3xl">🎓</span>
+                <div>
+                  <h3 className="text-lg font-medium text-[#412402]">学完课程，来挑战「毕业项目」！</h3>
+                  <p className="mt-1 max-w-xl text-sm leading-relaxed text-[#7A5A12]">
+                    把前面学到的序列、循环、绘图、音乐……都组合起来，做出属于孩子自己的毕业作品。
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/missions/stage-6-8"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-[#0F6E56] px-6 text-sm font-medium text-white transition-colors hover:bg-[#085041]"
+              >
+                看看毕业项目
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* 年龄入口 */}
         <section id="missions" className="px-4 py-16 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-6xl">

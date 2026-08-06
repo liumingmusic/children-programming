@@ -1,27 +1,42 @@
-name: Deploy to GitHub Pages
+name: Build and Deploy to Pages
 
+# ─────────────────────────────────────────────────────────────
+# 触发方式：手动（推荐）
+#   在仓库 GitHub 页面 → Actions → 本工作流 → "Run workflow" 触发。
+#   日常只需把代码 push 到 main；构建与发布由维护者手动点一次即可。
+#
+# 如需改为「推送 main 自动部署」，把下面 on 段改成：
+#   on:
+#     push:
+#       branches: [main]
+#     workflow_dispatch:
+# ─────────────────────────────────────────────────────────────
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      note:
+        description: "部署说明（可选，写入发布提交信息）"
+        required: false
+        default: ""
 
-# 允许 Actions 把构建产物发布到 Pages
+# 允许工作流把构建产物推送到仓库的 pages 分支
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# 同一时间只跑一个 Pages 部署，避免并发覆盖
+# 避免两次手动触发并发推送、互相覆盖
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: pages-deploy
+  cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,30 +45,29 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        # 依赖树存在 peer 冲突，必须用 --legacy-peer-deps（npm ci 会直接失败）
         run: npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Build (static export → dist/)
         run: npm run build
         env:
-          # 与本地一致：避免任何 ca/worker 相关注入干扰 next build 的 worker 进程
+          # 与本地一致：避免任何 ca/worker 注入干扰 next build 的 worker 进程
           NODE_OPTIONS: ""
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          # 注意：deploy-pages 的 timeout 输入单位为毫秒（代码里 MAX_TIMEOUT=600000）。
-          # 此前误填 600（毫秒）导致秒级超时取消；这里用最大值 10 分钟，给 Pages 发布后端充足完成时间。
-          timeout: 600000
+      - name: Deploy dist/ → pages 分支
+        run: |
+          # 把静态导出产物推送到独立的 pages 分支（orphan），由 GitHub Pages 从该分支发布。
+          # 刻意不走 actions/deploy-pages：此前该仓库的 Pages 部署 API 卡死
+          #（deployment 永远停在 in_progress），改用「从分支发布」绕开该 API，最稳妥。
+          #
+          # ⚠️ 一次性前置配置（GitHub 仓库 Settings → Pages → Build and deployment）：
+          #   Source = "Deploy from a branch"
+          #   Branch = pages，目录 = /(root)
+          # 配置后，本步骤每次推送 pages 分支即自动发布。
+          cd dist
+          git init -b pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "deploy: ${{ github.event.inputs.note || 'build from main' }} (${{ github.sha }})"
+          git push --force "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" pages
