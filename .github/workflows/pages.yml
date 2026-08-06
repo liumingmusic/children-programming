@@ -53,3 +53,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # 给 Pages 发布后端更长的完成时间，避免短暂延迟被判定超时
+          timeout: 600
