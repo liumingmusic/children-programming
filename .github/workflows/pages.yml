@@ -54,5 +54,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          # 给 Pages 发布后端更长的完成时间，避免短暂延迟被判定超时
-          timeout: 600
+          # 注意：deploy-pages 的 timeout 输入单位为毫秒（代码里 MAX_TIMEOUT=600000）。
+          # 此前误填 600（毫秒）导致秒级超时取消；这里用最大值 10 分钟，给 Pages 发布后端充足完成时间。
+          timeout: 600000
