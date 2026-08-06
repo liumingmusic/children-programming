@@ -23,17 +23,26 @@ function ErLingAvatar({ className = "" }: { className?: string }) {
 }
 
 interface CertificateClientProps {
-  slug: string;
+  slug?: string;
 }
 
-export default function CertificateClient({ slug }: CertificateClientProps) {
+export default function CertificateClient({ slug: slugProp }: CertificateClientProps) {
   const [title, setTitle] = useState<string>("");
   const [completedAt, setCompletedAt] = useState<Date | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState(false);
+  const [slug, setSlug] = useState(slugProp || "");
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // 当未通过 prop 传入 slug 时（单页静态导出 /certificate?slug=xxx），从 URL 读取
   useEffect(() => {
+    if (slugProp || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setSlug(params.get("slug") || "");
+  }, [slugProp]);
+
+  useEffect(() => {
+    if (!slug) return;
     let cancelled = false;
     async function load() {
       try {

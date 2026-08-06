@@ -15,7 +15,7 @@ interface CompletionModalProps {
 /**
  * 任务完成后的庆祝弹窗。
  * - 点击 ✕ 或「返回星球任务」都会关闭（onClose）。
- * - 「查看证书」跳到 /certificate/[slug]。
+ * - 「查看证书」跳到 /certificate?slug=<slug>（单页静态导出，客户端读 URL）。
  * - 若同阶段有下一个项目，提供「挑战下一个」直达。
  */
 export default function CompletionModal({ open, onClose, project }: CompletionModalProps) {
@@ -60,7 +60,7 @@ export default function CompletionModal({ open, onClose, project }: CompletionMo
               返回任务列表
             </Link>
             <Link
-              href={`/certificate/${project.slug}`}
+              href={`/certificate?slug=${project.slug}`}
               onClick={onClose}
               className="flex-1 rounded-xl border border-[#EF9F27]/30 bg-[#FAEEDA] px-4 py-2.5 text-sm font-medium text-[#412402] hover:bg-[#FAC775]"
             >

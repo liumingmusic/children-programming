@@ -26,7 +26,7 @@ describe("CompletionModal 完成弹窗", () => {
   it("「查看证书」链接指向 /certificate/{slug}", () => {
     render(<CompletionModal open onClose={() => {}} project={getProject("hello")!} />);
     const link = screen.getByRole("link", { name: /查看证书/ }) as HTMLAnchorElement;
-    expect(link.getAttribute("href")).toContain("/certificate/hello");
+    expect(link.getAttribute("href")).toContain("/certificate?slug=hello");
   });
 
   it("「返回任务列表」链接指向所属项目集合 /missions/{stage}", () => {

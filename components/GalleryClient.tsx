@@ -269,7 +269,7 @@ export default function GalleryClient() {
                         </Link>
                         {item.completed && (
                           <Link
-                            href={`/certificate/${item.slug}`}
+                            href={`/certificate?slug=${item.slug}`}
                             className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#EF9F27]/30 bg-[#FAEEDA] text-[#412402] hover:bg-[#FAC775]"
                             title="查看创作证书"
                           >
