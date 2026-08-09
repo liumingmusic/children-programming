@@ -68,6 +68,9 @@ jobs:
           git init -b pages
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # GITHUB_TOKEN 用于 git 认证时必须用 x-access-token 作用户名、token 作密码；
+          # 直接把 token 放在 @ 前会被当成用户名并触发密码交互（CI 无终端→失败）。
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git add -A
           git commit -q -m "deploy: ${{ github.event.inputs.note || 'build from main' }} (${{ github.sha }})"
-          git push --force "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" pages
+          git push --force origin pages
