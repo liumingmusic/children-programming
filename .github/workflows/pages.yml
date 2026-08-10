@@ -19,7 +19,7 @@ on:
         required: false
         default: ""
 
-# 允许工作流把构建产物推送到仓库的 pages 分支
+# 允许工作流把构建产物推送到仓库的 gh-pages 分支
 permissions:
   contents: write
 
@@ -54,18 +54,16 @@ jobs:
           # 与本地一致：避免任何 ca/worker 注入干扰 next build 的 worker 进程
           NODE_OPTIONS: ""
 
-      - name: Deploy dist/ → pages 分支
+      - name: Deploy dist/ → gh-pages 分支
         run: |
-          # 把静态导出产物推送到独立的 pages 分支（orphan），由 GitHub Pages 从该分支发布。
+          # 把静态导出产物推送到 gh-pages 分支（orphan），由 GitHub Pages 从该分支发布。
           # 刻意不走 actions/deploy-pages：此前该仓库的 Pages 部署 API 卡死
           #（deployment 永远停在 in_progress），改用「从分支发布」绕开该 API，最稳妥。
           #
-          # ⚠️ 一次性前置配置（GitHub 仓库 Settings → Pages → Build and deployment）：
-          #   Source = "Deploy from a branch"
-          #   Branch = pages，目录 = /(root)
-          # 配置后，本步骤每次推送 pages 分支即自动发布。
+          # GitHub Pages 的 Source 已是 "Deploy from a branch" + gh-pages（legacy 模式），
+          # 因此本步骤每次推送 gh-pages 即自动发布，无需任何额外 Settings 配置。
           cd dist
-          git init -b pages
+          git init -b gh-pages
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # GITHUB_TOKEN 用于 git 认证时必须用 x-access-token 作用户名、token 作密码；
@@ -73,4 +71,4 @@ jobs:
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git add -A
           git commit -q -m "deploy: ${{ github.event.inputs.note || 'build from main' }} (${{ github.sha }})"
-          git push --force origin pages
+          git push --force origin gh-pages
