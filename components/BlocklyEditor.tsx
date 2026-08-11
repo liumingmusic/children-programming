@@ -4,6 +4,7 @@ import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
+import type { ToolboxEntry } from "@/lib/toolbox-category";
 import type { Runtime } from "@/lib/runtime";
 
 export interface BlocklyEditorHandle {
@@ -14,6 +15,11 @@ export interface BlocklyEditorHandle {
   resetWorkspace: () => void;
   /** 标记当前内容已落盘，避免退出时重复 flush。 */
   markSaved: () => void;
+  /**
+   * 由外部手风琴工具箱调用：把某个积木（含默认 fields / shadow inputs）添加到画布。
+   * 直接用 Blockly 序列化 API 复刻 flyout 拖出的效果，并放到当前可视区域左上角附近。
+   */
+  addBlock: (type: string, entry?: ToolboxEntry) => void;
 }
 
 interface BlocklyEditorProps {
@@ -28,10 +34,19 @@ interface BlocklyEditorProps {
   bootstrapXml?: () => Promise<string | null>;
   /** 退出（卸载）时若有未落盘的改动，用最新 XML 立即落盘，避免「拖完就走」丢作品。 */
   onFlush?: (xml: string) => void;
+  /**
+   * 是否关闭 Blockly 自带的 flyout（扁平工具箱）。
+   * 默认 true：改用外部自定义「手风琴」工具箱（点击添加）。
+   * 设为 false 则保留原生 flyout（如只读演示/回放视图）。
+   */
+  disableNativeFlyout?: boolean;
 }
 
 const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
-  function BlocklyEditor({ onChange, onAutoSave, bootstrapXml, onFlush }, ref) {
+  function BlocklyEditor(
+    { onChange, onAutoSave, bootstrapXml, onFlush, disableNativeFlyout = true },
+    ref
+  ) {
     const blocklyDiv = useRef<HTMLDivElement>(null);
     const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null);
     // 注入初始化 / 程序化 loadXml 期间抑制自动保存，避免把「刚加载的存档」或「看示范」误存成学生作品
@@ -91,8 +106,7 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
       registerCustomBlocks();
       suppressRef.current = true;
 
-      const workspace = Blockly.inject(blocklyDiv.current, {
-        toolbox: TOOLBOX,
+      const injectOptions: Blockly.BlocklyOptions = {
         grid: {
           spacing: 20,
           length: 3,
@@ -106,7 +120,14 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
         },
         trashcan: true,
         theme: Blockly.Themes.Classic,
-      });
+      };
+      // 不传 toolbox → 不创建原生 flyout，画布占满整块区域，
+      // 由外部手风琴面板负责「点击添加积木」。
+      if (!disableNativeFlyout) {
+        injectOptions.toolbox = TOOLBOX;
+      }
+
+      const workspace = Blockly.inject(blocklyDiv.current, injectOptions);
 
       workspaceRef.current = workspace;
 
@@ -179,6 +200,34 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
         if (!workspace) return;
         workspace.clear();
         dirtyRef.current = true; // 清空也是改动，退出时会被 flush（若用户未另存）
+      },
+      addBlock: (type: string, entry?: ToolboxEntry) => {
+        const workspace = workspaceRef.current;
+        if (!workspace) return;
+        const state: Record<string, unknown> = { type };
+        if (entry?.fields && Object.keys(entry.fields).length) {
+          state.fields = entry.fields;
+        }
+        if (entry?.inputs && Object.keys(entry.inputs).length) {
+          state.inputs = entry.inputs;
+        }
+        let block: Blockly.BlockSvg | null = null;
+        try {
+          block = Blockly.serialization.blocks.append(
+            state as unknown as Parameters<typeof Blockly.serialization.blocks.append>[0],
+            workspace
+          ) as Blockly.BlockSvg | null;
+        } catch (e) {
+          console.error("addBlock failed", e);
+          return;
+        }
+        if (!block) return;
+        // 放到当前可视区域左上角附近（带轻微随机偏移，避免连续添加叠在一起）。
+        const metrics = workspace.getMetrics();
+        const baseX = (metrics && metrics.viewLeft != null ? metrics.viewLeft : 0) + 40;
+        const baseY = (metrics && metrics.viewTop != null ? metrics.viewTop : 0) + 40;
+        block.moveBy(baseX + Math.random() * 24, baseY + Math.random() * 24);
+        block.select();
       },
       run: async (runtime: Runtime) => {
         const workspace = workspaceRef.current;

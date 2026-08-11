@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Play, RotateCcw, Save, Trash2, FolderHeart, Sparkles, X, Wand2 } from "lucide-react";
 import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
+import ToolboxAccordion from "@/components/ToolboxAccordion";
 import StagePlayer from "@/components/StagePlayer";
 import ErLingAvatar from "@/components/ErLingAvatar";
 import StudioReplayOverlay from "@/components/StudioReplayOverlay";
@@ -361,6 +362,11 @@ export default function StudioClient() {
             </p>
           </div>
         </aside>
+
+        {/* 积木工具箱（手风琴）：点击添加积木 */}
+        <ToolboxAccordion
+          onPick={(item) => editorRef.current?.addBlock(item.doc.id, item.entry)}
+        />
 
         {/* 中间积木编辑区 */}
         <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
