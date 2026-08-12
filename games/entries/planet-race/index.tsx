@@ -45,6 +45,8 @@ export default function PlanetRace() {
   const { high, submit } = useHighScore("planet-race");
   const [phase, setPhase] = useState<Phase>("idle");
   const [finalScore, setFinalScore] = useState(0);
+  // 窄屏（手机）检测：竖屏手机屏幕小，星球赛车竖着玩太憋屈，引导用平板/电脑。
+  const [isNarrow, setIsNarrow] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stateRef = useRef<GameState>(createState());
@@ -69,6 +71,15 @@ export default function PlanetRace() {
       r: Math.random() * 1.6 + 0.4,
       s: 20 + Math.random() * 50,
     }));
+  }, []);
+
+  // 监听视口宽度：手机（≤640px，多为竖屏）直接提示用更大屏设备，不进入游戏。
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsNarrow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
   const draw = useCallback((s: GameState) => {
@@ -245,6 +256,22 @@ export default function PlanetRace() {
   }, phase === "playing");
 
   const best = Math.max(high, finalScore);
+
+  // 手机端：屏幕太小，星球赛车体验不好，引导用平板/电脑访问。
+  if (isNarrow) {
+    return (
+      <div className="flex flex-col items-center gap-5 px-6 py-16 text-center">
+        <div className="text-5xl">📱🚀</div>
+        <p className="max-w-xs text-[#5F5E5A]">
+          手机屏幕有点小，星球赛车玩着费劲～
+        </p>
+        <p className="max-w-xs text-[#5F5E5A]">
+          建议用 <span className="font-medium text-[#0F6E56]">平板</span> 或{" "}
+          <span className="font-medium text-[#0F6E56]">电脑</span> 打开，体验更顺畅！
+        </p>
+      </div>
+    );
+  }
 
   if (phase === "idle") {
     return (

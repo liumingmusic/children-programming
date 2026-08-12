@@ -228,10 +228,10 @@ export default function StarPiano() {
         )}
       </div>
 
-      {/* 钢琴键盘 */}
+      {/* 钢琴键盘（撑满内容宽度，上限由 GameShell 的 max-w-3xl 控制） */}
       <div
-        className="relative w-full max-w-md select-none"
-        style={{ height: 200, touchAction: "none" }}
+        className="relative w-full select-none"
+        style={{ height: 220, touchAction: "none" }}
       >
         {/* 白键 */}
         <div className="flex h-full w-full gap-1">
