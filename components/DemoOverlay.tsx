@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
-import { Runtime, type StageState, type Hazard, type Cloud, type Species } from "@/lib/runtime";
+import { Runtime, type StageState, type Hazard, type Cloud, type Apple, type Species } from "@/lib/runtime";
 import StagePlayer from "@/components/StagePlayer";
 
 /** 伙伴角色元数据：cast id → 物种与名字。新增伙伴角色在此登记。 */
@@ -75,6 +75,7 @@ export default function DemoOverlay({
       .filter((m) => m.kind === "obstacle" || m.kind === "badguy")
       .map((m) => ({ x: m.x, y: m.y, r: 32, kind: m.kind as "obstacle" | "badguy" })) as Hazard[];
     const clouds = (project.scene?.clouds ?? []) as Cloud[];
+    const apples = (project.scene?.apples ?? []) as Apple[];
     const companions = (project.cast ?? [])
       .map((id) => CAST_META[id])
       .filter((c): c is { id: string; species: Species; name: string } => Boolean(c));
@@ -83,7 +84,7 @@ export default function DemoOverlay({
       360,
       (s) => setState(s),
       initialStars,
-      { hazards, clouds, companions }
+      { hazards, clouds, apples, companions }
     );
     runtimeRef.current = rt;
 

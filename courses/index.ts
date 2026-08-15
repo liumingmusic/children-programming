@@ -53,12 +53,21 @@ export interface SceneCloud {
   vy: number;
   r: number;
 }
+/** 会持续下落的苹果（接苹果 / 反应力游戏用），由运行时按 vy 下落并在底部循环重生。 */
+export interface SceneApple {
+  x: number;
+  y: number;
+  vy: number;
+  r: number;
+}
 /** 项目的舞台场景配置（纯展示，不参与运行逻辑判定）。 */
 export interface ProjectScene {
   marks?: SceneMark[];
   walls?: SceneWall[];
   /** 会动的乌云列表（躲避类项目用）。 */
   clouds?: SceneCloud[];
+  /** 会下落的苹果列表（接苹果 / 反应力游戏用）。 */
+  apples?: SceneApple[];
 }
 
 /** 项目分类：每个学龄段下，把项目进一步按「概念 / 题材」分组，便于在 /missions/[stage] 页分层展示。 */

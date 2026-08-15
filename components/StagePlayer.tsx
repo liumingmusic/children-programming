@@ -479,6 +479,20 @@ export default function StagePlayer({ state, scene, onStageClick, onTimeline }: 
       });
     }
 
+    // 苹果（会下落，接苹果 / 反应力游戏用）：红苹果 emoji，随运行时实时重绘
+    if (state.apples && state.apples.length) {
+      state.apples.forEach((a) => {
+        const p = toScreen(a.x, a.y);
+        const r = Math.max(12, a.r * scale);
+        ctx.save();
+        ctx.font = `${Math.max(16, 22 * scale)}px -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI Emoji", sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("🍎", p.x, p.y);
+        ctx.restore();
+      });
+    }
+
     // 每个角色：先画说话气泡（位于角色之上），再按物种画角色本体
     for (const act of state.actors) {
       if (!act.visible) continue;

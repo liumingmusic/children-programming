@@ -41,6 +41,7 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_touching_cloud" },
     { kind: "block" as const, type: "maker_touching_actor", fields: { ACTOR: "sanqi" } },
     { kind: "block" as const, type: "maker_distance_to", fields: { ACTOR: "sanqi" } },
+    { kind: "block" as const, type: "maker_touching_apple" },
     { kind: "block" as const, type: "maker_when_receive", fields: { MSG: "出发" } },
     { kind: "block" as const, type: "maker_broadcast", fields: { MSG: "出发" } },
     // ---- 音乐与节奏分类（分类 8）----
@@ -621,6 +622,15 @@ export function registerCustomBlocks() {
         this.setTooltip(
           "返回当前控制的角色到选中的另一个角色的距离（数字，越小越近）。常放进「如果 距离 < 50 那么…」做接力赛交接、排队间距判断，也能直接「说」出来。"
         );
+        this.setHelpUrl("");
+      },
+    },
+    maker_touching_apple: {
+      init() {
+        this.appendDummyInput().appendField("碰到苹果");
+        this.setOutput(true, "Boolean");
+        this.setColour(210);
+        this.setTooltip("如果当前控制的角色碰到了下落的苹果返回真。接苹果 / 反应力游戏的核心条件：放进「如果 碰到苹果 那么…」接住它、加分数。");
         this.setHelpUrl("");
       },
     },
@@ -1308,6 +1318,10 @@ export function registerCustomBlocks() {
   javascriptGenerator.forBlock["maker_distance_to"] = (block) => {
     const actor = JSON.stringify(block.getFieldValue("ACTOR"));
     return [`__runtime.distanceTo(${actor})`, Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_touching_apple"] = () => {
+    return [`__runtime.touchingApple()`, Order.FUNCTION_CALL];
   };
 
   // ---- 音乐与节奏（分类 8）----

@@ -96,6 +96,15 @@ const KEY_SLUGS = [
   "key_move", "key_maze", "key_piano",
 ];
 
+/** 分类 D · 键盘游戏（进阶 5 项）：每项用「按键驱动一格一判定」模型，判定基于真实 JS 标记。 */
+const D_GAME: Record<string, { collide: string; score: boolean }> = {
+  catch_apple: { collide: "__runtime.touchingApple(", score: true },
+  dodge_fall: { collide: "__runtime.touchingCloud(", score: false },
+  breakout_intro: { collide: "__runtime.touchingStar(", score: true },
+  space_shooter: { collide: "__runtime.touchingCloud(", score: true },
+  reaction_game: { collide: "__runtime.touchingApple(", score: true },
+};
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -652,6 +661,17 @@ export function computeSteps(
           else if (id === 2) done = hasAudio;
           else if (id === 3) done = finished;
         }
+      } else if (project.slug in D_GAME) {
+        // 键盘游戏进阶 5 项：按键驱动一格一判定，基于真实 JS 标记判定「移动 + 碰撞结算 (+ 分数)」
+        const cfg = D_GAME[project.slug];
+        const finished = logs.includes("[系统] 程序执行完毕");
+        const keyFired = logs.some((l) => l.includes("按下按键"));
+        const hasMove = code.includes("__runtime.move");
+        const usedCollide = code.includes(cfg.collide);
+        const usedScore = !cfg.score || code.includes("__runtime.changeVar") || code.includes("__runtime.setVar");
+        if (id === 1) done = keyFired || hasMove;
+        else if (id === 2) done = usedCollide && usedScore && (keyFired || hasMove);
+        else if (id === 3) done = finished;
       }
     return { ...step, done };
   });

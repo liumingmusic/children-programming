@@ -5,7 +5,7 @@ import { vi } from "vitest";
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
-import { Runtime, type StageState, type Species } from "@/lib/runtime";
+import { Runtime, type StageState, type Species, type Apple } from "@/lib/runtime";
 import { computeSteps } from "@/lib/steps";
 import { getProject, type CourseProject } from "@/courses";
 
@@ -133,6 +133,7 @@ export async function runDemoFull(slug: string) {
     ?.filter((m) => m.kind === "obstacle" || m.kind === "badguy")
     .map((m) => ({ x: m.x, y: m.y, r: 32, kind: m.kind as "obstacle" | "badguy" })) ?? [];
   const clouds = project.scene?.clouds ?? [];
+  const apples = (project.scene?.apples ?? []) as Apple[];
   const rt = new Runtime(
     480,
     360,
@@ -140,7 +141,7 @@ export async function runDemoFull(slug: string) {
       logs.push(...s.log);
     },
     initialStars,
-    { hazards, clouds, companions: companionsFor(project) }
+    { hazards, clouds, apples, companions: companionsFor(project) }
   );
   rt.setScripts({ whenStart, whenStageClicked, whenKeyPressed, whenReceived });
   await rt.handleRunStart();

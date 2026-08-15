@@ -8,7 +8,7 @@ import ToolboxAccordion from "@/components/ToolboxAccordion";
 import StagePlayer from "@/components/StagePlayer";
 import DemoOverlay from "@/components/DemoOverlay";
 import ErLingAvatar from "@/components/ErLingAvatar";
-import { Runtime, StageState, type Hazard, type Cloud, type Species } from "@/lib/runtime";
+import { Runtime, StageState, type Hazard, type Cloud, type Apple, type Species } from "@/lib/runtime";
 
 /** 伙伴角色元数据：cast id → 物种与名字。新增伙伴角色在此登记。 */
 const CAST_META: Record<string, { id: string; species: Species; name: string }> = {
@@ -162,6 +162,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           kind: m.kind as "obstacle" | "badguy",
         })) as Hazard[],
       clouds: (project.scene?.clouds ?? []) as Cloud[],
+      apples: (project.scene?.apples ?? []) as Apple[],
       companions: (project.cast ?? [])
         .map((id) => CAST_META[id])
         .filter((c): c is { id: string; species: Species; name: string } => Boolean(c)),

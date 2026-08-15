@@ -35,6 +35,14 @@ export interface Cloud {
   r: number;
 }
 
+/** 会持续下落的苹果（接苹果 / 反应力游戏用），由运行时按 vy 持续下落，落到屏幕底部后从顶部循环重生。 */
+export interface Apple {
+  x: number;
+  y: number;
+  vy: number;
+  r: number;
+}
+
 export type Species = "erling" | "sanqi";
 
 export interface ActorState {
@@ -178,6 +186,8 @@ export interface StageState {
   stars: Star[];
   /** 当前乌云位置（会动），用于躲避类项目渲染与碰撞判定。 */
   clouds?: { x: number; y: number; r: number }[];
+  /** 当前苹果位置（会下落），用于接苹果 / 反应力游戏渲染与碰撞判定。 */
+  apples?: { x: number; y: number; r: number }[];
   /** 时间轴子系统状态（分类10·科学）。仅当项目为 timeline 模式时存在。 */
   timeline?: TimelineState;
   /** 当前活跃粒子（分类10·科学：雨/雪/火山）。 */
@@ -727,8 +737,11 @@ export class Runtime {
   private hazards: Hazard[];
   private clouds: Cloud[];
   private initialClouds: Cloud[];
+  private apples: Apple[];
+  private initialApples: Apple[];
   private vars: Record<string, number> = {};
   private cloudRaf: number | null = null;
+  private appleRaf: number | null = null;
   /** 当前被「控制角色」积木选中的角色 id；默认二零，保证旧项目行为不变。 */
   private currentActorId: string = "erling";
   /** 当前处于「落笔」状态的角色 id（画笔路径归属于落笔的那位角色）。默认二零。 */
@@ -744,6 +757,8 @@ export class Runtime {
     opts?: {
       hazards?: Hazard[];
       clouds?: Cloud[];
+      /** 下落的苹果（接苹果 / 反应力游戏用）。 */
+      apples?: Apple[];
       /** 额外的伙伴角色（如 三七）；二零始终存在。 */
       companions?: { id: string; species: Species; name: string }[];
     }
@@ -757,6 +772,8 @@ export class Runtime {
     this.hazards = opts?.hazards ? opts.hazards.map((h) => ({ ...h })) : [];
     this.initialClouds = opts?.clouds ? opts.clouds.map((c) => ({ ...c })) : [];
     this.clouds = this.initialClouds.map((c) => ({ ...c }));
+    this.initialApples = opts?.apples ? opts.apples.map((a) => ({ ...a })) : [];
+    this.apples = this.initialApples.map((a) => ({ ...a }));
     const actors: ActorState[] = [makeActor("erling", "erling", "二零")];
     for (const c of opts?.companions ?? []) {
       actors.push(makeActor(c.id, c.species, c.name));
@@ -773,6 +790,7 @@ export class Runtime {
       penDown: false,
       stars: this.initialStars.map((s) => ({ ...s })),
       clouds: this.initialClouds.map((c) => ({ x: c.x, y: c.y, r: c.r })),
+      apples: this.initialApples.map((a) => ({ x: a.x, y: a.y, r: a.r })),
       particles: [],
       running: false,
       log: [],
@@ -829,6 +847,8 @@ export class Runtime {
     this.state.stars = this.initialStars.map((s) => ({ ...s }));
     this.clouds = this.initialClouds.map((c) => ({ ...c }));
     this.state.clouds = this.initialClouds.map((c) => ({ x: c.x, y: c.y, r: c.r }));
+    this.apples = this.initialApples.map((a) => ({ ...a }));
+    this.state.apples = this.initialApples.map((a) => ({ x: a.x, y: a.y, r: a.r }));
     this.state.running = false;
     this.state.log = [];
     this.runningType = null;
@@ -1067,6 +1087,15 @@ export class Runtime {
     });
   }
 
+  /** 角色是否碰到任意一颗下落的苹果。 */
+  touchingApple(): boolean {
+    return this.apples.some((a) => {
+      const dx = this.currentActor().x - a.x;
+      const dy = this.currentActor().y - a.y;
+      return Math.sqrt(dx * dx + dy * dy) < a.r + 25;
+    });
+  }
+
   /** 启动乌云飘移动画（仅在存在乌云时）。 */
   private startClouds() {
     if (this.cloudRaf !== null || this.clouds.length === 0) return;
@@ -1090,6 +1119,34 @@ export class Runtime {
     if (this.cloudRaf !== null) {
       cancelAnimationFrame(this.cloudRaf);
       this.cloudRaf = null;
+    }
+  }
+
+  /** 启动苹果下落动画（仅在存在苹果时）。苹果持续下落，落到底部后从顶部随机 x 重生。 */
+  private startApples() {
+    if (this.appleRaf !== null || this.apples.length === 0) return;
+    const top = this.height / 2 - 30;
+    const bottom = -this.height / 2 + 30;
+    const step = () => {
+      for (const a of this.apples) {
+        a.y -= a.vy; // 屏幕坐标 y 向上为正，vy>0 时 y 减小 = 向下落
+        if (a.y < bottom) {
+          a.y = top;
+          a.x = (Math.random() * 2 - 1) * (this.width / 2 - 40);
+        }
+      }
+      this.state.apples = this.apples.map((a) => ({ x: a.x, y: a.y, r: a.r }));
+      this.emit();
+      this.appleRaf = requestAnimationFrame(step);
+    };
+    this.appleRaf = requestAnimationFrame(step);
+  }
+
+  /** 停止苹果下落动画。 */
+  private stopApples() {
+    if (this.appleRaf !== null) {
+      cancelAnimationFrame(this.appleRaf);
+      this.appleRaf = null;
     }
   }
 
@@ -1285,6 +1342,7 @@ export class Runtime {
     this.state.running = true;
     this.runningType = type;
     this.startClouds();
+    this.startApples();
     // 在用户手势内恢复 / 创建音频上下文，满足浏览器自动播放策略（首次发声前必须已 resume）
     const ctx = getAudioContext();
     if (ctx && ctx.state === "suspended") ctx.resume().catch(() => {});
@@ -1306,6 +1364,7 @@ export class Runtime {
       this.log(`[系统] 程序出错：${e}`);
     } finally {
       this.stopClouds();
+      this.stopApples();
       delete (window as unknown as Record<string, unknown>).__runtimeArg;
     }
 

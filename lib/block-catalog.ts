@@ -496,6 +496,18 @@ export const BLOCK_CATALOG: BlockDoc[] = [
     stages: ["stage-6-8", "stage-9-12"],
   },
   {
+    id: "maker_touching_apple",
+    label: "碰到苹果?",
+    category: "侦测",
+    color: 210,
+    shape: "boolean",
+    parts: [T("碰到苹果")],
+    purpose: "判断当前控制的角色是否碰到了下落的苹果（接苹果 / 反应力游戏用）。",
+    usage: "放进「如果 碰到苹果 那么…」接住苹果：加分、说一句话，或触发下一步。",
+    example: "如果 碰到苹果 那么 变量 得分 增加 1",
+    stages: ["stage-6-8", "stage-9-12"],
+  },
+  {
     id: "maker_compare",
     label: "比较",
     category: "侦测",
