@@ -86,7 +86,7 @@ children-programming/
 │   └── nav.ts                   #   ★ 全站导航单一数据源 NAV_ITEMS（新增模块只改这里）
 │
 ├── tests/                       # Vitest 测试（全量约 248 用例，含 courses / runtime / steps / 编辑器 / games）
-├── docs/                        # 规划与跟踪文档（plan-track / roadmap-6-8 / component-inventory）
+├── docs/                        # 规划与跟踪文档（plan-track 真值表 / roadmap-6-8 市调）
 ├── scripts/                     # 辅助脚本（如 analyze-components.ts）
 ├── public/                      # 静态资源
 └── next.config.ts / tailwind / tsconfig / vitest.config.ts   # 构建与配置
@@ -161,4 +161,4 @@ curl -I https://liumingmusic.github.io/children-programming/
 
 ## 文档
 
-更深入的规划与进度见 `docs/`：`plan-track.md`（总体计划与上线跟踪）、`roadmap-6-8.md`（6–8 岁阶段路线图）、`component-inventory-6-8.md`（6–8 岁积木组件清单）。
+更深入的规划与进度见 `docs/`：`plan-track.md`（总体计划与上线跟踪，跨三阶段真值表）、`roadmap-6-8.md`（早期市面调研与 6–8 岁阶段路线图）。
