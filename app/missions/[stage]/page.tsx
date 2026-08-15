@@ -62,7 +62,23 @@ export default async function StagePage({ params }: StagePageProps) {
 
           {/* 闯关解锁界面：与 /missions 一致的关卡地图（严格顺序解锁） */}
           {current.status === "open" ? (
-            <MissionsExplorer defaultStage={current.id} />
+            <>
+              <MissionsExplorer defaultStage={current.id} />
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#5DCAA5]/30 bg-[#F4FBF8] px-6 py-5">
+                <div>
+                  <p className="font-medium text-[#04342C]">任务做够了？去造物工坊自由发挥</p>
+                  <p className="mt-1 text-sm text-[#5F5E5A]">
+                    没有题目、没有对错——拖积木让二零和三七动起来，作品存在本地随时回看。
+                  </p>
+                </div>
+                <Link
+                  href={`/studio?stage=${current.id}`}
+                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-[#0F6E56] px-6 text-sm font-medium text-white transition-colors hover:bg-[#085041]"
+                >
+                  去造物工坊自由创作
+                </Link>
+              </div>
+            </>
           ) : (
             <div className="flex items-center gap-4 rounded-2xl border border-dashed border-black/10 bg-[#F1EFE8]/50 p-8 text-[#5F5E5A]">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-black/5">

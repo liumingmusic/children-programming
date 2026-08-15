@@ -27,6 +27,15 @@ const CAST_META: Record<string, { id: string; species: Species; name: string }> 
   sanqi: { id: "sanqi", species: "sanqi", name: "三七" },
 };
 
+/** 6-8 阶段工具箱：不含「变量」「函数」（它们是 9-12 的代码概念）。 */
+const STAGE6_CATEGORIES = ["事件", "运动", "外观", "画笔", "控制", "侦测", "运算", "声音", "角色"];
+
+/** 阶段 → 首页/导航展示标签。 */
+const STAGE_LABELS: Record<string, string> = {
+  "stage-6-8": "6-8 岁 · 纯积木",
+  "stage-9-12": "9-12 岁 · 代码初探",
+};
+
 const INITIAL_STATE: StageState = {
   width: STAGE_WIDTH,
   height: STAGE_HEIGHT,
@@ -75,6 +84,18 @@ export default function StudioClient() {
   const [hint, setHint] = useState<string | null>(null);
   const [resetToast, setResetToast] = useState<string | null>(null);
   const [showBrief, setShowBrief] = useState(false);
+  const [stage, setStage] = useState<string>("");
+
+  // 读 ?stage= 查询参数（客户端读取，避免静态导出下 useSearchParams 的 Suspense 约束）。
+  // 造物工坊据学龄裁剪工具箱：6-8 纯积木；9-12 完整积木 + 显示生成的代码。
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const s = new URLSearchParams(window.location.search).get("stage");
+    if (s === "stage-6-8" || s === "stage-9-12") setStage(s);
+  }, []);
+
+  const toolboxCategories = stage === "stage-6-8" ? STAGE6_CATEGORIES : undefined;
+  const showCode = stage === "stage-9-12";
 
   // 运行时：默认实例化「三七」，自由创作直接可用多角色 / 显隐 / 场景积木。
   useEffect(() => {
@@ -247,6 +268,11 @@ export default function StudioClient() {
             返回星球
           </Link>
           <h1 className="text-base font-medium text-[#04342C]">造物工坊</h1>
+          {stage && STAGE_LABELS[stage] && (
+            <span className="hidden rounded-full bg-[#EEEDFE] px-2.5 py-1 text-xs font-medium text-[#534AB7] sm:inline">
+              {STAGE_LABELS[stage]}
+            </span>
+          )}
           <span className="hidden rounded-full bg-[#E1F5EE] px-2.5 py-1 text-xs font-medium text-[#0F6E56] sm:inline">
             自由创作 · 本地保存
           </span>
@@ -363,8 +389,9 @@ export default function StudioClient() {
           </div>
         </aside>
 
-        {/* 积木工具箱（手风琴）：点击添加积木 */}
+        {/* 积木工具箱（手风琴）：点击添加积木；依学龄裁剪分类 */}
         <ToolboxAccordion
+          categories={toolboxCategories}
           onPick={(item) => editorRef.current?.addBlock(item.doc.id, item.entry)}
         />
 
@@ -438,9 +465,12 @@ export default function StudioClient() {
         </button>
       </footer>
 
-      {/* 生成的代码预览（调试用） */}
+      {/* 生成的代码预览：9-12 阶段默认可见（代码初探），其余隐藏 */}
       {generatedCode && (
-        <div className="hidden border-t border-black/5 bg-white px-4 py-2 text-xs text-[#5F5E5A]">
+        <div
+          className={`${showCode ? "" : "hidden "}border-t border-black/5 bg-white px-4 py-2 text-xs text-[#5F5E5A]`}
+        >
+          <p className="mb-1 font-medium text-[#04342C]">生成的 JavaScript（代码初探）</p>
           <pre className="font-mono">{generatedCode}</pre>
         </div>
       )}

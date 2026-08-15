@@ -11,6 +11,8 @@ import BlockChip from "./BlockChip";
 interface ToolboxAccordionProps {
   /** 点击某个积木时回调，携带该积木的文档与默认 TOOLBOX 条目（含 fields/shadow）。 */
   onPick: (item: ToolboxItem) => void;
+  /** 可选：只展示这些分类（造物工坊按学龄裁剪工具箱用）。不传则展示全部。 */
+  categories?: string[];
 }
 
 /**
@@ -19,10 +21,14 @@ interface ToolboxAccordionProps {
  * - 默认展开「事件」「运动」两个分类，其余折叠，学生可自行展开查找。
  * - 点击积木即「添加到画布」（点击添加，而非拖拽）。
  */
-export default function ToolboxAccordion({ onPick }: ToolboxAccordionProps) {
+export default function ToolboxAccordion({ onPick, categories }: ToolboxAccordionProps) {
+  const groups = categories
+    ? CATEGORIZED_TOOLBOX.filter((g) => categories.includes(g.category))
+    : CATEGORIZED_TOOLBOX;
+
   const [open, setOpen] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
-    for (const g of CATEGORIZED_TOOLBOX) {
+    for (const g of groups) {
       init[g.category] = DEFAULT_EXPANDED_CATEGORIES.includes(g.category);
     }
     return init;
@@ -40,7 +46,7 @@ export default function ToolboxAccordion({ onPick }: ToolboxAccordionProps) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {CATEGORIZED_TOOLBOX.map((group) => {
+        {groups.map((group) => {
           const isOpen = open[group.category];
           return (
             <div key={group.category} className="border-b border-black/5 last:border-b-0">

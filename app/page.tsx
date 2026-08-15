@@ -5,7 +5,17 @@ import SiteHeader from "@/components/SiteHeader";
 import { getProject } from "@/courses";
 
 export default function Home() {
-  const featuredSlugs = ["hello", "rainbow", "snowflake", "pentagon", "star5", "house"];
+  const featuredSlugs = [
+    "hello",
+    "rainbow",
+    "snowflake",
+    "chorus",
+    "relay_race",
+    "two_actor_chat",
+    "star5",
+    "house",
+    "animal_queue",
+  ];
   const featured = featuredSlugs
     .map((s) => getProject(s))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
@@ -18,6 +28,7 @@ export default function Home() {
 
   const faqs = [
     { q: "需要会打字吗？", a: "6-8 岁阶段全程用彩色积木，拖一拖就能编程，不需要键盘打字。" },
+    { q: "大一点的孩子（9-12 岁）学什么？", a: "9-12 岁从积木过渡到 JavaScript——拖积木的同时能看到它生成的代码，自然学会函数、变量，做出工具和小游戏。" },
     { q: "要花钱吗？", a: "完全免费、没有会员、没有广告，所有功能对孩子开放。" },
     { q: "孩子不会做怎么办？", a: "每个任务都有「看示范」参考答案，可以照着学，关掉就回到自己的画布继续探索。" },
   ];
@@ -128,6 +139,52 @@ export default function Home() {
                   </span>
                 </Link>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 更多玩法：游乐场 + 工坊 露出 */}
+        <section className="px-4 py-16 sm:px-6 sm:py-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-10 text-center">
+              <h2 className="text-2xl font-medium text-[#04342C]">除了做任务，还有更多玩法</h2>
+              <p className="mt-2 text-[#5F5E5A]">学累了去游乐场放松，或者到工坊自由创作</p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <Link
+                href="/playground"
+                className="group flex items-center gap-5 rounded-2xl border border-black/5 bg-white p-6 transition-shadow hover:shadow-md"
+              >
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#EEEDFE]">
+                  <Gamepad2 className="h-7 w-7 text-[#7F77DD]" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="flex items-center gap-1 text-lg font-medium text-[#04342C]">
+                    星球游乐场
+                    <ChevronRight className="h-4 w-4 text-[#7F77DD] transition-transform group-hover:translate-x-1" />
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-[#5F5E5A]">
+                    2048、打节拍、星球赛车、星星钢琴……编程学累了，来这儿纯放松。
+                  </p>
+                </div>
+              </Link>
+              <Link
+                href="/studio"
+                className="group flex items-center gap-5 rounded-2xl border border-black/5 bg-white p-6 transition-shadow hover:shadow-md"
+              >
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#FAECE7]">
+                  <Palette className="h-7 w-7 text-[#D85A30]" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="flex items-center gap-1 text-lg font-medium text-[#04342C]">
+                    造物工坊
+                    <ChevronRight className="h-4 w-4 text-[#D85A30] transition-transform group-hover:translate-x-1" />
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-[#5F5E5A]">
+                    没有题目的自由创作：让二零和三七动起来、画画、做音乐、讲故事，存本地随时回看。
+                  </p>
+                </div>
+              </Link>
             </div>
           </div>
         </section>

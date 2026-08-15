@@ -12,6 +12,12 @@ import { game2048Meta } from "./entries/game2048/meta";
 import { beatTapMeta } from "./entries/beat-tap/meta";
 import { planetRaceMeta } from "./entries/planet-race/meta";
 import { starPianoMeta } from "./entries/star-piano/meta";
+import { starCatchMeta } from "./entries/star-catch/meta";
+import { breakoutMeta } from "./entries/breakout/meta";
+import { snakeSpaceMeta } from "./entries/snake-space/meta";
+import { memoryCardsMeta } from "./entries/memory-cards/meta";
+import { numberMatchMeta } from "./entries/number-match/meta";
+import { beatMemoryMeta } from "./entries/beat-memory/meta";
 
 /** 全部游戏（按展示顺序排列）。 */
 export const GAMES: GameDefMeta[] = [
@@ -19,6 +25,12 @@ export const GAMES: GameDefMeta[] = [
   beatTapMeta,
   planetRaceMeta,
   starPianoMeta,
+  starCatchMeta,
+  breakoutMeta,
+  snakeSpaceMeta,
+  memoryCardsMeta,
+  numberMatchMeta,
+  beatMemoryMeta,
 ];
 
 /** 给 generateStaticParams 用的 slug 列表。 */

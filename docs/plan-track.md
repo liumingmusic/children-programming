@@ -358,3 +358,28 @@
 8. **回写本表**：把对应行 ⬜ 改为 ✅ 并补 slug。
 
 > 约定：所有新增项目默认接入对应阶段的 `projectSlugs`（stage-6-8 已含 105 项；stage-9-12 已含 32 项；stage-13-16 待建）。每次完善后同步更新本表，保证「计划」与「实况」一致。
+
+---
+
+## 五、站点功能模块（课程之外 · 非引导项目）
+
+> 这些模块是「课程任务（/learn）」之外的独立站点功能，不属于上面三阶段的引导项目计数，但同样需要随上线同步维护。导航由 `lib/nav.ts` 的 `NAV_ITEMS` 单一收口（现 7 项：首页 / 星球任务 / 平台指南 / 星球游乐场 / 造物工坊 / 组件库 / 作品花园 / 家长入口）。
+
+### 5.1 平台指南（`/guide`）　✅（已上线）
+- 独立菜单页，承载完整平台介绍：三理念（免费 / 无广告 / 隐私安全）+ 三阶段能力阶梯（6-8 图形化 / 9-12 代码初探 / 13-16 进阶工坊）+ 六大模块导航卡片（任务/游乐场/工坊/组件库/作品花园/家长入口，均可点跳转）+ 三步上手 + 家长话术。
+- 解决「首页装不下完整平台介绍」的问题：首页只做轻量露出（更多玩法卡片 + 9-12 FAQ），完整说明收口到 `/guide`。
+
+### 5.2 星球游乐场（`/playground`）　✅（已上线 · 10 个游戏）
+- drop-in 三步契约：每个游戏建 `games/entries/<slug>/{index.tsx, logic.ts, meta.ts}`，`registry.ts` 加 meta，`games/components/GamePlayer.tsx` 加 `GAME_COMPONENTS` 映射。
+- 现 10 个（`GameCategory` 四类）：
+  - 逻辑益智：`game2048`、`memory-cards`（记忆翻牌）、`number-match`（数字消消乐）、`snake-space`（太空贪吃蛇）
+  - 音乐节奏：`beat-tap`、`planet-race`、`star-piano`、`beat-memory`（节拍记忆 Simon）
+  - 体育竞速：`star-catch`（接星星）、`breakout`（星球打砖块）
+  - 物理沙盒：暂未上（预留分类）
+- 由上一轮的 4 个扩到 10 个；核心模式为纯函数 `logic.ts`（`createState`/`step`/`Input`）+ canvas 渲染（`useGameLoop`/`useHighScore`）或 DOM 游戏（React state），零引擎改动。
+
+### 5.3 造物工坊（`/studio`）　✅（已上线 · 按学龄分龄）
+- 单路由 + `?stage=` 参数分龄，避免拆重路由的 UI 重复；`StudioClient` 读取 `window.location.search` 的 `stage`（仅接受 `stage-6-8` / `stage-9-12`）。
+- **6-8 岁 · 纯积木**：工具箱过滤为 `["事件","运动","外观","画笔","控制","侦测","运算","声音","角色"]`（不含变量/函数），无代码预览区。
+- **9-12 岁 · 代码初探**：全量工具箱 + 显示「生成的 JavaScript（代码初探）」预览区，让孩子从积木过渡到看代码。
+- 工坊内可自由创作并 localStorage 本地保存（命名 / 我的作品 / 回放 / 删除）；任务页各阶段末尾 CTA 卡片 `Link href={\`/studio?stage=${current.id}\`}` 引导自由创作。

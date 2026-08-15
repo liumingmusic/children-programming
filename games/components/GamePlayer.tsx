@@ -8,6 +8,12 @@ import Game2048 from "@/games/entries/game2048";
 import BeatTap from "@/games/entries/beat-tap";
 import PlanetRace from "@/games/entries/planet-race";
 import StarPiano from "@/games/entries/star-piano";
+import StarCatch from "@/games/entries/star-catch";
+import Breakout from "@/games/entries/breakout";
+import SnakeSpace from "@/games/entries/snake-space";
+import MemoryCards from "@/games/entries/memory-cards";
+import NumberMatch from "@/games/entries/number-match";
+import BeatMemory from "@/games/entries/beat-memory";
 
 // slug -> 游戏组件 映射（客户端）。
 // 新增游戏时：① 建 entries/<slug>/{index.tsx,logic.ts,meta.ts} ② 在 registry.ts 加 meta
@@ -18,6 +24,12 @@ const GAME_COMPONENTS: Record<string, ComponentType> = {
   "beat-tap": BeatTap,
   "planet-race": PlanetRace,
   "star-piano": StarPiano,
+  "star-catch": StarCatch,
+  breakout: Breakout,
+  "snake-space": SnakeSpace,
+  "memory-cards": MemoryCards,
+  "number-match": NumberMatch,
+  "beat-memory": BeatMemory,
 };
 
 export default function GamePlayer({ slug }: { slug: string }) {
