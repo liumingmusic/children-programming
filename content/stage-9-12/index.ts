@@ -1,4 +1,36 @@
 import type { CourseProject } from "@/courses";
+import { fn_squareProject } from "./a/fn_square";
+import { fn_polygonProject } from "./a/fn_polygon";
+import { fn_houseProject } from "./a/fn_house";
+import { fn_snowflakeProject } from "./a/fn_snowflake";
+import { fn_treeProject } from "./a/fn_tree";
+import { fn_toolboxProject } from "./a/fn_toolbox";
+import { fn_spiralProject } from "./a/fn_spiral";
+import { fn_castleProject } from "./a/fn_castle";
+import { var_counterProject } from "./b/var_counter";
+import { var_scoreProject } from "./b/var_score";
+import { var_livesProject } from "./b/var_lives";
+import { var_speedProject } from "./b/var_speed";
+import { var_parityProject } from "./b/var_parity";
+import { var_gradientProject } from "./b/var_gradient";
+import { var_timerProject } from "./b/var_timer";
+import { var_bestProject } from "./b/var_best";
 
-/** stage-9-12 暂无项目，待后续按分类补充。 */
-export const stage9Projects: CourseProject[] = [];
+export const stage9Projects: CourseProject[] = [
+  fn_squareProject,
+  fn_polygonProject,
+  fn_houseProject,
+  fn_snowflakeProject,
+  fn_treeProject,
+  fn_toolboxProject,
+  fn_spiralProject,
+  fn_castleProject,
+  var_counterProject,
+  var_scoreProject,
+  var_livesProject,
+  var_speedProject,
+  var_parityProject,
+  var_gradientProject,
+  var_timerProject,
+  var_bestProject,
+];

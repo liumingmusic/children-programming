@@ -1,0 +1,43 @@
+import type { CourseProject } from "@/courses";
+
+export const var_livesProject: CourseProject = {
+  slug: "var_lives",
+  category: "var",
+  title: "生命值系统",
+  ageGroup: "9-12 岁",
+  description: "用变量「生命」记录还剩下的机会，每受一次伤就减 1。",
+  missionBrief: "定义变量「生命」=3，每受到一次伤害就让「生命 减少 1」，最后说出来——这就是游戏里的生命值。",
+  erLingHint: "① 当开始运行：把变量 生命 设为 3；② 重复 3 次（说 变量 生命、变量 生命 增加 -1）；③ 运行看生命一点点减少。",
+  steps: [
+    { id: 1, title: "用变量记录生命" },
+    { id: 2, title: "让生命随受伤减少" },
+    { id: 3, title: "运行看到生命变化" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_set_var">
+          <field name="NAME">生命</field>
+          <value name="VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_say">
+                  <value name="TEXT"><block type="maker_get_var"><field name="NAME">生命</field></block></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                  <next>
+                    <block type="maker_change_var">
+                      <field name="NAME">生命</field>
+                      <value name="DELTA"><shadow type="math_number"><field name="NUM">-1</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};

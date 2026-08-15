@@ -991,6 +991,34 @@ export class Runtime {
     return this.vars[name] ?? 0;
   }
 
+  /** 读取某个项目的最高分（本地保存，跨刷新保留）。没有记录时返回 0。 */
+  getBest(key: string): number {
+    if (typeof window === "undefined" || !window.localStorage) return 0;
+    try {
+      const raw = window.localStorage.getItem(`cp_best_${key}`);
+      return raw ? Number(raw) || 0 : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  /** 写入最高分（只有比已记录更高才更新）。返回更新后的最高分。 */
+  setBest(key: string, value: number): number {
+    const prev = this.getBest(key);
+    if (value > prev) {
+      if (typeof window !== "undefined" && window.localStorage) {
+        try {
+          window.localStorage.setItem(`cp_best_${key}`, String(value));
+        } catch {
+          /* 忽略隐私模式等写入失败 */
+        }
+      }
+      this.log(`[系统] 新纪录！最高分更新为 ${value}`);
+      return value;
+    }
+    return prev;
+  }
+
   // --- 算术（分类 9 · 数学启蒙）：同步计算并返回结果，同时记日志供步骤判定 ---
   // 与 getVar 一样是「即时计算」，不进 Action 队列（运算本身无需动画，结果由「说」展示）。
   add(a: number, b: number): number {

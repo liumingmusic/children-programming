@@ -14,6 +14,7 @@ export type BlockCategory =
   | "侦测"
   | "运算"
   | "变量"
+  | "函数"
   | "声音"
   | "角色"
   | "特殊";
@@ -52,6 +53,7 @@ export const CATEGORY_COLORS: Record<BlockCategory, string> = {
   侦测: "#4A90D9",
   运算: "#D98C3F",
   变量: "#9B6CC9",
+  函数: "#5B8DEF",
   声音: "#B45EC9",
   角色: "#3FA796",
   特殊: "#C0566B",
@@ -66,6 +68,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   "侦测",
   "运算",
   "变量",
+  "函数",
   "声音",
   "角色",
   "特殊",
@@ -851,6 +854,75 @@ export const BLOCK_CATALOG: BlockDoc[] = [
     usage: "在「记忆翻牌」项目里单独游玩，靠记忆记住卡片位置，把 6 对全部配对。",
     example: "翻开 🍎，再翻 🍎 → 配对成功。",
     stages: ["stage-6-8"],
+  },
+
+  // —— 9-12 阶段 · 函数与自定义积木（分类 A）——
+  {
+    id: "maker_func_def",
+    label: "定义积木",
+    category: "函数",
+    color: 255,
+    shape: "hat",
+    parts: [T("定义积木"), { kind: "input", inputType: "text", placeholder: "积木名" }],
+    purpose: "把一串积木打包成「你自己的积木」，取个名字。后面用「调用我的积木」就能反复使用它，不必每次都重搭。",
+    usage: "先放「定义积木 名字」，再把要重复用的动作放进它下面的凹槽；最后用「调用我的积木 名字」来运行。函数还能自己调用自己（递归）。",
+    example: "定义积木 画正方形 ▸（落笔 ▸ 重复 4 次 ▸ 移动 100 ▸ 右转 90 ▸ 抬笔）",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_func_call",
+    label: "调用我的积木",
+    category: "函数",
+    color: 255,
+    shape: "statement",
+    parts: [T("调用我的积木"), { kind: "input", inputType: "text", placeholder: "积木名" }],
+    purpose: "运行一次你定义的积木，相当于把那一串积木再执行一遍。可以调用很多次，也能在定义里调用自己（递归）。",
+    usage: "名字要和「定义积木」里写的一模一样（区分大小写）。例如定义了「画正方形」，这里就填「画正方形」。",
+    example: "调用我的积木 画正方形",
+    stages: ["stage-9-12"],
+  },
+
+  // —— 9-12 阶段 · 变量与状态进阶（分类 B）：计时器 / 最高分 ——
+  {
+    id: "maker_now",
+    label: "当前时间",
+    category: "变量",
+    color: 330,
+    shape: "reporter",
+    parts: [T("当前时间(毫秒)")],
+    purpose: "返回此刻的时间（一个很大的毫秒数）。把它存进变量，等一会儿再取一次相减，就能算出「用了多少毫秒」。",
+    usage: "开始 = 当前时间；……（做事情）……；结束 = 当前时间；用时 = 结束 - 开始。常用来做计时挑战。",
+    example: "把变量 开始 设为 当前时间",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_best_get",
+    label: "最高分",
+    category: "变量",
+    color: 330,
+    shape: "reporter",
+    parts: [T("最高分"), { kind: "input", inputType: "text", placeholder: "记录名" }],
+    purpose: "读出某个游戏的历史最高分（本地保存，关掉网页也还在）。第一次玩没有记录时返回 0。",
+    usage: "在「如果 得分 > 最高分 那么 …」里用，判断要不要刷新纪录。记录名要和「写入最高分」保持一致。",
+    example: "说 当前最高分是 最高分 得分",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_best_set",
+    label: "写入最高分",
+    category: "变量",
+    color: 330,
+    shape: "statement",
+    parts: [
+      T("把最高分"),
+      { kind: "input", inputType: "text", placeholder: "记录名" },
+      T("设为"),
+      { kind: "input", inputType: "number", placeholder: "得分" },
+    ],
+    purpose: "把这次的得分记下来：只有当它比已保存的最高分更高时才会更新（自动替你比较，不会越记越低）。",
+    usage: "游戏结束时用，把本次得分写进「最高分」。下次再打开网页，用「最高分」积木就能读出来。",
+    example: "把最高分 得分 设为 变量 本局得分",
+    stages: ["stage-9-12"],
   },
 ];
 

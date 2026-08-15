@@ -66,6 +66,13 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_emit_snow", fields: { T0: "0", T1: "8", RATE: "15", SMIN: "40", SMAX: "80" } },
     { kind: "block" as const, type: "maker_emit_lava", fields: { T0: "0", T1: "8", RATE: "25", SMIN: "120", SMAX: "200" } },
     { kind: "block" as const, type: "maker_mix_color", fields: { C1: "红", C2: "黄" } },
+    // ---- 9-12 阶段 · 函数与自定义积木（分类 A）----
+    { kind: "block" as const, type: "maker_func_def", fields: { NAME: "我的积木" }, inputs: { DO: {} } },
+    { kind: "block" as const, type: "maker_func_call", fields: { NAME: "我的积木" } },
+    // ---- 9-12 阶段 · 变量与状态进阶（分类 B）：计时器 / 最高分 ----
+    { kind: "block" as const, type: "maker_now" },
+    { kind: "block" as const, type: "maker_best_get", fields: { KEY: "得分" } },
+    { kind: "block" as const, type: "maker_best_set", fields: { KEY: "得分" }, inputs: { VALUE: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
   ],
 } as unknown as Blockly.utils.toolbox.ToolboxDefinition;
 
@@ -939,6 +946,68 @@ export function registerCustomBlocks() {
         this.setHelpUrl("");
       },
     },
+    // ---- 9-12 阶段 · 函数与自定义积木（分类 A）----
+    maker_func_def: {
+      init() {
+        this.appendDummyInput()
+          .appendField("定义积木")
+          .appendField(new Blockly.FieldTextInput("我的积木"), "NAME");
+        this.appendStatementInput("DO").setCheck(null);
+        this.setColour(255);
+        this.setTooltip("把一串积木打包成你自己的积木。名字要和「调用我的积木」保持一致。函数里还能调用自己（递归）。");
+        this.setHelpUrl("");
+        this.setPreviousStatement(false);
+        this.setNextStatement(false);
+      },
+    },
+    maker_func_call: {
+      init() {
+        this.appendDummyInput()
+          .appendField("调用我的积木")
+          .appendField(new Blockly.FieldTextInput("我的积木"), "NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(255);
+        this.setTooltip("运行一次你定义的积木。名字要一模一样（区分大小写）。可以调用很多次，也能自己调用自己做递归。");
+        this.setHelpUrl("");
+      },
+    },
+    // ---- 9-12 阶段 · 变量与状态进阶（分类 B）：计时器 / 最高分 ----
+    maker_now: {
+      init() {
+        this.appendDummyInput().appendField("当前时间(毫秒)");
+        this.setOutput(true, "Number");
+        this.setColour(330);
+        this.setTooltip("返回此刻的时间（毫秒）。存进变量后两次相减，就能算出用了多少毫秒，做计时挑战。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_best_get: {
+      init() {
+        this.appendDummyInput()
+          .appendField("最高分")
+          .appendField(new Blockly.FieldTextInput("得分"), "KEY");
+        this.setOutput(true, "Number");
+        this.setColour(330);
+        this.setTooltip("读出某个游戏的历史最高分（本地保存）。没有记录时返回 0。记录名要和「写入最高分」一致。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_best_set: {
+      init() {
+        this.appendDummyInput()
+          .appendField("把最高分")
+          .appendField(new Blockly.FieldTextInput("得分"), "KEY")
+          .appendField("设为");
+        this.appendValueInput("VALUE").setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("把本次得分记下来：只有比已保存的最高分更高才会更新（自动比较，不会越记越低）。");
+        this.setHelpUrl("");
+      },
+    },
   });
 
   // Hat block: when start runs the stack and then ends
@@ -1253,5 +1322,41 @@ export function registerCustomBlocks() {
     const c1 = JSON.stringify(block.getFieldValue("C1"));
     const c2 = JSON.stringify(block.getFieldValue("C2"));
     return [`__runtime.timelineMix(${c1}, ${c2})`, Order.FUNCTION_CALL];
+  };
+
+  // ---- 9-12 阶段 · 函数与自定义积木（分类 A）----
+  // 关键点：运行时是「积木动作先入队、再由动画循环回放」，因此普通 function 声明
+  // + 调用就完全正确，无需 async/await；function 声明会 hoist，调用可出现在定义之前，
+  // 递归（函数体内调用自己）也因此天然成立。
+  const sanitizeFnName = (raw: string): string => {
+    const cleaned = (raw || "我的积木").replace(/[^\w\u4e00-\u9fff$]/g, "");
+    return cleaned || "myBlock";
+  };
+
+  javascriptGenerator.forBlock["maker_func_def"] = (block, generator) => {
+    const fn = sanitizeFnName(block.getFieldValue("NAME"));
+    const body = generator.statementToCode(block, "DO");
+    return `function ${fn}() {\n${body}}\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_func_call"] = (block) => {
+    const fn = sanitizeFnName(block.getFieldValue("NAME"));
+    return `${fn}();\n`;
+  };
+
+  // ---- 9-12 阶段 · 变量与状态进阶（分类 B）：计时器 / 最高分 ----
+  javascriptGenerator.forBlock["maker_now"] = () => {
+    return ["Date.now()", Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_best_get"] = (block) => {
+    const key = JSON.stringify(block.getFieldValue("KEY"));
+    return [`__runtime.getBest(${key})`, Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_best_set"] = (block, generator) => {
+    const key = JSON.stringify(block.getFieldValue("KEY"));
+    const value = generator.valueToCode(block, "VALUE", Order.ATOMIC) || "0";
+    return `__runtime.setBest(${key}, ${value});\n`;
   };
 }

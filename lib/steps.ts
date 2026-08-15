@@ -76,6 +76,16 @@ const PBL_SLUGS = [
   "singing_picture", "two_actor_show", "my_solar_system", "interactive_book",
 ];
 
+/** 分类 A · 函数与自定义积木（9-12 阶段，全 8 项）。判定基于真实 JS 标记：定义了函数、调用了函数。 */
+const FN_SLUGS = [
+  "fn_square", "fn_polygon", "fn_house", "fn_snowflake", "fn_tree", "fn_toolbox", "fn_spiral", "fn_castle",
+];
+
+/** 分类 B · 变量与状态（9-12 阶段，全 8 项）。判定基于真实 JS 标记（变量/取余/计时/最高分）。 */
+const VAR_SLUGS = [
+  "var_counter", "var_score", "var_lives", "var_speed", "var_parity", "var_gradient", "var_timer", "var_best",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -552,6 +562,46 @@ export function computeSteps(
         if (id === 1) done = clickFired;
         else if (id === 2) done = code.includes("__runtime.touchingStar()") && code.includes("__runtime.gotoStar");
         else if (id === 3) done = logs.some((log) => log.includes("所有星星都收集完了")) || finished;
+      }
+    }
+    else if (FN_SLUGS.includes(project.slug)) {
+      // 函数类（分类 A）：基于真实 JS 标记判定「定义了函数 / 调用了函数」
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (id === 1) done = code.includes("function ");
+      else if (id === 2) done = code.includes("();");
+      else if (id === 3) done = finished;
+    } else if (VAR_SLUGS.includes(project.slug)) {
+      // 变量类（分类 B）：基于真实 JS 标记判定「用了变量 / 取余 / 计时 / 最高分」
+      const finished = logs.includes("[系统] 程序执行完毕");
+      const hasVar = code.includes("__runtime.setVar") || code.includes("__runtime.changeVar") || code.includes("__runtime.getVar");
+      if (project.slug === "var_counter" || project.slug === "var_score") {
+        if (id === 1) done = hasVar;
+        else if (id === 2) done = hasVar && code.includes("__runtime.move");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "var_lives") {
+        if (id === 1) done = hasVar;
+        else if (id === 2) done = code.includes("__runtime.changeVar") && /-\d/.test(code);
+        else if (id === 3) done = finished;
+      } else if (project.slug === "var_speed") {
+        if (id === 1) done = hasVar;
+        else if (id === 2) done = code.includes("__runtime.getVar") && code.includes("__runtime.move");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "var_parity") {
+        if (id === 1) done = hasVar;
+        else if (id === 2) done = code.includes("__runtime.getVar") && code.includes("%");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "var_gradient") {
+        if (id === 1) done = code.includes("__runtime.penDown()") && hasVar;
+        else if (id === 2) done = code.includes("__runtime.changeVar") && code.includes("__runtime.setPenColor");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "var_timer") {
+        if (id === 1) done = code.includes("Date.now()");
+        else if (id === 2) done = code.includes("Date.now()") && code.includes("__runtime.sub");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "var_best") {
+        if (id === 1) done = hasVar;
+        else if (id === 2) done = code.includes("__runtime.setBest");
+        else if (id === 3) done = finished;
       }
     }
     return { ...step, done };

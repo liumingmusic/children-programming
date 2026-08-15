@@ -1,0 +1,41 @@
+import type { CourseProject } from "@/courses";
+
+export const var_speedProject: CourseProject = {
+  slug: "var_speed",
+  category: "var",
+  title: "速度变量控制移动",
+  ageGroup: "9-12 岁",
+  description: "用变量「速度」当步长，改一个地方就能让二零走快走慢。",
+  missionBrief: "把「移动」的步数接到变量「速度」上。想让二零走快就调大速度，走慢就调小——这就是用变量控制行为。",
+  erLingHint: "① 当开始运行：把变量 速度 设为 15；② 重复 8 次（移动 速度、右转 45）；③ 运行。改一下速度的值，看走的圈大小变化。",
+  steps: [
+    { id: 1, title: "用变量当步长" },
+    { id: 2, title: "让移动跟着变量走" },
+    { id: 3, title: "运行看速度的效果" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_set_var">
+          <field name="NAME">速度</field>
+          <value name="VALUE"><shadow type="math_number"><field name="NUM">15</field></shadow></value>
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><block type="maker_get_var"><field name="NAME">速度</field></block></value>
+                  <next>
+                    <block type="maker_turn">
+                      <value name="DEGREES"><shadow type="math_number"><field name="NUM">45</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+};
