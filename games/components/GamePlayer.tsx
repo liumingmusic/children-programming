@@ -16,6 +16,11 @@ import NumberMatch from "@/games/entries/number-match";
 import BeatMemory from "@/games/entries/beat-memory";
 import GravityBounce from "@/games/entries/gravity-bounce";
 import Billiard from "@/games/entries/billiard";
+import SpaceRunner from "@/games/entries/space-runner";
+import MeteorDodge from "@/games/entries/meteor-dodge";
+import Fishing from "@/games/entries/fishing";
+import Tetris from "@/games/entries/tetris";
+import Sokoban from "@/games/entries/sokoban";
 
 // slug -> 游戏组件 映射（客户端）。
 // 新增游戏时：① 建 entries/<slug>/{index.tsx,logic.ts,meta.ts} ② 在 registry.ts 加 meta
@@ -34,6 +39,11 @@ const GAME_COMPONENTS: Record<string, ComponentType> = {
   "beat-memory": BeatMemory,
   "gravity-bounce": GravityBounce,
   billiard: Billiard,
+  "space-runner": SpaceRunner,
+  "meteor-dodge": MeteorDodge,
+  fishing: Fishing,
+  tetris: Tetris,
+  sokoban: Sokoban,
 };
 
 export default function GamePlayer({ slug }: { slug: string }) {

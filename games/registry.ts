@@ -20,6 +20,11 @@ import { numberMatchMeta } from "./entries/number-match/meta";
 import { beatMemoryMeta } from "./entries/beat-memory/meta";
 import { gravityBounceMeta } from "./entries/gravity-bounce/meta";
 import { billiardMeta } from "./entries/billiard/meta";
+import { spaceRunnerMeta } from "./entries/space-runner/meta";
+import { meteorDodgeMeta } from "./entries/meteor-dodge/meta";
+import { fishingMeta } from "./entries/fishing/meta";
+import { tetrisMeta } from "./entries/tetris/meta";
+import { sokobanMeta } from "./entries/sokoban/meta";
 
 /** 全部游戏（按展示顺序排列）。 */
 export const GAMES: GameDefMeta[] = [
@@ -35,6 +40,11 @@ export const GAMES: GameDefMeta[] = [
   beatMemoryMeta,
   gravityBounceMeta,
   billiardMeta,
+  spaceRunnerMeta,
+  meteorDodgeMeta,
+  fishingMeta,
+  tetrisMeta,
+  sokobanMeta,
 ];
 
 /** 给 generateStaticParams 用的 slug 列表。 */

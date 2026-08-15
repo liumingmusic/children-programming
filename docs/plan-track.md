@@ -369,14 +369,14 @@
 - 独立菜单页，承载完整平台介绍：三理念（免费 / 无广告 / 隐私安全）+ 三阶段能力阶梯（6-8 图形化 / 9-12 代码初探 / 13-16 进阶工坊）+ 六大模块导航卡片（任务/游乐场/工坊/组件库/作品花园/家长入口，均可点跳转）+ 三步上手 + 家长话术。
 - 解决「首页装不下完整平台介绍」的问题：首页只做轻量露出（更多玩法卡片 + 9-12 FAQ），完整说明收口到 `/guide`。
 
-### 5.2 星球游乐场（`/playground`）　✅（已上线 · 12 个游戏）
+### 5.2 星球游乐场（`/playground`）　✅（已上线 · 17 个游戏）
 - drop-in 三步契约：每个游戏建 `games/entries/<slug>/{index.tsx, logic.ts, meta.ts}`，`registry.ts` 加 meta，`games/components/GamePlayer.tsx` 加 `GAME_COMPONENTS` 映射。
-- 现 12 个（`GameCategory` 四类）：
-  - 逻辑益智：`game2048`、`memory-cards`（记忆翻牌）、`number-match`（数字消消乐）、`snake-space`（太空贪吃蛇）
+- 现 17 个（`GameCategory` 四类）：
+  - 逻辑益智：`game2048`、`memory-cards`（记忆翻牌）、`number-match`（数字消消乐）、`snake-space`（太空贪吃蛇）、`tetris`（俄罗斯方块 · 7-bag+旋转/消行）、`sokoban`（推箱子 · 标准关卡记号）
   - 音乐节奏：`beat-tap`、`planet-race`、`star-piano`、`beat-memory`（节拍记忆 Simon）
-  - 体育竞速：`star-catch`（接星星）、`breakout`（星球打砖块）
+  - 体育竞速：`star-catch`（接星星）、`breakout`（星球打砖块）、`space-runner`（太空跑酷 · 跳跃躲小行星）、`meteor-dodge`（躲避流星 · 左右移动）、`fishing`（钓鱼 · 时机收竿）
   - 物理沙盒：`gravity-bounce`（重力弹球 · 重力+弹性碰撞）、`billiard`（星球台球 · 等质量弹性碰撞/动量守恒）
-- 由上一轮的 4 个扩到 10 个、再扩到 12 个（物理沙盒分类从预留补齐）；核心模式为纯函数 `logic.ts`（`createState`/`step`/`Input`）+ canvas 渲染（`useGameLoop`/`useHighScore`）或 DOM 游戏（React state），零引擎改动。
+- 由上一轮的 4 个扩到 10 个、再扩到 12 个、本轮再扩到 17 个（体育竞速补 3 个、逻辑益智补 2 个经典）；核心模式为纯函数 `logic.ts`（`createState`/`step`/`Input`，含可选 seed 做确定性测试）+ canvas 渲染（`useGameLoop`/`useHighScore`）或 DOM 游戏（React state），零引擎改动。
 
 ### 5.3 造物工坊（`/studio`）　✅（已上线 · 按学龄分龄）
 - 单路由 + `?stage=` 参数分龄，避免拆重路由的 UI 重复；`StudioClient` 读取 `window.location.search` 的 `stage`（仅接受 `stage-6-8` / `stage-9-12`）。
