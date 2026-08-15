@@ -14,7 +14,7 @@ export const CATEGORIES: Record<string, ProjectCategory[]> = {
   "stage-13-16": stage13Categories,
 };
 
-/** 全部项目（当前仅 stage-6-8 有项目）。 */
+/** 各阶段项目聚合（stage-6-8 已 105 项，stage-9-12 已 32 项，stage-13-16 待建）。 */
 export const projects: CourseProject[] = [
   ...stage6Projects,
   ...stage9Projects,

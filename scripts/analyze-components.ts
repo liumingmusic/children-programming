@@ -1,4 +1,5 @@
 import { getStageProjects } from "../courses/index";
+import type { CourseProject } from "../courses/index";
 
 // 积木 type -> 中文组件名映射
 const BLOCK_LABELS: Record<string, string> = {
@@ -69,13 +70,13 @@ const CAT_LABELS: Record<string, string> = {
   game: "分类6·游戏",
 };
 
-function detectSpecial(p: any): string[] {
+function detectSpecial(p: CourseProject): string[] {
   const out: string[] = [];
   if (p.component === "memory") out.push("记忆翻牌组件(MemoryGame)");
   const scene = p.scene;
   if (scene?.clouds) out.push("飘动乌云(Cloud动画)");
   const marks = scene?.marks || [];
-  const kinds = marks.map((m: any) => m.kind).filter(Boolean);
+  const kinds = marks.map((m) => m.kind).filter(Boolean);
   if (kinds.includes("obstacle")) out.push("障碍标记(Obstacle)");
   if (kinds.includes("badguy")) out.push("坏人标记(Badguy/多角色)");
   return out;

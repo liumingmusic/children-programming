@@ -47,10 +47,10 @@ describe("两次注入+加载（模拟退出再进入）", () => {
     let threw = "";
     try {
       loadXml(ws2, loaded ?? "");
-    } catch (e: any) {
-      threw = e?.message ?? String(e);
+    } catch (e) {
+      threw = e instanceof Error ? e.message : String(e);
     }
-    console.log("[DIAG2] ws2.rendered=", (ws2 as any).rendered, "blocks=", ws2.getAllBlocks().length, "threw=", threw);
+    console.log("[DIAG2] ws2.rendered=", (ws2 as unknown as { rendered: boolean }).rendered, "blocks=", ws2.getAllBlocks().length, "threw=", threw);
     expect(threw).toBe("");
     expect(ws2.getAllBlocks().length).toBeGreaterThan(0);
     ws2.dispose();

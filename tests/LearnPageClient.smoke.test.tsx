@@ -6,7 +6,7 @@ import { getProject } from "@/courses";
 
 // Blockly 在 jsdom 里注入成本太高，用轻量桩替代
 vi.mock("@/components/BlocklyEditor", () => ({
-  default: forwardRef((_props, ref) => {
+  default: forwardRef(function MockBlocklyEditor(_props, ref) {
     useImperativeHandle(ref, () => ({
       getXml: () => "",
       loadXml: () => {},
