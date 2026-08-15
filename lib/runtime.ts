@@ -322,12 +322,15 @@ type Action = { actorId?: string } & (
   | { type: "playToneByMouseX" }
   | { type: "playToneByActorX" }
   | { type: "playChord"; notes: string[] }
+  | { type: "broadcast"; message: string }
 );
 
 export type Script = {
   whenStart: string;
   whenStageClicked: string;
   whenKeyPressed: { key: string; code: string }[];
+  /** 广播接收脚本（多角色消息传递）：消息名 → 该消息触发时执行的 JS 片段。 */
+  whenReceived?: { message: string; code: string }[];
 };
 
 const DEFAULT_STARS: Star[] = [
@@ -715,7 +718,9 @@ export class Runtime {
   private width: number;
   private height: number;
   private state: StageState;
-  private scripts: Script = { whenStart: "", whenStageClicked: "", whenKeyPressed: [] };
+  private scripts: Script = { whenStart: "", whenStageClicked: "", whenKeyPressed: [], whenReceived: [] };
+  /** 当前正在执行（回放）的动作下标；broadcast 触发接收脚本时据此把新动作插到自身之后。 */
+  private currentActionIndex = 0;
   private mouse: Point = { x: 0, y: 0 };
   private runningType: "start" | "click" | "key" | null = null;
   private initialStars: Star[];
@@ -1118,6 +1123,15 @@ export class Runtime {
     this.actions.push({ type: "wait", seconds: seconds * 1000 });
   }
 
+  /**
+   * 广播一条消息（多角色协作）。它仅把一个 broadcast 动作入队；真正执行到该动作时，
+   * 会触发所有「当接收到 这条消息」的脚本，并把它们的动作插到当前动作之后，
+   * 使接收角色在广播的"瞬间"立即响应（近似 Scratch 的并行广播语义）。
+   */
+  broadcast(message: string) {
+    this.actions.push({ type: "broadcast", message, actorId: this.currentActorId });
+  }
+
   // --- 音频（Web Audio 实时合成，排队播放，使旋律按顺序发声）---
   playNote(note: string, beats = 1) {
     this.actions.push({ type: "playNote", note, beats: Math.max(0.25, beats) });
@@ -1178,6 +1192,27 @@ export class Runtime {
       this.log(`[系统] 收集到星星 ${star.id} 号！`);
       this.emit();
     }
+  }
+
+  /** 当前控制的角色是否碰到另一个角色（多角色游戏：猫追老鼠 / 守护与躲避 / 双人对战）。 */
+  touchingActor(otherId: string): boolean {
+    const self = this.currentActor();
+    const other = this.findActor(otherId);
+    if (!other || self.id === other.id) return false;
+    const dx = self.x - other.x;
+    const dy = self.y - other.y;
+    const r = 28 * (self.size + other.size) / 2; // 碰撞半径随两者大小变化
+    return Math.sqrt(dx * dx + dy * dy) < r;
+  }
+
+  /** 当前控制的角色到另一个角色的距离（接力赛交接 / 排队间距 / 距离判断）。 */
+  distanceTo(otherId: string): number {
+    const self = this.currentActor();
+    const other = this.findActor(otherId);
+    if (!other) return Infinity;
+    const dx = self.x - other.x;
+    const dy = self.y - other.y;
+    return Math.sqrt(dx * dx + dy * dy);
   }
 
   // --- Script registration ---
@@ -1274,8 +1309,8 @@ export class Runtime {
       delete (window as unknown as Record<string, unknown>).__runtimeArg;
     }
 
-    for (const action of this.actions) {
-      await this.performAction(action);
+    for (this.currentActionIndex = 0; this.currentActionIndex < this.actions.length; this.currentActionIndex++) {
+      await this.performAction(this.actions[this.currentActionIndex]);
     }
 
     this.commitCurrentPath();
@@ -1287,6 +1322,33 @@ export class Runtime {
     this.state.running = false;
     this.runningType = null;
     this.emit();
+  }
+
+  /**
+   * 广播分发：把匹配 message 的「当接收到」脚本即时求值，生成动作，
+   * 并插入到当前正在执行的动作（广播动作）之后，让接收角色立刻响应。
+   */
+  private _runReceiveHandlers(message: string) {
+    const handlers = (this.scripts.whenReceived ?? []).filter((h) => h.message === message && h.code);
+    if (!handlers.length) return;
+    this.log(`[系统] 接收到消息「${message}」`);
+    const before = this.actions.length;
+    for (const h of handlers) {
+      try {
+        const wrapped = `(function(__runtime) {\n${h.code}\n})(__runtimeArg);`;
+        (window as unknown as Record<string, unknown>).__runtimeArg = this;
+        // eslint-disable-next-line no-eval
+        eval(wrapped);
+      } catch (e) {
+        this.log(`[系统] 接收脚本出错：${e}`);
+      } finally {
+        delete (window as unknown as Record<string, unknown>).__runtimeArg;
+      }
+    }
+    if (this.actions.length > before) {
+      const added = this.actions.splice(before);
+      this.actions.splice(this.currentActionIndex + 1, 0, ...added);
+    }
   }
 
   /** 播放一个音符并在其时长后 resolve，使音频动作在队列里「按拍等待」，旋律依次发声。 */
@@ -1334,6 +1396,12 @@ export class Runtime {
     const actor = this.findActor(action.actorId ?? this.currentActorId) ?? this.currentActor();
     return new Promise((resolve) => {
       switch (action.type) {
+        case "broadcast": {
+          this.log(`[系统] 广播消息「${action.message}」`);
+          this._runReceiveHandlers(action.message);
+          resolve();
+          break;
+        }
         case "move": {
           this.log(`[系统] ${actor.name}开始移动`);
           const rad = (actor.angle * Math.PI) / 180;

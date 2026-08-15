@@ -85,17 +85,26 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [lockReady, setLockReady] = useState(false);
   const [locked, setLocked] = useState(false);
 
-  // 键盘事件：把方向键转发给运行时，用于「按键前进」等键盘操控项目
+  // 键盘事件：把方向键（与键盘弹琴的字母键 A S D F G H J K）转发给运行时
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // 不拦截组合键（Ctrl/Meta/Alt），保留浏览器快捷键
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      // 不拦截正在编辑文本的输入（积木里的文字框、搜索框等），避免吞掉按键
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       const map: Record<string, string> = {
         ArrowUp: "up",
         ArrowDown: "down",
         ArrowLeft: "left",
         ArrowRight: "right",
       };
-      const key = map[e.key];
-      if (!key) return;
+      let key = map[e.key];
+      if (!key) {
+        // 字母键：键盘弹琴（任一单字母都会转发，无匹配脚本时运行时直接忽略）
+        if (/^[a-zA-Z]$/.test(e.key)) key = e.key.toLowerCase();
+        else return;
+      }
       e.preventDefault();
       runtimeRef.current?.handleKeyPressed(key);
     };

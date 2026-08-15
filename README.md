@@ -49,8 +49,8 @@ children-programming/
 │   │   ├── seq/  loop/  draw/   #     各分类下，每个项目一个 .ts，导出 CourseProject
 │   │   ├── event/ cond/  game/  #     （目前 stage-6-8 共 61 个项目，每个文件即一个独立项目）
 │   │   │   └── <slug>.ts        #       例：loop/square.ts 导出 squareProject
-│   ├── stage-9-12/              #   占位（categories.ts + 空 index.ts，待填充项目）
-│   └── stage-13-16/             #   占位
+│   ├── stage-9-12/              #   图形化进阶：分类 A·函数 8/8 ✅ + 分类 B·变量 8/8 ✅ + 分类 C·多角色 4/8 + 分类 D·键盘 3/8（共 23 项目，自定义积木/变量/多角色/键盘运行时已落地）；分类 E–J 规划中
+│   └── stage-13-16/             #   文本代码过渡：categories.ts 已定义 8 分类（K–R），项目待填充（需先开 JS 模式运行时）
 │
 ├── courses/                     # ★ 引擎与内容的「薄聚合层」
 │   └── index.ts                 #   从 @/content 导入 stages/CATEGORIES/projects → 跑镜像(MIRROR)

@@ -236,6 +236,7 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
         let whenStart = "";
         let whenStageClicked = "";
         const whenKeyPressed: { key: string; code: string }[] = [];
+        const whenReceived: { message: string; code: string }[] = [];
         for (const block of topBlocks) {
           const type = block.type;
           if (type === "maker_when_start") {
@@ -246,9 +247,13 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
             const key = block.getFieldValue("KEY") || "up";
             const code = javascriptGenerator.blockToCode(block).toString();
             whenKeyPressed.push({ key, code });
+          } else if (type === "maker_when_receive") {
+            const msg = block.getFieldValue("MSG") || "出发";
+            const code = javascriptGenerator.blockToCode(block).toString();
+            whenReceived.push({ message: msg, code });
           }
         }
-        runtime.setScripts({ whenStart, whenStageClicked, whenKeyPressed });
+        runtime.setScripts({ whenStart, whenStageClicked, whenKeyPressed, whenReceived });
         await runtime.handleRunStart();
         // 演示用自动触发：有「当舞台被点击」脚本时，自动模拟一次舞台点击（无论是否同时有
         // 「当开始运行」，便于「两个事件组合」类项目在「看示范」时也能把点击分支跑出来）；

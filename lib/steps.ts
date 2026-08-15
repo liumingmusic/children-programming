@@ -86,6 +86,16 @@ const VAR_SLUGS = [
   "var_counter", "var_score", "var_lives", "var_speed", "var_parity", "var_gradient", "var_timer", "var_best",
 ];
 
+/** 分类 C · 多角色与协作（9-12 阶段）。判定基于真实 JS 标记：控制角色 / 角色间碰撞 / 距离 / 广播消息。 */
+const MULTI_SLUGS = [
+  "cat_mouse", "guardian_dodge", "two_player", "message_relay",
+];
+
+/** 分类 D · 键盘与操控游戏（9-12 阶段）。判定基于真实 JS 标记：按键事件触发 / 移动或转向 / 弹奏音符。 */
+const KEY_SLUGS = [
+  "key_move", "key_maze", "key_piano",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -602,8 +612,47 @@ export function computeSteps(
         if (id === 1) done = hasVar;
         else if (id === 2) done = code.includes("__runtime.setBest");
         else if (id === 3) done = finished;
+      } else if (MULTI_SLUGS.includes(project.slug)) {
+        // 多角色类（分类 C）：基于真实 JS 标记判定
+        const finished = logs.includes("[系统] 程序执行完毕");
+        const startFired = logs.some((l) => l.includes("开始执行程序"));
+        if (project.slug === "message_relay") {
+          // 角色间消息传递：用了「广播」积木，且接收脚本真正触发（日志里有"接收到消息"）
+          const usedBroadcast = code.includes("__runtime.broadcast(");
+          if (id === 1) done = startFired;
+          else if (id === 2) done = usedBroadcast;
+          else if (id === 3) done = logs.includes("[系统] 接收到消息");
+        } else {
+          // 角色间碰撞 / 距离：控制角色 + (碰到角色 / 到角色的距离)
+          const usedControl = code.includes("__runtime.controlActor");
+          const usedTouch = code.includes("__runtime.touchingActor(");
+          const usedDist = code.includes("__runtime.distanceTo(");
+          if (id === 1) done = startFired;
+          else if (id === 2) done = usedControl && (usedTouch || usedDist);
+          else if (id === 3) done = finished;
+        }
       }
-    }
+      } else if (KEY_SLUGS.includes(project.slug)) {
+        // 键盘操控类（分类 D）：基于真实 JS 标记 / 运行日志判定「按键触发 + 移动/转向/弹奏」
+        const finished = logs.includes("[系统] 程序执行完毕");
+        const keyFired = logs.some((l) => l.includes("按下按键"));
+        const hasMove = code.includes("__runtime.move");
+        const hasTurn = code.includes("__runtime.turn");
+        const hasAudio = hasAnyAudio(code);
+        if (project.slug === "key_move") {
+          if (id === 1) done = keyFired;
+          else if (id === 2) done = hasMove;
+          else if (id === 3) done = finished;
+        } else if (project.slug === "key_maze") {
+          if (id === 1) done = keyFired;
+          else if (id === 2) done = hasMove && hasTurn;
+          else if (id === 3) done = finished;
+        } else if (project.slug === "key_piano") {
+          if (id === 1) done = keyFired;
+          else if (id === 2) done = hasAudio;
+          else if (id === 3) done = finished;
+        }
+      }
     return { ...step, done };
   });
 }

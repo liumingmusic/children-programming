@@ -93,17 +93,20 @@ export default function StudioReplayOverlay({
     let whenStart = "";
     let whenStageClicked = "";
     const whenKeyPressed: { key: string; code: string }[] = [];
+    const whenReceived: { message: string; code: string }[] = [];
     for (const b of ws.getTopBlocks(true)) {
       const code = javascriptGenerator.blockToCode(b).toString();
       if (b.type === "maker_when_start") whenStart += code + "\n";
       else if (b.type === "maker_when_stage_clicked") whenStageClicked += code + "\n";
       else if (b.type === "maker_when_key_pressed")
         whenKeyPressed.push({ key: b.getFieldValue("KEY") || "up", code: code + "\n" });
+      else if (b.type === "maker_when_receive")
+        whenReceived.push({ message: b.getFieldValue("MSG") || "出发", code: code + "\n" });
     }
     whenStart = javascriptGenerator.finish(whenStart);
     whenStageClicked = javascriptGenerator.finish(whenStageClicked);
     whenKeyPressed.forEach((k) => (k.code = javascriptGenerator.finish(k.code)));
-    rt.setScripts({ whenStart, whenStageClicked, whenKeyPressed });
+    rt.setScripts({ whenStart, whenStageClicked, whenKeyPressed, whenReceived });
     await rt.handleRunStart();
     if (whenStageClicked) await rt.handleStageClick(0, 0);
     else if (whenKeyPressed.length) await rt.handleKeyPressed(whenKeyPressed[0].key);

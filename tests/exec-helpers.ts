@@ -75,6 +75,7 @@ export function genScripts(xml: string): {
   whenStart: string;
   whenStageClicked: string;
   whenKeyPressed: { key: string; code: string }[];
+  whenReceived: { message: string; code: string }[];
 } {
   registerCustomBlocks();
   const div = document.createElement("div");
@@ -97,6 +98,7 @@ export function genScripts(xml: string): {
   let whenStart = "";
   let whenStageClicked = "";
   const whenKeyPressed: { key: string; code: string }[] = [];
+  const whenReceived: { message: string; code: string }[] = [];
   for (const block of topBlocks) {
     const type = block.type;
     if (type === "maker_when_start") {
@@ -106,18 +108,21 @@ export function genScripts(xml: string): {
     } else if (type === "maker_when_key_pressed") {
       const key = block.getFieldValue("KEY") || "up";
       whenKeyPressed.push({ key, code: javascriptGenerator.blockToCode(block).toString() });
+    } else if (type === "maker_when_receive") {
+      const msg = block.getFieldValue("MSG") || "出发";
+      whenReceived.push({ message: msg, code: javascriptGenerator.blockToCode(block).toString() });
     }
   }
   javascriptGenerator.finish();
   ws.dispose();
-  return { whenStart, whenStageClicked, whenKeyPressed };
+  return { whenStart, whenStageClicked, whenKeyPressed, whenReceived };
 }
 
 // 把某项目（含 click / key / 收集类）的「看示范」真实跑一遍：
 // 用 project.stars 作为可收集目标，并自动触发一次「点击 / 按键」以模拟演示。
 export async function runDemoFull(slug: string) {
   const project = getProject(slug)!;
-  const { whenStart, whenStageClicked, whenKeyPressed } = genScripts(project.defaultXml!);
+  const { whenStart, whenStageClicked, whenKeyPressed, whenReceived } = genScripts(project.defaultXml!);
   const code =
     whenStart + "\n" + whenStageClicked + "\n" + whenKeyPressed.map((k) => k.code).join("\n");
   const logs: string[] = [];
@@ -137,7 +142,7 @@ export async function runDemoFull(slug: string) {
     initialStars,
     { hazards, clouds, companions: companionsFor(project) }
   );
-  rt.setScripts({ whenStart, whenStageClicked, whenKeyPressed });
+  rt.setScripts({ whenStart, whenStageClicked, whenKeyPressed, whenReceived });
   await rt.handleRunStart();
   // 与线上 BlocklyEditor.run 一致：有点击脚本就自动点一下，否则有按键脚本就自动按一下
   if (whenStageClicked) await rt.handleStageClick(0, 0);

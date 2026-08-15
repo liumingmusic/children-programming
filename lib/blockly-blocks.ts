@@ -39,6 +39,10 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_set_expression" },
     { kind: "block" as const, type: "maker_touching_mark" },
     { kind: "block" as const, type: "maker_touching_cloud" },
+    { kind: "block" as const, type: "maker_touching_actor", fields: { ACTOR: "sanqi" } },
+    { kind: "block" as const, type: "maker_distance_to", fields: { ACTOR: "sanqi" } },
+    { kind: "block" as const, type: "maker_when_receive", fields: { MSG: "出发" } },
+    { kind: "block" as const, type: "maker_broadcast", fields: { MSG: "出发" } },
     // ---- 音乐与节奏分类（分类 8）----
     { kind: "block" as const, type: "maker_play_note", fields: { NOTE: "do" }, inputs: { BEATS: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
     { kind: "block" as const, type: "maker_play_drum", fields: { KIND: "kick" } },
@@ -270,15 +274,66 @@ export function registerCustomBlocks() {
               ["↓ 下", "down"],
               ["← 左", "left"],
               ["→ 右", "right"],
+              ["A · 哆", "a"],
+              ["S · 来", "s"],
+              ["D · 米", "d"],
+              ["F · 发", "f"],
+              ["G · 索", "g"],
+              ["H · 拉", "h"],
+              ["J · 西", "j"],
+              ["K · 哆↑", "k"],
             ]),
             "KEY"
           );
         this.appendStatementInput("STACK").setCheck(null);
         this.setColour(160);
-        this.setTooltip("当按下指定方向键时，执行这里的积木");
+        this.setTooltip("当按下指定方向键（或字母键 A S D F G H J K 弹琴）时，执行这里的积木");
         this.setHelpUrl("");
         this.setNextStatement(false);
         this.setPreviousStatement(false);
+      },
+    },
+    maker_when_receive: {
+      init() {
+        this.appendDummyInput()
+          .appendField("当接收到")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["出发", "出发"],
+              ["集合", "集合"],
+              ["接力", "接力"],
+              ["过独木桥", "过独木桥"],
+              ["完成任务", "完成任务"],
+            ]),
+            "MSG"
+          );
+        this.appendStatementInput("STACK").setCheck(null);
+        this.setColour(160);
+        this.setTooltip("当别的角色用「广播 消息」发出同一条消息（如「出发」），这里接的积木立刻执行。多角色间传递消息、协调动作的核心事件帽。");
+        this.setHelpUrl("");
+        this.setNextStatement(false);
+        this.setPreviousStatement(false);
+      },
+    },
+    maker_broadcast: {
+      init() {
+        this.appendDummyInput()
+          .appendField("广播")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["出发", "出发"],
+              ["集合", "集合"],
+              ["接力", "接力"],
+              ["过独木桥", "过独木桥"],
+              ["完成任务", "完成任务"],
+            ]),
+            "MSG"
+          );
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("向所有角色广播一条消息（如「出发」）。任何「当接收到 这条消息」的角色会立刻做出反应，实现角色之间的消息传递与协作。");
+        this.setHelpUrl("");
       },
     },
     maker_touching_edge: {
@@ -527,6 +582,45 @@ export function registerCustomBlocks() {
         this.setOutput(true, "Boolean");
         this.setColour(210);
         this.setTooltip("如果二零碰到了飘动的乌云返回真。常放进「如果…那么」做躲避。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_touching_actor: {
+      init() {
+        this.appendDummyInput()
+          .appendField("碰到角色")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["三七", "sanqi"],
+              ["二零", "erling"],
+            ]),
+            "ACTOR"
+          );
+        this.setOutput(true, "Boolean");
+        this.setColour(210);
+        this.setTooltip(
+          "如果当前控制的角色（如二零）碰到了选中的另一个角色（如三七）返回真。多角色游戏猫追老鼠、守护与躲避、双人对战的核心条件。"
+        );
+        this.setHelpUrl("");
+      },
+    },
+    maker_distance_to: {
+      init() {
+        this.appendDummyInput()
+          .appendField("到角色")
+          .appendField(
+            new Blockly.FieldDropdown([
+              ["三七", "sanqi"],
+              ["二零", "erling"],
+            ]),
+            "ACTOR"
+          )
+          .appendField("的距离");
+        this.setOutput(true, "Number");
+        this.setColour(210);
+        this.setTooltip(
+          "返回当前控制的角色到选中的另一个角色的距离（数字，越小越近）。常放进「如果 距离 < 50 那么…」做接力赛交接、排队间距判断，也能直接「说」出来。"
+        );
         this.setHelpUrl("");
       },
     },
@@ -1094,6 +1188,16 @@ export function registerCustomBlocks() {
     return stack;
   };
 
+  javascriptGenerator.forBlock["maker_when_receive"] = (block, generator) => {
+    const stack = generator.statementToCode(block, "STACK");
+    return stack;
+  };
+
+  javascriptGenerator.forBlock["maker_broadcast"] = (block) => {
+    const msg = JSON.stringify(block.getFieldValue("MSG"));
+    return `__runtime.broadcast(${msg});\n`;
+  };
+
   javascriptGenerator.forBlock["maker_touching_edge"] = () => {
     return ["__runtime.touchingEdge()", Order.FUNCTION_CALL];
   };
@@ -1194,6 +1298,16 @@ export function registerCustomBlocks() {
 
   javascriptGenerator.forBlock["maker_touching_cloud"] = () => {
     return ["__runtime.touchingCloud()", Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_touching_actor"] = (block) => {
+    const actor = JSON.stringify(block.getFieldValue("ACTOR"));
+    return [`__runtime.touchingActor(${actor})`, Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_distance_to"] = (block) => {
+    const actor = JSON.stringify(block.getFieldValue("ACTOR"));
+    return [`__runtime.distanceTo(${actor})`, Order.FUNCTION_CALL];
   };
 
   // ---- 音乐与节奏（分类 8）----

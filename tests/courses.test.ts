@@ -137,8 +137,7 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("soon 阶段的 projectSlugs 为空时返回空数组", () => {
-    expect(getStageProjects("stage-9-12")).toEqual([]);
+  it("soon 阶段（stage-13-16 无项目）getStageProjects 返回空数组", () => {
     expect(getStageProjects("stage-13-16")).toEqual([]);
   });
 
@@ -251,8 +250,7 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("soon 阶段（无项目）getStageCategories 返回空数组", () => {
-    expect(getStageCategories("stage-9-12")).toEqual([]);
+  it("soon 阶段（stage-13-16 无项目）getStageCategories 返回空数组", () => {
     expect(getStageCategories("stage-13-16")).toEqual([]);
   });
 });

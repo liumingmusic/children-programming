@@ -51,7 +51,7 @@ describe("LearnPageClient 学习页冒烟", () => {
 
   it("运行按钮在积木为空时给出提示（交互有响应）", async () => {
     render(<LearnPageClient project={getProject("hello")!} />);
-    const runBtn = await screen.findByRole("button", { name: /运行/ });
+    const runBtn = await screen.findByRole("button", { name: "运行" });
     fireEvent.click(runBtn);
     expect(await screen.findByText(/二零还没收到指令/)).toBeInTheDocument();
   });

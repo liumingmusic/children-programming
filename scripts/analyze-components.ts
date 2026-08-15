@@ -5,6 +5,8 @@ const BLOCK_LABELS: Record<string, string> = {
   maker_when_start: "当开始(启动帽子)",
   maker_when_stage_clicked: "当点击舞台(帽子)",
   maker_when_key_pressed: "当按下按键(帽子)",
+  maker_when_receive: "当接收到消息(广播接收帽子)",
+  maker_broadcast: "广播消息(多角色消息传递)",
   maker_move: "移动(前进N步)",
   maker_turn: "右转N度",
   maker_turn_left: "左转N度",
