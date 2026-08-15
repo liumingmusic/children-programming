@@ -4,6 +4,8 @@ import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
 import { Runtime } from "@/lib/runtime";
 import { BLOCK_CATALOG } from "@/lib/block-catalog";
+import { computeSteps } from "@/lib/steps";
+import { getProject } from "@/courses";
 import { genScripts } from "./exec-helpers";
 
 /**
@@ -166,5 +168,81 @@ describe("P0-2 catalog ↔ toolbox 对称", () => {
     expect(receive.category).toBe("事件");
     expect(broadcast.shape).toBe("statement");
     expect(receive.shape).toBe("hat");
+  });
+});
+
+describe("分类 C · 剩余 4 项（对话 / 接力 / 合唱 / 排队）", () => {
+  const NEW = ["two_actor_chat", "relay_race", "chorus", "animal_queue"];
+
+  it("4 个 slug 都已注册且 defaultXml 含对应多角色积木", () => {
+    for (const s of NEW) {
+      const p = getProject(s);
+      expect(p, `未注册 ${s}`).toBeTruthy();
+      expect(p!.defaultXml, `${s} 缺 defaultXml`).toBeTruthy();
+    }
+    const xml = (s: string) => getProject(s)!.defaultXml!;
+    expect(xml("two_actor_chat")).toContain("maker_control_actor");
+    expect(xml("two_actor_chat")).toContain("maker_say");
+    expect(xml("relay_race")).toContain("maker_broadcast");
+    expect(xml("relay_race")).toContain("maker_when_receive");
+    expect(xml("relay_race")).toContain("maker_move");
+    expect(xml("chorus")).toContain("maker_play_note");
+    expect(xml("chorus")).toContain("maker_play_chord");
+    expect(xml("animal_queue")).toContain("maker_distance_to");
+    expect(xml("animal_queue")).toContain("maker_move");
+  });
+
+  it("4 项 defaultXml 均能成功生成代码（无解析 / 生成错误）", () => {
+    for (const s of NEW) {
+      const { whenStart, whenReceived } = genScripts(getProject(s)!.defaultXml!);
+      expect(whenStart.length).toBeGreaterThan(0);
+      // relay_race 含「当接收到」帽子，其余只有 when_start
+      if (s === "relay_race") expect(whenReceived.length).toBe(1);
+    }
+  });
+
+  it("合唱团：maker_play_note / maker_play_chord 生成对应 __runtime 调用", () => {
+    const { whenStart } = genScripts(getProject("chorus")!.defaultXml!);
+    expect(whenStart).toContain("__runtime.playNote(");
+    expect(whenStart).toContain("__runtime.playChord(");
+  });
+
+  it("排队的动物：defaultXml 代码生成含 distanceTo 与 move", () => {
+    const { whenStart } = genScripts(getProject("animal_queue")!.defaultXml!);
+    expect(whenStart).toContain('__runtime.distanceTo("erling")');
+    expect(whenStart).toContain("__runtime.move(");
+  });
+
+  it("4 项 computeSteps 三步全绿（控制双角色 + 各自核心动作 + 跑完）", () => {
+    const cases: Record<string, string> = {
+      two_actor_chat:
+        '__runtime.controlActor("erling"); __runtime.say("hi"); __runtime.controlActor("sanqi"); __runtime.say("yo");',
+      relay_race:
+        '__runtime.controlActor("erling"); __runtime.move(30); __runtime.broadcast("接棒"); __runtime.controlActor("sanqi"); __runtime.move(30);',
+      chorus:
+        '__runtime.controlActor("erling"); __runtime.playNote("do"); __runtime.controlActor("sanqi"); __runtime.playChord(["do","mi","sol"]);',
+      animal_queue:
+        '__runtime.controlActor("erling"); __runtime.move(20); __runtime.controlActor("sanqi"); __runtime.distanceTo("erling"); __runtime.move(20);',
+    };
+    const logs = ["[系统] 开始执行程序", "[系统] 程序执行完毕"];
+    for (const [slug, code] of Object.entries(cases)) {
+      const p = getProject(slug)!;
+      expect(computeSteps(p, code, logs).map((s) => s.done), `${slug} 三步`).toEqual([
+        true,
+        true,
+        true,
+      ]);
+    }
+  });
+
+  it("两个角色对话：缺三七控制时第 2 步不算完成", () => {
+    const p = getProject("two_actor_chat")!;
+    // 只有二零说话，没有控制三七
+    const code = '__runtime.controlActor("erling"); __runtime.say("hi");';
+    const logs = ["[系统] 开始执行程序", "[系统] 程序执行完毕"];
+    const steps = computeSteps(p, code, logs);
+    expect(steps[0].done).toBe(true);
+    expect(steps[1].done).toBe(false);
+    expect(steps[2].done).toBe(true);
   });
 });

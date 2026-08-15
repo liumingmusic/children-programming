@@ -15,7 +15,7 @@ export const stages: Stage[] = [
     name: "代码初探",
     tagline: "从积木过渡到 JavaScript，做小工具与互动游戏。",
     status: "open",
-    projectSlugs: ["fn_square", "fn_polygon", "fn_house", "fn_snowflake", "fn_tree", "fn_toolbox", "fn_spiral", "fn_castle", "var_counter", "var_score", "var_lives", "var_speed", "var_parity", "var_gradient", "var_timer", "var_best", "cat_mouse", "guardian_dodge", "two_player", "message_relay", "key_move", "key_maze", "key_piano", "catch_apple", "dodge_fall", "breakout_intro", "space_shooter", "reaction_game"],
+    projectSlugs: ["fn_square", "fn_polygon", "fn_house", "fn_snowflake", "fn_tree", "fn_toolbox", "fn_spiral", "fn_castle", "var_counter", "var_score", "var_lives", "var_speed", "var_parity", "var_gradient", "var_timer", "var_best", "cat_mouse", "guardian_dodge", "two_player", "message_relay", "two_actor_chat", "relay_race", "chorus", "animal_queue", "key_move", "key_maze", "key_piano", "catch_apple", "dodge_fall", "breakout_intro", "space_shooter", "reaction_game"],
   },
   {
     id: "stage-13-16",

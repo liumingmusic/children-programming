@@ -89,6 +89,7 @@ const VAR_SLUGS = [
 /** 分类 C · 多角色与协作（9-12 阶段）。判定基于真实 JS 标记：控制角色 / 角色间碰撞 / 距离 / 广播消息。 */
 const MULTI_SLUGS = [
   "cat_mouse", "guardian_dodge", "two_player", "message_relay",
+  "two_actor_chat", "relay_race", "chorus", "animal_queue",
 ];
 
 /** 分类 D · 键盘与操控游戏（9-12 阶段）。判定基于真实 JS 标记：按键事件触发 / 移动或转向 / 弹奏音符。 */
@@ -621,6 +622,7 @@ export function computeSteps(
         if (id === 1) done = hasVar;
         else if (id === 2) done = code.includes("__runtime.setBest");
         else if (id === 3) done = finished;
+      }
       } else if (MULTI_SLUGS.includes(project.slug)) {
         // 多角色类（分类 C）：基于真实 JS 标记判定
         const finished = logs.includes("[系统] 程序执行完毕");
@@ -631,6 +633,40 @@ export function computeSteps(
           if (id === 1) done = startFired;
           else if (id === 2) done = usedBroadcast;
           else if (id === 3) done = logs.includes("[系统] 接收到消息");
+        } else if (project.slug === "two_actor_chat") {
+          // 两个角色对话：二零和三七都开口说话（两个 controlActor + say）
+          const ctrlErling = code.includes('__runtime.controlActor("erling")');
+          const ctrlSanqi = code.includes('__runtime.controlActor("sanqi")');
+          const usedSay = code.includes("__runtime.say(");
+          if (id === 1) done = startFired;
+          else if (id === 2) done = ctrlErling && ctrlSanqi && usedSay;
+          else if (id === 3) done = finished;
+        } else if (project.slug === "relay_race") {
+          // 接力赛：两个角色都跑（两个 controlActor）+ 移动 + 广播交接
+          const ctrlErling = code.includes('__runtime.controlActor("erling")');
+          const ctrlSanqi = code.includes('__runtime.controlActor("sanqi")');
+          const hasMove = code.includes("__runtime.move");
+          const usedBroadcast = code.includes("__runtime.broadcast(");
+          if (id === 1) done = startFired;
+          else if (id === 2) done = ctrlErling && ctrlSanqi && hasMove && usedBroadcast;
+          else if (id === 3) done = finished;
+        } else if (project.slug === "chorus") {
+          // 合唱团：两个角色都发声（两个 controlActor + 音效）
+          const ctrlErling = code.includes('__runtime.controlActor("erling")');
+          const ctrlSanqi = code.includes('__runtime.controlActor("sanqi")');
+          const hasAudio = hasAnyAudio(code);
+          if (id === 1) done = startFired;
+          else if (id === 2) done = ctrlErling && ctrlSanqi && hasAudio;
+          else if (id === 3) done = finished;
+        } else if (project.slug === "animal_queue") {
+          // 排队的动物：两个角色列队前进（两个 controlActor + 移动 / 保持距离）
+          const ctrlErling = code.includes('__runtime.controlActor("erling")');
+          const ctrlSanqi = code.includes('__runtime.controlActor("sanqi")');
+          const hasMove = code.includes("__runtime.move");
+          const usedDist = code.includes("__runtime.distanceTo(");
+          if (id === 1) done = startFired;
+          else if (id === 2) done = ctrlErling && ctrlSanqi && (hasMove || usedDist);
+          else if (id === 3) done = finished;
         } else {
           // 角色间碰撞 / 距离：控制角色 + (碰到角色 / 到角色的距离)
           const usedControl = code.includes("__runtime.controlActor");
@@ -641,7 +677,7 @@ export function computeSteps(
           else if (id === 3) done = finished;
         }
       }
-      } else if (KEY_SLUGS.includes(project.slug)) {
+      else if (KEY_SLUGS.includes(project.slug)) {
         // 键盘操控类（分类 D）：基于真实 JS 标记 / 运行日志判定「按键触发 + 移动/转向/弹奏」
         const finished = logs.includes("[系统] 程序执行完毕");
         const keyFired = logs.some((l) => l.includes("按下按键"));
@@ -1086,6 +1122,26 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 1) return "先拖一个蓝色「当舞台被点击」事件，点舞台才会触发互动。";
       if (stepId === 2) return "在事件里放「如果 碰到星星 那么 说 找到星星啦」，再接三个「飞向星星 1/2/3 号」收集起来。";
       if (stepId === 3) return "点「运行」后点一下舞台，二零会收集完所有星星并说「绘本讲完啦」，这本互动绘本就完成咯！";
+    }
+    if (slug === "two_actor_chat") {
+      if (stepId === 1) return "拖一个绿色「当开始运行」事件，程序才会启动。";
+      if (stepId === 2) return "用「控制角色 二零」让二零说话，再用「控制角色 三七」让三七接话——两个角色都要开口才算对话哦。";
+      if (stepId === 3) return "点「运行」，看二零和三七是不是你一言我一语聊起来啦！";
+    }
+    if (slug === "relay_race") {
+      if (stepId === 1) return "拖一个绿色「当开始运行」事件作为起跑枪。";
+      if (stepId === 2) return "让二零重复前进，再用「广播 接棒」把接力棒交出去；另放「当接收到 接棒」让三七接棒继续跑。两个角色都要动起来！";
+      if (stepId === 3) return "点「运行」，看接力棒从二零顺利传到三七手里没有。";
+    }
+    if (slug === "chorus") {
+      if (stepId === 1) return "拖一个绿色「当开始运行」事件开始演唱。";
+      if (stepId === 2) return "「控制角色 二零」连弹几个音符当主旋律，「控制角色 三七」弹一个和弦当伴奏——两个角色都要发出声音！";
+      if (stepId === 3) return "点「运行」，听二零和三七是不是一起把歌声奏出来了。";
+    }
+    if (slug === "animal_queue") {
+      if (stepId === 1) return "拖一个绿色「当开始运行」事件开始列队。";
+      if (stepId === 2) return "「控制角色 二零」带队向前走，「控制角色 三七」用「如果 到二零的距离 大于 40 那么 移动」紧紧跟在后面，排成一支队伍。";
+      if (stepId === 3) return "点「运行」，看两只小动物是不是整齐地列队前进。";
     }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
