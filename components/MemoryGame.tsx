@@ -29,8 +29,15 @@ function buildDeck(): Card[] {
   return shuffle(deck);
 }
 
+// 确定性初始牌组（未洗牌），避免 SSR/客户端随机不一致导致 hydration 不匹配。
+const INITIAL_DECK: Card[] = EMOJIS.flatMap((emoji, i) => [
+  { id: i * 2, emoji, flipped: false, matched: false },
+  { id: i * 2 + 1, emoji, flipped: false, matched: false },
+]);
+
 export default function MemoryGame({ onWin }: { onWin: () => void }) {
-  const [cards, setCards] = useState<Card[]>(buildDeck);
+  // 初始用确定性牌组（与 SSR 一致），挂载后再洗牌，避免 hydration 不匹配。
+  const [cards, setCards] = useState<Card[]>(INITIAL_DECK);
   const [moves, setMoves] = useState(0);
   const firstIdx = useRef<number | null>(null);
   const secondIdx = useRef<number | null>(null);
@@ -43,6 +50,11 @@ export default function MemoryGame({ onWin }: { onWin: () => void }) {
       onWin();
     }
   }, [matchedCount, cards.length, onWin]);
+
+  // 客户端挂载后再洗牌（buildDeck 使用 Math.random，不能在初次渲染阶段调用）。
+  useEffect(() => {
+    setCards(buildDeck());
+  }, []);
 
   const restart = useCallback(() => {
     setCards(buildDeck());

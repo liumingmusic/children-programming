@@ -2,13 +2,26 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useHighScore } from "@/games/hooks/useHighScore";
-import { buildDeck, type Card } from "./logic";
+import { buildDeck, PAIR_EMOJIS, type Card } from "./logic";
 
 type Phase = "playing" | "result";
 
+// 确定性初始牌组（未洗牌、确定性 id），避免 SSR/客户端随机不一致导致 hydration 不匹配。
+const INITIAL_CARDS: Card[] = (() => {
+  const chosen = PAIR_EMOJIS.slice(0, 6);
+  const deck: Card[] = [];
+  let id = 0;
+  for (const emoji of chosen) {
+    deck.push({ id: id++, emoji, flipped: false, matched: false });
+    deck.push({ id: id++, emoji, flipped: false, matched: false });
+  }
+  return deck;
+})();
+
 export default function MemoryCards() {
   const { high, submit } = useHighScore("memory-cards");
-  const [cards, setCards] = useState<Card[]>(() => buildDeck());
+  // 初始用确定性牌组（与 SSR 一致），挂载后再洗牌，避免 hydration 不匹配。
+  const [cards, setCards] = useState<Card[]>(INITIAL_CARDS);
   const [firstIdx, setFirstIdx] = useState<number | null>(null);
   const [lock, setLock] = useState(false);
   const [moves, setMoves] = useState(0);
@@ -22,6 +35,11 @@ export default function MemoryCards() {
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
+  }, []);
+
+  // 客户端挂载后再洗牌（buildDeck 使用 Math.random，不能在初次渲染阶段调用）。
+  useEffect(() => {
+    setCards(buildDeck());
   }, []);
 
   const restart = useCallback(() => {

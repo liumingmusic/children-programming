@@ -47,9 +47,13 @@ const KEY_DIR: Record<string, Dir> = {
   s: "down",
 };
 
+// 空棋盘（确定性，避免 SSR/客户端随机不一致导致 hydration 不匹配）。
+const EMPTY_BOARD: Board = Array.from({ length: 4 }, () => Array(4).fill(0));
+
 export default function Game2048() {
   const { high, submit } = useHighScore("game2048");
-  const [board, setBoard] = useState<Board>(() => createInitial());
+  // 初始用空棋盘（与 SSR 一致），挂载后再随机生成，避免 hydration 不匹配。
+  const [board, setBoard] = useState<Board>(EMPTY_BOARD);
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(high);
   const [status, setStatus] = useState<"playing" | "won" | "over">("playing");
@@ -58,6 +62,11 @@ export default function Game2048() {
   useEffect(() => {
     setBest(high);
   }, [high]);
+
+  // 客户端挂载后再随机布置初始方块（Math.random 不能在初次渲染阶段调用）。
+  useEffect(() => {
+    setBoard(createInitial());
+  }, []);
 
   const restart = () => {
     setBoard(createInitial());

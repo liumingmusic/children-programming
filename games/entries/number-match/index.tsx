@@ -6,9 +6,17 @@ import { buildTiles, type Tile } from "./logic";
 
 type Phase = "playing" | "result";
 
+// 确定性初始排列（未洗牌），避免 SSR/客户端随机不一致导致 hydration 不匹配。
+const INITIAL_TILES: Tile[] = Array.from({ length: 16 }, (_, i) => ({
+  id: i,
+  value: Math.floor(i / 2) + 1,
+  cleared: false,
+}));
+
 export default function NumberMatch() {
   const { high, submit } = useHighScore("number-match");
-  const [tiles, setTiles] = useState<Tile[]>(() => buildTiles());
+  // 初始用确定性排列（与 SSR 一致），挂载后再洗牌，避免 hydration 不匹配。
+  const [tiles, setTiles] = useState<Tile[]>(INITIAL_TILES);
   const [selected, setSelected] = useState<number[]>([]);
   const [lock, setLock] = useState(false);
   const [clearedCount, setClearedCount] = useState(0);
@@ -19,6 +27,11 @@ export default function NumberMatch() {
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
+  }, []);
+
+  // 客户端挂载后再洗牌（buildTiles 使用 Math.random，不能在初次渲染阶段调用）。
+  useEffect(() => {
+    setTiles(buildTiles());
   }, []);
 
   const restart = useCallback(() => {
