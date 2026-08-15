@@ -18,6 +18,8 @@ import { snakeSpaceMeta } from "./entries/snake-space/meta";
 import { memoryCardsMeta } from "./entries/memory-cards/meta";
 import { numberMatchMeta } from "./entries/number-match/meta";
 import { beatMemoryMeta } from "./entries/beat-memory/meta";
+import { gravityBounceMeta } from "./entries/gravity-bounce/meta";
+import { billiardMeta } from "./entries/billiard/meta";
 
 /** 全部游戏（按展示顺序排列）。 */
 export const GAMES: GameDefMeta[] = [
@@ -31,6 +33,8 @@ export const GAMES: GameDefMeta[] = [
   memoryCardsMeta,
   numberMatchMeta,
   beatMemoryMeta,
+  gravityBounceMeta,
+  billiardMeta,
 ];
 
 /** 给 generateStaticParams 用的 slug 列表。 */
