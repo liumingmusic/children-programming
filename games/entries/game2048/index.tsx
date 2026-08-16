@@ -1,14 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { useHighScore } from "@/games/hooks/useHighScore";
+import { sfx, useMuted } from "@/games/hooks/useGameJuice";
+import LevelBanner from "@/games/components/LevelBanner";
+import SoundToggle from "@/games/components/SoundToggle";
 import {
   canMove,
+  comboMult2048,
   createInitial,
   hasWon,
+  levelForMaxTile,
+  maxTile,
   move,
+  nextTarget,
   spawnTile,
+  TILE_LEVELS,
   type Board,
   type Dir,
 } from "./logic";
@@ -52,12 +60,18 @@ const EMPTY_BOARD: Board = Array.from({ length: 4 }, () => Array(4).fill(0));
 
 export default function Game2048() {
   const { high, submit } = useHighScore("game2048");
-  // 初始用空棋盘（与 SSR 一致），挂载后再随机生成，避免 hydration 不匹配。
   const [board, setBoard] = useState<Board>(EMPTY_BOARD);
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(high);
   const [status, setStatus] = useState<"playing" | "won" | "over">("playing");
   const [keepPlaying, setKeepPlaying] = useState(false);
+  const [level, setLevel] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [banner, setBanner] = useState<{ text: string; key: number } | null>(null);
+
+  const comboRef = useRef(0);
+  const levelRef = useRef(0);
+  const bannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setBest(high);
@@ -65,14 +79,31 @@ export default function Game2048() {
 
   // 客户端挂载后再随机布置初始方块（Math.random 不能在初次渲染阶段调用）。
   useEffect(() => {
-    setBoard(createInitial());
+    const b = createInitial();
+    setBoard(b);
+    const lv = levelForMaxTile(maxTile(b));
+    levelRef.current = lv;
+    setLevel(lv);
   }, []);
 
+  const showBanner = (text: string) => {
+    setBanner({ text, key: Date.now() });
+    if (bannerTimer.current) clearTimeout(bannerTimer.current);
+    bannerTimer.current = setTimeout(() => setBanner(null), 1400);
+  };
+
   const restart = () => {
-    setBoard(createInitial());
+    const b = createInitial();
+    setBoard(b);
     setScore(0);
     setStatus("playing");
     setKeepPlaying(false);
+    comboRef.current = 0;
+    setCombo(0);
+    const lv = levelForMaxTile(maxTile(b));
+    levelRef.current = lv;
+    setLevel(lv);
+    setBanner(null);
   };
 
   const doMove = (dir: Dir) => {
@@ -80,10 +111,39 @@ export default function Game2048() {
     const { board: nb, gained, moved } = move(board, dir);
     if (!moved) return;
     const withTile = spawnTile(nb);
-    const newScore = score + gained;
+
+    // 连击：连续合并的步数越多，得分倍率越高
+    const newCombo = gained > 0 ? comboRef.current + 1 : 0;
+    comboRef.current = newCombo;
+    setCombo(newCombo);
+    const mult = comboMult2048(newCombo);
+    const newScore = score + Math.round(gained * mult);
+
     setScore(newScore);
     submit(newScore);
     setBoard(withTile);
+
+    // 反馈
+    if (gained > 0) {
+      sfx.merge(maxTile(withTile));
+      if (comboMult2048(newCombo) > comboMult2048(newCombo - 1)) sfx.combo(newCombo);
+    }
+
+    // 关卡递进
+    const lv = levelForMaxTile(maxTile(withTile));
+    if (lv > levelRef.current) {
+      levelRef.current = lv;
+      setLevel(lv);
+      const tgt = TILE_LEVELS[lv - 1];
+      if (lv >= TILE_LEVELS.length) {
+        showBanner("🏆 拼出 2048！通关！");
+        sfx.win();
+      } else {
+        showBanner(`🎯 解锁第 ${lv + 1} 关：拼出 ${TILE_LEVELS[lv]}`);
+        sfx.levelup();
+      }
+    }
+
     if (!keepPlaying && hasWon(withTile)) {
       setStatus("won");
     } else if (!canMove(withTile)) {
@@ -103,12 +163,13 @@ export default function Game2048() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
+  const target = nextTarget(maxTile(board));
   const flat = board.flat();
 
   return (
     <div className="flex flex-col items-center">
       {/* 计分板 */}
-      <div className="mb-4 flex w-full max-w-sm items-center justify-between gap-3">
+      <div className="mb-3 flex w-full max-w-sm items-center justify-between gap-3">
         <div className="flex-1 rounded-xl bg-[#E1F5EE] px-4 py-2 text-center">
           <div className="text-xs text-[#0F6E56]">得分</div>
           <div className="text-xl font-semibold text-[#04342C]">{score}</div>
@@ -126,6 +187,18 @@ export default function Game2048() {
         </button>
       </div>
 
+      {/* 关卡 / 连击条 */}
+      <div className="mb-2 flex w-full max-w-sm items-center justify-between rounded-xl bg-[#EEEDFE] px-4 py-1.5 text-sm text-[#7F77DD]">
+        <span>
+          关卡 {level}/{TILE_LEVELS.length}
+          {target ? ` ｜ 目标拼出 ${target}` : " ｜ 🏆已通关"}
+        </span>
+        <span className="flex items-center gap-2">
+          <span>连击 {combo}{comboMult2048(combo) > 1 ? ` ×${comboMult2048(combo).toFixed(1)}` : ""}</span>
+          <SoundToggle />
+        </span>
+      </div>
+
       {/* 棋盘 */}
       <div className="relative w-full max-w-sm rounded-2xl bg-[#0F6E56] p-3 shadow-md">
         <div className="grid grid-cols-4 gap-2 sm:gap-3">
@@ -136,7 +209,13 @@ export default function Game2048() {
                 v
               )}`}
             >
-              {v > 0 ? v : ""}
+              {v > 0 ? (
+                <span key={v} className="animate-pop">
+                  {v}
+                </span>
+              ) : (
+                ""
+              )}
             </div>
           ))}
         </div>
@@ -166,6 +245,8 @@ export default function Game2048() {
             </div>
           </div>
         )}
+
+        {banner && <LevelBanner key={banner.key} text={banner.text} tone="#7F77DD" />}
       </div>
 
       {/* 触屏方向键（低龄儿童友好） */}
@@ -203,7 +284,7 @@ export default function Game2048() {
       </div>
 
       <p className="mt-4 text-center text-sm text-[#5F5E5A]">
-        用方向键 / WASD，或点上面的方向键移动。相同数字碰到一起就会合并翻倍哦！
+        用方向键 / WASD，或点上面的方向键移动。相同数字碰到一起就会合并翻倍，连续合并还有连击加成！
       </p>
     </div>
   );

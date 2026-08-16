@@ -60,3 +60,21 @@ export function generateNotes(opts: {
 export function lastNoteTime(notes: BeatNote[]): number {
   return notes.reduce((m, n) => Math.max(m, n.time), 0);
 }
+
+// ---------------------------------------------------------- 关卡配置（增强）
+
+export const MAX_LEVEL = 5;
+
+/** 第 level 关的谱面参数。 */
+export interface LevelConfig {
+  bpm: number;
+  count: number;
+}
+
+export function levelConfig(level: number): LevelConfig {
+  // 每关更快、更长：BPM 100→148，音符 40→80
+  return {
+    bpm: 100 + (level - 1) * 12,
+    count: 40 + (level - 1) * 10,
+  };
+}

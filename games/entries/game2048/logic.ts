@@ -132,3 +132,31 @@ export function canMove(board: Board): boolean {
   }
   return false;
 }
+
+/** 关卡目标方块值（共 6 关，最后一关拼出 2048）。 */
+export const TILE_LEVELS = [64, 128, 256, 512, 1024, 2048];
+
+/** 当前棋盘最大方块。 */
+export function maxTile(board: Board): number {
+  let m = 0;
+  for (const row of board) for (const v of row) if (v > m) m = v;
+  return m;
+}
+
+/** 连击倍率（用于 2048）：连续合并的步数越多，得分倍率越高，最高 1.8 倍。 */
+export function comboMult2048(combo: number): number {
+  return 1 + Math.min(combo, 8) * 0.1;
+}
+
+/** 根据当前最大方块值，返回已解锁关卡序号（0..TILE_LEVELS.length）。 */
+export function levelForMaxTile(max: number): number {
+  let lv = 0;
+  for (const t of TILE_LEVELS) if (max >= t) lv++;
+  return lv;
+}
+
+/** 下一关目标方块（已通关则返回 null）。 */
+export function nextTarget(max: number): number | null {
+  for (const t of TILE_LEVELS) if (max < t) return t;
+  return null;
+}

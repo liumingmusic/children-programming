@@ -7,17 +7,19 @@ import {
   generateNotes,
   judge,
   lastNoteTime,
+  levelConfig,
+  MAX_LEVEL,
   scoreFor,
   type BeatNote,
 } from "./logic";
+import { sfx, playTone, useMuted } from "@/games/hooks/useGameJuice";
+import LevelBanner from "@/games/components/LevelBanner";
+import SoundToggle from "@/games/components/SoundToggle";
 
 const LANES = 4;
 const LANE_KEYS = ["D", "F", "J", "K"];
 const KEY_LANE: Record<string, number> = { d: 0, f: 1, j: 2, k: 3 };
 const LEAD = 2.2; // 音符提前出现的秒数
-const BPM = 100;
-const COUNT = 40;
-const HIT_LINE = 0.82; // 命中线在轨道高度中的比例
 const MISS_GRACE = 0.2;
 
 type NoteState = BeatNote & { judged: boolean; sounded: boolean };
@@ -31,12 +33,21 @@ interface Stats {
   good: number;
   miss: number;
 }
+interface Popup {
+  id: number;
+  lane: number;
+  text: string;
+  tone: string;
+}
 
 export default function BeatTap() {
   const { high, submit } = useHighScore("beat-tap");
   const [phase, setPhase] = useState<Phase>("idle");
   const [now, setNow] = useState(0);
   const [result, setResult] = useState<Stats | null>(null);
+  const [level, setLevel] = useState(1);
+  const [popups, setPopups] = useState<Popup[]>([]);
+  const [banner, setBanner] = useState<{ text: string; key: number } | null>(null);
 
   const notesRef = useRef<NoteState[]>([]);
   const startRef = useRef(0);
@@ -48,49 +59,53 @@ export default function BeatTap() {
     good: 0,
     miss: 0,
   });
-  const audioRef = useRef<AudioContext | null>(null);
+  const levelRef = useRef(1);
+  const popupId = useRef(0);
+  const bannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const playTone = useCallback(
-    (freq: number, dur = 0.08, type: OscillatorType = "sine", gain = 0.15) => {
-      const ctx = audioRef.current;
-      if (!ctx) return;
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = type;
-      osc.frequency.value = freq;
-      osc.connect(g);
-      g.connect(ctx.destination);
-      const t = ctx.currentTime;
-      g.gain.setValueAtTime(gain, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      osc.start(t);
-      osc.stop(t + dur);
-    },
-    []
-  );
+  const showBanner = useCallback((text: string) => {
+    setBanner({ text, key: Date.now() });
+    if (bannerTimer.current) clearTimeout(bannerTimer.current);
+    bannerTimer.current = setTimeout(() => setBanner(null), 1400);
+  }, []);
+
+  const pushPopup = useCallback((lane: number, text: string, tone: string) => {
+    const id = ++popupId.current;
+    setPopups((p) => [...p, { id, lane, text, tone }]);
+    setTimeout(() => setPopups((p) => p.filter((x) => x.id !== id)), 800);
+  }, []);
 
   const finish = useCallback(() => {
     const s = statsRef.current;
-    setResult({ ...s });
-    submit(s.score);
-    setPhase("result");
-  }, [submit]);
+    if (levelRef.current < MAX_LEVEL) {
+      levelRef.current += 1;
+      setLevel(levelRef.current);
+      const cfg = levelConfig(levelRef.current);
+      notesRef.current = generateNotes({
+        bpm: cfg.bpm,
+        count: cfg.count,
+        start: LEAD,
+        lanes: LANES,
+      }).map((n) => ({ ...n, judged: false, sounded: false }));
+      startRef.current = performance.now() / 1000;
+      setNow(0);
+      showBanner(`第 ${levelRef.current} 关`);
+      sfx.levelup();
+    } else {
+      setResult({ ...s });
+      submit(s.score);
+      setPhase("result");
+      sfx.win();
+    }
+  }, [submit, showBanner]);
 
   const start = useCallback(() => {
-    try {
-      const Ctx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      const ctx = new Ctx();
-      void ctx.resume();
-      audioRef.current = ctx;
-    } catch {
-      audioRef.current = null;
-    }
+    levelRef.current = 1;
+    setLevel(1);
+    const cfg = levelConfig(1);
     notesRef.current = generateNotes({
-      bpm: BPM,
-      count: COUNT,
+      bpm: cfg.bpm,
+      count: cfg.count,
       start: LEAD,
       lanes: LANES,
     }).map((n) => ({ ...n, judged: false, sounded: false }));
@@ -105,6 +120,8 @@ export default function BeatTap() {
     startRef.current = performance.now() / 1000;
     setNow(0);
     setResult(null);
+    setPopups([]);
+    setBanner(null);
     setPhase("playing");
   }, []);
 
@@ -117,12 +134,13 @@ export default function BeatTap() {
     for (const n of notes) {
       if (!n.sounded && t >= n.time) {
         n.sounded = true;
-        playTone(440, 0.05, "triangle", 0.08); // 背景节拍轻击
+        playTone(440, 0.05, "triangle", 0.07); // 背景节拍轻击
       }
       if (!n.judged && t > n.time + MISS_GRACE) {
         n.judged = true;
         stats.miss += 1;
         stats.combo = 0;
+        pushPopup(n.lane, "MISS", "#D85A30");
       }
     }
     if (t > lastNoteTime(notes) + 1.5) finish();
@@ -148,16 +166,18 @@ export default function BeatTap() {
       const j = judge(bestDelta)!;
       if (j === "perfect") {
         stats.perfect += 1;
-        playTone(880, 0.1, "sine", 0.18);
+        sfx.catch();
+        pushPopup(lane, "PERFECT!", "#0F6E56");
       } else {
         stats.good += 1;
         playTone(660, 0.1, "sine", 0.16);
+        pushPopup(lane, "GOOD", "#EF9F27");
       }
       stats.combo += 1;
       stats.maxCombo = Math.max(stats.maxCombo, stats.combo);
       stats.score += scoreFor(j, stats.combo);
     },
-    [phase, playTone]
+    [phase, pushPopup]
   );
 
   // 键盘：D F J K 对应四条轨道
@@ -173,13 +193,6 @@ export default function BeatTap() {
     return () => window.removeEventListener("keydown", onKey);
   }, [hit]);
 
-  // 卸载时关闭音频上下文
-  useEffect(() => {
-    return () => {
-      audioRef.current?.close().catch(() => {});
-    };
-  }, []);
-
   const best = result ? Math.max(high, result.score) : high;
 
   if (phase === "idle") {
@@ -190,12 +203,18 @@ export default function BeatTap() {
           音符会从上方落下来，在它碰到<span className="font-medium text-[#7F77DD]">虚线</span>的瞬间，
           敲对应的键 <span className="font-mono font-medium">D F J K</span>，或者直接点对应的轨道！越准分越高。
         </p>
-        <button
-          onClick={start}
-          className="rounded-full bg-[#7F77DD] px-8 py-3 text-lg font-medium text-white shadow-sm hover:bg-[#6a61cf]"
-        >
-          开始游戏
-        </button>
+        <p className="text-sm text-[#5F5E5A]">
+          共 {MAX_LEVEL} 关，每关节奏更快、谱面更长，连续命中还有连击加成！
+        </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={start}
+            className="rounded-full bg-[#7F77DD] px-8 py-3 text-lg font-medium text-white shadow-sm hover:bg-[#6a61cf]"
+          >
+            开始游戏
+          </button>
+          <SoundToggle />
+        </div>
       </div>
     );
   }
@@ -205,9 +224,9 @@ export default function BeatTap() {
     const acc = total > 0 ? Math.round(((result.perfect + result.good) / total) * 100) : 0;
     return (
       <div className="flex flex-col items-center gap-4 py-8 text-center">
-        <div className="text-4xl">🌟 演奏完成！</div>
+        <div className="text-4xl">🌟 全部通关！</div>
         <div className="grid w-full max-w-sm grid-cols-2 gap-3">
-          <Stat label="得分" value={result.score} />
+          <Stat label="总得分" value={result.score} />
           <Stat label="最高分" value={best} />
           <Stat label="最大连击" value={result.maxCombo} />
           <Stat label="准确率" value={`${acc}%`} />
@@ -240,9 +259,12 @@ export default function BeatTap() {
           <div className="text-lg font-semibold text-[#04342C]">{stats.combo}</div>
         </div>
         <div className="rounded-xl bg-[#FAEEDA] px-4 py-1.5 text-center">
-          <div className="text-xs text-[#412402]">最高</div>
-          <div className="text-lg font-semibold text-[#04342C]">{high}</div>
+          <div className="text-xs text-[#412402]">关卡</div>
+          <div className="text-lg font-semibold text-[#04342C]">
+            {level}/{MAX_LEVEL}
+          </div>
         </div>
+        <SoundToggle />
       </div>
 
       {/* 轨道 */}
@@ -251,15 +273,28 @@ export default function BeatTap() {
           <div
             key={lane}
             onClick={() => hit(lane)}
-            className="relative flex-1 cursor-pointer rounded-xl bg-[#EEEDFE] active:bg-[#E0DEFB]"
+            className="relative flex-1 cursor-pointer overflow-hidden rounded-xl bg-[#EEEDFE] active:bg-[#E0DEFB]"
           >
             <div
               className="absolute left-0 right-0 border-t-2 border-dashed border-[#7F77DD]"
-              style={{ top: `${HIT_LINE * 100}%` }}
+              style={{ top: `${0.82 * 100}%` }}
             />
             <div className="absolute bottom-1 left-0 right-0 text-center text-xs font-medium text-[#7F77DD]">
               {LANE_KEYS[lane]}
             </div>
+            {/* 判定浮字 */}
+            {popups
+              .filter((p) => p.lane === lane)
+              .map((p) => (
+                <div
+                  key={p.id}
+                  className="animate-float pointer-events-none absolute left-1/2 -translate-x-1/2 text-sm font-bold"
+                  style={{ top: "70%", color: p.tone }}
+                >
+                  {p.text}
+                </div>
+              ))}
+            {/* 下落音符 */}
             {notesRef.current
               .filter(
                 (n) =>
@@ -273,13 +308,15 @@ export default function BeatTap() {
                   <div
                     key={n.id}
                     className="absolute left-1/2 h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#7F77DD] shadow-md"
-                    style={{ top: `${progress * HIT_LINE * 100}%` }}
+                    style={{ top: `${progress * 0.82 * 100}%` }}
                   />
                 );
               })}
           </div>
         ))}
       </div>
+
+      {banner && <LevelBanner text={banner.text} tone="#7F77DD" />}
 
       <p className="mt-4 text-center text-sm text-[#5F5E5A]">
         用 <span className="font-mono font-medium">D F J K</span> 或点轨道，在虚线处命中下落的圆点！

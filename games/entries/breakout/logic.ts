@@ -1,5 +1,6 @@
 // 星球打砖块 · 纯函数核心（可无 DOM 测试）。
 // 竖屏逻辑分辨率；挡板在底部横向移动，小球反弹击碎顶部砖块。
+// 增强：多层关卡（每关多一行砖 + 更快球速）+ 连击倍率。
 
 export const W = 360;
 export const H = 540;
@@ -12,11 +13,26 @@ export const BALL_SPEED = 250;
 export const MAX_LIVES = 3;
 
 export const BRICK_COLS = 7;
-export const BRICK_ROWS = 4;
+export const BRICK_ROWS = 4; // 第 1 关行数
+export const BRICK_MAX_ROWS = 6;
 export const BRICK_GAP = 6;
 export const BRICK_TOP = 64;
 export const BRICK_H = 18;
 export const BRICK_SIDE = 10; // 左右留白
+
+export const MAX_LEVEL = 5;
+const COMBO_STEP = 5;
+const SPEED_PER_LEVEL = 32;
+
+export function rowsForLevel(level: number): number {
+  return Math.min(BRICK_ROWS + (level - 1), BRICK_MAX_ROWS);
+}
+export function speedForLevel(level: number): number {
+  return BALL_SPEED + (level - 1) * SPEED_PER_LEVEL;
+}
+export function comboMult(combo: number): number {
+  return Math.min(3, 1 + Math.floor(combo / COMBO_STEP) * 0.5);
+}
 
 export interface Brick {
   id: number;
@@ -34,11 +50,16 @@ export interface GameState {
   ballY: number;
   vx: number;
   vy: number;
+  speed: number; // 当前球速（随关卡提升）
   score: number;
   lives: number;
   alive: boolean;
-  bricks: Brick[];
   won: boolean;
+  cleared: boolean; // 已通关全部关卡
+  level: number;
+  combo: number;
+  comboBest: number;
+  bricks: Brick[];
 }
 
 export interface Input {
@@ -46,14 +67,14 @@ export interface Input {
   targetX: number | null;
 }
 
-const BRICK_COLORS = ["#7F77DD", "#378ADD", "#0F6E56", "#EF9F27"];
+const BRICK_COLORS = ["#7F77DD", "#378ADD", "#0F6E56", "#EF9F27", "#E0608A", "#3AA8A0"];
 
-export function buildBricks(): Brick[] {
+export function buildBricks(rows: number): Brick[] {
   const bricks: Brick[] = [];
   const usableW = W - BRICK_SIDE * 2;
   const bw = (usableW - BRICK_GAP * (BRICK_COLS - 1)) / BRICK_COLS;
   let id = 1;
-  for (let r = 0; r < BRICK_ROWS; r++) {
+  for (let r = 0; r < rows; r++) {
     for (let c = 0; c < BRICK_COLS; c++) {
       bricks.push({
         id: id++,
@@ -69,33 +90,40 @@ export function buildBricks(): Brick[] {
   return bricks;
 }
 
-export function createState(): GameState {
+export function createState(level = 1): GameState {
+  const speed = speedForLevel(level);
   return {
     paddleX: W / 2,
     ballX: W / 2,
     ballY: PADDLE_Y - BALL_R - 2,
-    vx: BALL_SPEED * 0.6,
-    vy: -BALL_SPEED,
+    vx: speed * 0.6,
+    vy: -speed,
+    speed,
     score: 0,
     lives: MAX_LIVES,
     alive: true,
-    bricks: buildBricks(),
     won: false,
+    cleared: false,
+    level,
+    combo: 0,
+    comboBest: 0,
+    bricks: buildBricks(rowsForLevel(level)),
   };
 }
 
 function resetBall(s: GameState): GameState {
+  const speed = s.speed;
   return {
     ...s,
     ballX: W / 2,
     ballY: PADDLE_Y - BALL_R - 2,
-    vx: BALL_SPEED * (Math.random() < 0.5 ? -0.6 : 0.6),
-    vy: -BALL_SPEED,
+    vx: speed * (Math.random() < 0.5 ? -0.6 : 0.6),
+    vy: -speed,
   };
 }
 
 export function step(s: GameState, dt: number, input: Input): GameState {
-  if (!s.alive || s.won) return s;
+  if (!s.alive || s.cleared) return s;
 
   // 挡板
   let paddleX = s.paddleX;
@@ -115,6 +143,8 @@ export function step(s: GameState, dt: number, input: Input): GameState {
   let vy = s.vy;
   let score = s.score;
   let lives = s.lives;
+  let combo = s.combo;
+  let comboBest = s.comboBest;
 
   // 左右墙
   if (ballX - BALL_R < 0) {
@@ -140,10 +170,9 @@ export function step(s: GameState, dt: number, input: Input): GameState {
   ) {
     ballY = PADDLE_Y - PADDLE_H / 2 - BALL_R;
     vy = -Math.abs(vy);
-    // 按击中位置改变角度
     const off = (ballX - paddleX) / (PADDLE_W / 2);
-    vx = BALL_SPEED * Math.max(-0.85, Math.min(0.85, off));
-    vy = -Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - vx * vx)) * (vy < 0 ? 1 : -1);
+    vx = s.speed * Math.max(-0.85, Math.min(0.85, off));
+    vy = -Math.sqrt(Math.max(0, s.speed * s.speed - vx * vx)) * (vy < 0 ? 1 : -1);
   }
 
   // 砖块碰撞
@@ -157,8 +186,9 @@ export function step(s: GameState, dt: number, input: Input): GameState {
       ballY - BALL_R <= b.y + b.h
     ) {
       b.alive = false;
-      score += 10;
-      // 判断从哪个方向撞入，反转对应速度分量
+      combo += 1;
+      comboBest = Math.max(comboBest, combo);
+      score += Math.round(10 * comboMult(combo));
       const fromSide =
         Math.min(ballX + BALL_R - b.x, b.x + b.w - (ballX - BALL_R)) <
         Math.min(ballY + BALL_R - b.y, b.y + b.h - (ballY - BALL_R));
@@ -179,18 +209,40 @@ export function step(s: GameState, dt: number, input: Input): GameState {
     vy,
     score,
     lives,
+    combo,
+    comboBest,
     bricks,
   };
   if (ballY - BALL_R > H) {
     lives -= 1;
+    combo = 0; // 掉球断连击
     if (lives <= 0) {
       alive = false;
-      next = { ...next, lives, alive };
+      next = { ...next, lives, combo, alive };
     } else {
-      next = { ...resetBall(next), lives };
+      next = { ...resetBall(next), lives, combo };
     }
   }
 
-  const won = next.bricks.every((b) => !b.alive);
-  return { ...next, won };
+  // 通关 / 过关判定
+  const remaining = next.bricks.filter((b) => b.alive).length;
+  if (remaining === 0) {
+    if (next.level < MAX_LEVEL) {
+      const nl = next.level + 1;
+      const bs = speedForLevel(nl);
+      return {
+        ...next,
+        level: nl,
+        bricks: buildBricks(rowsForLevel(nl)),
+        ballX: W / 2,
+        ballY: PADDLE_Y - BALL_R - 2,
+        vx: bs * 0.6,
+        vy: -bs,
+        won: false,
+      };
+    }
+    return { ...next, cleared: true, won: true };
+  }
+
+  return next;
 }

@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPoi
 import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
 import { useCanvasRef } from "@/games/hooks/useCanvasRef";
+import { sfx, spawnBurst, stepParticles, drawParticles, useMuted, type Particle } from "@/games/hooks/useGameJuice";
+import LevelBanner from "@/games/components/LevelBanner";
+import SoundToggle from "@/games/components/SoundToggle";
 import {
   W,
   H,
@@ -12,6 +15,8 @@ import {
   PADDLE_Y,
   BALL_R,
   MAX_LIVES,
+  MAX_LEVEL,
+  comboMult,
   type GameState,
   type Input,
   createState,
@@ -25,6 +30,8 @@ export default function Breakout() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [finalScore, setFinalScore] = useState(0);
   const [won, setWon] = useState(false);
+  const [muted, toggleMute] = useMuted();
+  const [banner, setBanner] = useState<{ text: string; key: number } | null>(null);
 
   const { canvasRef, ensureSize } = useCanvasRef(W, H);
   const stateRef = useRef<GameState>(createState());
@@ -34,6 +41,14 @@ export default function Breakout() {
   const endedRef = useRef(false);
   const timeRef = useRef(0);
   const bgRef = useRef<{ x: number; y: number; r: number; s: number }[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
+  const bannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showBanner = useCallback((text: string) => {
+    setBanner({ text, key: Date.now() });
+    if (bannerTimer.current) clearTimeout(bannerTimer.current);
+    bannerTimer.current = setTimeout(() => setBanner(null), 1400);
+  }, []);
 
   const draw = useCallback((s: GameState) => {
     if (!ensureSize()) return;
@@ -83,6 +98,20 @@ export default function Breakout() {
     ctx.arc(s.ballX, s.ballY, BALL_R, 0, Math.PI * 2);
     ctx.fill();
 
+    // 连击浮字
+    if (s.combo >= 3) {
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.fillStyle = "#FFE9A8";
+      ctx.font = "bold 20px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`${s.combo} 连击!`, s.ballX, s.ballY - 16);
+      ctx.restore();
+    }
+
+    // 粒子
+    drawParticles(ctx, particlesRef.current);
+
     // HUD
     ctx.fillStyle = "#E1F5EE";
     ctx.font = "bold 18px system-ui, sans-serif";
@@ -97,7 +126,7 @@ export default function Breakout() {
     endedRef.current = true;
     const s = stateRef.current;
     setFinalScore(s.score);
-    setWon(s.won);
+    setWon(s.cleared);
     submit(s.score);
     setPhase("result");
   }, [submit]);
@@ -109,8 +138,10 @@ export default function Breakout() {
     keysRef.current = { left: false, right: false };
     pointerDownRef.current = false;
     timeRef.current = 0;
+    particlesRef.current = [];
     setFinalScore(0);
     setWon(false);
+    setBanner(null);
     setPhase("playing");
   }, []);
 
@@ -160,8 +191,9 @@ export default function Breakout() {
   };
 
   useGameLoop((dt) => {
-    const s = stateRef.current;
-    if (!s.alive || s.won) {
+    const d = Math.min(dt, 0.034);
+    const prev = stateRef.current;
+    if (!prev.alive || prev.cleared) {
       end();
       return;
     }
@@ -173,14 +205,40 @@ export default function Breakout() {
       inputRef.current.targetX != null
         ? { dir: 0, targetX: inputRef.current.targetX }
         : { dir, targetX: null };
-    const ns = step(s, Math.min(dt, 0.034), input);
+    const ns = step(prev, d, input);
+
+    // 事件反馈：砖块被击碎（分数增加）→ 找刚消失的砖位置迸发粒子
+    if (ns.score > prev.score) {
+      for (const b of prev.bricks) {
+        if (b.alive) {
+          const still = ns.bricks.find((x) => x.id === b.id);
+          if (!still || !still.alive) {
+            spawnBurst(particlesRef.current, b.x + b.w / 2, b.y + b.h / 2, b.color, 12, 160);
+          }
+        }
+      }
+      sfx.brick();
+      if (comboMult(ns.combo) > comboMult(prev.combo)) sfx.combo(ns.combo);
+    }
+    if (ns.combo < prev.combo && prev.combo >= 3) sfx.miss();
+    if (ns.level > prev.level) {
+      showBanner(`第 ${ns.level} 关`);
+      sfx.levelup();
+    }
+    if (ns.cleared && !prev.cleared) {
+      showBanner("🏆 全部通关！");
+      sfx.win();
+    }
+
     stateRef.current = ns;
-    timeRef.current += dt;
+    timeRef.current += d;
+    stepParticles(particlesRef.current, d);
     draw(ns);
-    if (!ns.alive || ns.won) end();
+    if (!ns.alive || ns.cleared) end();
   }, phase === "playing");
 
   const best = Math.max(high, finalScore);
+  const s = stateRef.current;
 
   if (phase === "idle") {
     return (
@@ -188,17 +246,21 @@ export default function Breakout() {
         <div className="text-5xl">🧱🚀</div>
         <p className="max-w-sm text-[#5F5E5A]">
           移动<span className="font-medium text-[#0F6E56]">挡板</span>把小球弹起来，击碎顶部所有
-          <span className="font-medium">砖块</span>！球掉下去就少一条命，共 {MAX_LIVES} 条命。
+          <span className="font-medium">砖块</span>！连续击碎不丢球会累积
+          <span className="font-medium text-[#FFD65A]">连击倍率</span>。
         </p>
         <p className="text-sm text-[#5F5E5A]">
-          💡 用 <span className="font-mono">← →</span> 或 <span className="font-mono">A D</span>，手机直接拖动挡板
+          共 {MAX_LEVEL} 关，每关多一行砖、球也更快，看你能打到第几关！
         </p>
-        <button
-          onClick={start}
-          className="rounded-full bg-[#0F6E56] px-8 py-3 text-lg font-medium text-white shadow-sm hover:bg-[#085041]"
-        >
-          开始打砖块
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={start}
+            className="rounded-full bg-[#0F6E56] px-8 py-3 text-lg font-medium text-white shadow-sm hover:bg-[#085041]"
+          >
+            开始打砖块
+          </button>
+          <SoundToggle />
+        </div>
         {high > 0 && <p className="text-sm text-[#5F5E5A]">历史最高分：{high}</p>}
       </div>
     );
@@ -207,12 +269,12 @@ export default function Breakout() {
   if (phase === "result") {
     return (
       <div className="flex flex-col items-center gap-4 py-10 text-center">
-        <div className="text-4xl">{won ? "🎉 全部击碎！" : "💥 球掉下去了！"}</div>
+        <div className="text-4xl">{won ? "🎉 全部通关！" : "💥 球掉下去了！"}</div>
         <div className="grid w-full max-w-xs grid-cols-2 gap-3">
           <Stat label="本次得分" value={finalScore} />
           <Stat label="历史最高" value={best} />
-          <Stat label="剩余生命" value={stateRef.current.lives} />
-          <Stat label="砖块清光" value={won ? "是" : "否"} />
+          <Stat label="到达关卡" value={`第 ${s.level} 关`} />
+          <Stat label="最高连击" value={s.comboBest} />
         </div>
         <button
           onClick={start}
@@ -226,8 +288,15 @@ export default function Breakout() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="mb-2 w-full max-w-md rounded-xl bg-[#E1F5EE] px-4 py-1.5 text-center text-sm text-[#0F6E56]">
-        历史最高 {high} ｜ 击碎全部砖块获胜
+      <div className="mb-2 flex w-full max-w-md items-center justify-between rounded-xl bg-[#E1F5EE] px-4 py-1.5 text-sm text-[#0F6E56]">
+        <span>
+          第 {s.level} 关 ｜ 剩 {s.bricks.filter((b) => b.alive).length} 块
+          {s.cleared ? " ｜ 🏆已通关" : ""}
+        </span>
+        <span className="flex items-center gap-2">
+          <span>连击 {s.combo}{comboMult(s.combo) > 1 ? ` ×${comboMult(s.combo).toFixed(1)}` : ""}</span>
+          <SoundToggle />
+        </span>
       </div>
       <div
         className="relative w-full max-w-md overflow-hidden rounded-2xl"
@@ -242,6 +311,7 @@ export default function Breakout() {
           onPointerLeave={onPointerUp}
           className="absolute inset-0 h-full w-full"
         />
+        {banner && <LevelBanner key={banner.key} text={banner.text} tone="#0F6E56" />}
       </div>
     </div>
   );

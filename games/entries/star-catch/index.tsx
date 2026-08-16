@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPoi
 import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
 import { useCanvasRef } from "@/games/hooks/useCanvasRef";
+import { sfx, spawnBurst, stepParticles, drawParticles, useMuted, type Particle } from "@/games/hooks/useGameJuice";
+import LevelBanner from "@/games/components/LevelBanner";
+import SoundToggle from "@/games/components/SoundToggle";
 import {
   W,
   H,
@@ -11,6 +14,9 @@ import {
   BASKET_H,
   BASKET_Y,
   MAX_LIVES,
+  MAX_LEVEL,
+  comboMult,
+  levelTargetFor,
   type GameState,
   type Input,
   createState,
@@ -34,6 +40,8 @@ export default function StarCatch() {
   const { high, submit } = useHighScore("star-catch");
   const [phase, setPhase] = useState<Phase>("idle");
   const [finalScore, setFinalScore] = useState(0);
+  const [muted, toggleMute] = useMuted();
+  const [banner, setBanner] = useState<{ text: string; key: number } | null>(null);
 
   const { canvasRef, ensureSize } = useCanvasRef(W, H);
   const stateRef = useRef<GameState>(createState());
@@ -42,6 +50,15 @@ export default function StarCatch() {
   const pointerDownRef = useRef(false);
   const endedRef = useRef(false);
   const bgRef = useRef<{ x: number; y: number; r: number; s: number }[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
+  const flashRef = useRef(0);
+  const bannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showBanner = useCallback((text: string) => {
+    setBanner({ text, key: Date.now() });
+    if (bannerTimer.current) clearTimeout(bannerTimer.current);
+    bannerTimer.current = setTimeout(() => setBanner(null), 1400);
+  }, []);
 
   const draw = useCallback((s: GameState) => {
     if (!ensureSize()) return;
@@ -100,6 +117,26 @@ export default function StarCatch() {
     ctx.arc(s.basketX, by + 4, 7, 0, Math.PI * 2);
     ctx.fill();
 
+    // 连击浮字
+    if (s.combo >= 3) {
+      ctx.save();
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = "#FFE9A8";
+      ctx.font = "bold 22px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`${s.combo} 连击!`, s.basketX, BASKET_Y - 26 - (s.combo % 5) * 2);
+      ctx.restore();
+    }
+
+    // 粒子
+    drawParticles(ctx, particlesRef.current);
+
+    // 漏接红闪
+    if (flashRef.current > 0) {
+      ctx.fillStyle = `rgba(216,90,48,${flashRef.current * 0.5})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+
     // HUD
     ctx.fillStyle = "#E1F5EE";
     ctx.font = "bold 18px system-ui, sans-serif";
@@ -124,7 +161,10 @@ export default function StarCatch() {
     inputRef.current = { dir: 0, targetX: null };
     keysRef.current = { left: false, right: false };
     pointerDownRef.current = false;
+    particlesRef.current = [];
+    flashRef.current = 0;
     setFinalScore(0);
+    setBanner(null);
     setPhase("playing");
   }, []);
 
@@ -174,8 +214,9 @@ export default function StarCatch() {
   };
 
   useGameLoop((dt) => {
-    const s = stateRef.current;
-    if (!s.alive) {
+    const d = Math.min(dt, 0.034);
+    const prev = stateRef.current;
+    if (!prev.alive) {
       end();
       return;
     }
@@ -187,13 +228,42 @@ export default function StarCatch() {
       inputRef.current.targetX != null
         ? { dir: 0, targetX: inputRef.current.targetX }
         : { dir, targetX: null };
-    const ns = step(s, Math.min(dt, 0.034), input);
+    const ns = step(prev, d, input);
+
+    // 事件反馈
+    if (ns.combo > prev.combo) {
+      spawnBurst(particlesRef.current, ns.basketX, BASKET_Y, "#FFD65A", 10, 150);
+      sfx.catch();
+      if (comboMult(ns.combo) > comboMult(prev.combo)) {
+        sfx.combo(ns.combo);
+        spawnBurst(particlesRef.current, ns.basketX, BASKET_Y, "#FFE9A8", 16, 220);
+      }
+    }
+    if (ns.lives < prev.lives) {
+      sfx.miss();
+      flashRef.current = 0.25;
+    }
+    if (ns.level > prev.level) {
+      showBanner(`第 ${ns.level} 关`);
+      sfx.levelup();
+    }
+    if (ns.cleared && !prev.cleared) {
+      showBanner("🏆 全部通关！继续挑战");
+      sfx.win();
+    }
+
     stateRef.current = ns;
+    flashRef.current = Math.max(0, flashRef.current - d);
+    stepParticles(particlesRef.current, d);
     draw(ns);
     if (!ns.alive) end();
   }, phase === "playing");
 
   const best = Math.max(high, finalScore);
+  const s = stateRef.current;
+  const prevThresh = s.level > 1 ? levelTargetFor(s.level - 1) : 0;
+  const inLevel = Math.min(s.caught - prevThresh, s.levelTarget - prevThresh);
+  const goal = s.levelTarget - prevThresh;
 
   if (phase === "idle") {
     return (
@@ -201,17 +271,24 @@ export default function StarCatch() {
         <div className="text-5xl">🌟🧺</div>
         <p className="max-w-sm text-[#5F5E5A]">
           左右移动<span className="font-medium text-[#0F6E56]">小篮子</span>，接住天上掉下来的
-          <span className="font-medium text-[#FFD65A]">星星</span>！漏掉三颗就结束，看你能接多少。
+          <span className="font-medium text-[#FFD65A]">星星</span>！连续接住会累积
+          <span className="font-medium text-[#FFD65A]">连击倍率</span>，漏掉三颗就结束。
+        </p>
+        <p className="text-sm text-[#5F5E5A]">
+          共 {MAX_LEVEL} 关，每关都要接住更多星星，看你能冲到第几关！
         </p>
         <p className="text-sm text-[#5F5E5A]">
           💡 用 <span className="font-mono">← →</span> 或 <span className="font-mono">A D</span>，手机直接拖动篮子
         </p>
-        <button
-          onClick={start}
-          className="rounded-full bg-[#0F6E56] px-8 py-3 text-lg font-medium text-white shadow-sm hover:bg-[#085041]"
-        >
-          开始接星星
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={start}
+            className="rounded-full bg-[#0F6E56] px-8 py-3 text-lg font-medium text-white shadow-sm hover:bg-[#085041]"
+          >
+            开始接星星
+          </button>
+          <SoundToggle />
+        </div>
         {high > 0 && <p className="text-sm text-[#5F5E5A]">历史最高分：{high}</p>}
       </div>
     );
@@ -224,8 +301,8 @@ export default function StarCatch() {
         <div className="grid w-full max-w-xs grid-cols-2 gap-3">
           <Stat label="本次得分" value={finalScore} />
           <Stat label="历史最高" value={best} />
-          <Stat label="接住星星" value={stateRef.current.caught} />
-          <Stat label="剩余生命" value={stateRef.current.lives} />
+          <Stat label="到达关卡" value={`第 ${s.level} 关`} />
+          <Stat label="最高连击" value={s.comboBest} />
         </div>
         <button
           onClick={start}
@@ -239,8 +316,15 @@ export default function StarCatch() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="mb-2 w-full max-w-md rounded-xl bg-[#E1F5EE] px-4 py-1.5 text-center text-sm text-[#0F6E56]">
-        历史最高 {high} ｜ 漏掉 {MAX_LIVES} 颗星星就结束
+      <div className="mb-2 flex w-full max-w-md items-center justify-between rounded-xl bg-[#E1F5EE] px-4 py-1.5 text-sm text-[#0F6E56]">
+        <span>
+          第 {s.level} 关 ｜ 本关 {inLevel}/{goal}
+          {s.cleared ? " ｜ 🏆已通关" : ""}
+        </span>
+        <span className="flex items-center gap-2">
+          <span>连击 {s.combo}{comboMult(s.combo) > 1 ? ` ×${comboMult(s.combo).toFixed(1)}` : ""}</span>
+          <SoundToggle />
+        </span>
       </div>
       <div
         className="relative w-full max-w-md overflow-hidden rounded-2xl"
@@ -255,12 +339,13 @@ export default function StarCatch() {
           onPointerLeave={onPointerUp}
           className="absolute inset-0 h-full w-full"
         />
+        {banner && <LevelBanner key={banner.key} text={banner.text} tone="#0F6E56" />}
       </div>
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="rounded-xl bg-white p-3 text-center shadow-sm">
       <div className="text-xs text-[#5F5E5A]">{label}</div>
