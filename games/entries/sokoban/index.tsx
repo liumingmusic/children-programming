@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
+import { useCanvasRef } from "@/games/hooks/useCanvasRef";
 import {
   CELL, DEFAULT_LEVEL, type GameState, type Input, createState, step,
 } from "./logic";
@@ -14,7 +15,6 @@ export default function Sokoban() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [finalScore, setFinalScore] = useState(0);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stateRef = useRef<GameState>(createState());
   const moveRef = useRef<Input["move"]>(null);
   const btnRef = useRef<Input["move"]>(null);
@@ -23,22 +23,16 @@ export default function Sokoban() {
   const W = stateRef.current.cols * CELL;
   const Hh = stateRef.current.rows * CELL;
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = Hh * dpr;
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.scale(dpr, dpr);
-  }, [W, Hh]);
+  const { canvasRef, ensureSize } = useCanvasRef(W, Hh);
 
   const draw = useCallback((s: GameState) => {
+    if (!ensureSize()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    ctx.clearRect(0, 0, W, Hh);
     ctx.fillStyle = "#10203a";
     ctx.fillRect(0, 0, W, Hh);
 

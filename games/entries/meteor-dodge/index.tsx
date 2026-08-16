@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
+import { useCanvasRef } from "@/games/hooks/useCanvasRef";
 import {
   W, H, PLAYER_SIZE, PLAYER_Y, MAX_LIVES,
   type GameState, type Input, createState, step,
@@ -15,7 +16,7 @@ export default function MeteorDodge() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [finalScore, setFinalScore] = useState(0);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { canvasRef, ensureSize } = useCanvasRef(W, H);
   const stateRef = useRef<GameState>(createState());
   const inputRef = useRef<Input>({ dir: 0, targetX: null });
   const keysRef = useRef({ left: false, right: false });
@@ -23,28 +24,23 @@ export default function MeteorDodge() {
   const endedRef = useRef(false);
   const bgRef = useRef<{ x: number; y: number; r: number; s: number }[]>([]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.scale(dpr, dpr);
-    bgRef.current = Array.from({ length: 55 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.3 + 0.4,
-      s: 18 + Math.random() * 44,
-    }));
-  }, []);
-
   const draw = useCallback((s: GameState) => {
+    if (!ensureSize()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    if (bgRef.current.length === 0) {
+      bgRef.current = Array.from({ length: 55 }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.3 + 0.4,
+        s: 18 + Math.random() * 44,
+      }));
+    }
+
+    ctx.clearRect(0, 0, W, H);
     const grad = ctx.createLinearGradient(0, 0, 0, H);
     grad.addColorStop(0, "#1a1140");
     grad.addColorStop(1, "#070418");

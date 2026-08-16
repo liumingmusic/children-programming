@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
+import { useCanvasRef } from "@/games/hooks/useCanvasRef";
 import {
   W, H, COLS, ROWS, CELL, ROTATIONS,
   type GameState, type Input, createState, step, cellsOf,
@@ -17,28 +18,20 @@ export default function Tetris() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [finalScore, setFinalScore] = useState(0);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { canvasRef, ensureSize } = useCanvasRef(W, H);
   const stateRef = useRef<GameState>(createState());
   const keysRef = useRef({ left: false, right: false, rotate: false, soft: false, hard: false });
   const btnRef = useRef({ left: false, right: false, rotate: false, soft: false, hard: false });
   const endedRef = useRef(false);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.scale(dpr, dpr);
-  }, []);
-
   const draw = useCallback((s: GameState) => {
+    if (!ensureSize()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = "#0a1428";
     ctx.fillRect(0, 0, W, H);
 

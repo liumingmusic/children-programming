@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
+import { useCanvasRef } from "@/games/hooks/useCanvasRef";
 import {
   W,
   H,
@@ -18,24 +19,16 @@ export default function Billiard() {
   const [phase, setPhase] = useState<"idle" | "playing">("idle");
   const [collisions, setCollisions] = useState(0);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { canvasRef, ensureSize } = useCanvasRef(W, H);
   const stateRef = useRef<GameState>(createState());
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.scale(dpr, dpr);
-  }, []);
-
   const draw = useCallback((s: GameState) => {
+    if (!ensureSize()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = "#0e3b2e";
     ctx.fillRect(0, 0, W, H);
     ctx.strokeStyle = "#1f6b52";

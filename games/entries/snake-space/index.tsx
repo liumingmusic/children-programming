@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
+import { useCanvasRef } from "@/games/hooks/useCanvasRef";
 import {
   W,
   H,
@@ -22,27 +23,11 @@ export default function SnakeSpace() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [finalScore, setFinalScore] = useState(0);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { canvasRef, ensureSize } = useCanvasRef(W, H);
   const stateRef = useRef<GameState>(createState());
   const inputRef = useRef<Input>({ dx: 0, dy: 0 });
   const endedRef = useRef(false);
   const bgRef = useRef<{ x: number; y: number; r: number; s: number }[]>([]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.scale(dpr, dpr);
-    bgRef.current = Array.from({ length: 40 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.2 + 0.3,
-      s: 12 + Math.random() * 30,
-    }));
-  }, []);
 
   // 键盘：方向键 / WASD 设定移动方向
   useEffect(() => {
@@ -58,11 +43,22 @@ export default function SnakeSpace() {
   }, []);
 
   const draw = useCallback((s: GameState, t: number) => {
+    if (!ensureSize()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    if (bgRef.current.length === 0) {
+      bgRef.current = Array.from({ length: 40 }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.2 + 0.3,
+        s: 12 + Math.random() * 30,
+      }));
+    }
+
+    ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = "#050a18";
     ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "rgba(255,255,255,0.6)";

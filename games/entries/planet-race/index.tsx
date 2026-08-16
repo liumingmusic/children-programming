@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
+import { useCanvasRef } from "@/games/hooks/useCanvasRef";
 import {
   W,
   H,
@@ -48,30 +49,13 @@ export default function PlanetRace() {
   // 窄屏（手机）检测：竖屏手机屏幕小，星球赛车竖着玩太憋屈，引导用平板/电脑。
   const [isNarrow, setIsNarrow] = useState(false);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { canvasRef, ensureSize } = useCanvasRef(W, H);
   const stateRef = useRef<GameState>(createState());
   const inputRef = useRef<Input>({ dir: 0, targetX: null });
   const keysRef = useRef({ left: false, right: false });
   const pointerDownRef = useRef(false);
   const endedRef = useRef(false);
   const bgRef = useRef<BgStar[]>([]);
-
-  // 配置画布尺寸 + 背景星点（仅在飞船组件挂载时一次）
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.scale(dpr, dpr);
-    bgRef.current = Array.from({ length: 70 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.6 + 0.4,
-      s: 20 + Math.random() * 50,
-    }));
-  }, []);
 
   // 监听视口宽度：手机（≤640px，多为竖屏）直接提示用更大屏设备，不进入游戏。
   useEffect(() => {
@@ -83,10 +67,22 @@ export default function PlanetRace() {
   }, []);
 
   const draw = useCallback((s: GameState) => {
+    if (!ensureSize()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    if (bgRef.current.length === 0) {
+      bgRef.current = Array.from({ length: 70 }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.6 + 0.4,
+        s: 20 + Math.random() * 50,
+      }));
+    }
+
+    ctx.clearRect(0, 0, W, H);
 
     // 太空背景
     const grad = ctx.createLinearGradient(0, 0, 0, H);
