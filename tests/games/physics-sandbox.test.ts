@@ -42,7 +42,8 @@ describe("gravity-bounce 物理与边界", () => {
       s = gbStep(s, DT, input);
     }
     expect(s.bounces).toBeGreaterThan(0);
-    expect(s.score).toBe(s.bounces * 10);
+    // 连击为加分项：总得分不低于基础分（弹跳×10）
+    expect(s.score).toBeGreaterThanOrEqual(s.bounces * 10);
   });
 
   it("完全漏接会扣除生命直至结束", () => {

@@ -1,6 +1,31 @@
 // 造物钢琴 · 音名 / 频率映射（纯函数，可测试）。
 // 等程律：freq = 440 * 2^(n/12)，n 为相对 A4 的半音数。
 
+import { levelTarget as levelTargetFn, MAX_LEVEL, comboMult as comboMultFn } from "@/games/lib/enhance";
+
+export const MAX_LEVELS = MAX_LEVEL;
+export const comboMult = comboMultFn;
+
+/** 第 level 关需正确弹奏的次数：5 → 13（每关 +2）。 */
+export function levelTargetFor(level: number): number {
+  return levelTargetFn(5, 2, level);
+}
+
+/**
+ * 第 level 关的目标音池：白键随关增多（5→13），第 MAX_LEVELS 关加入黑键。
+ */
+export function challengePool(level: number): PianoKey[] {
+  const whiteCount = Math.min(WHITE_KEYS.length, 3 + level * 2);
+  const pool = WHITE_KEYS.slice(0, whiteCount);
+  if (level >= MAX_LEVELS) return [...pool, ...BLACK_KEYS];
+  return pool;
+}
+
+/** 从音池随机挑一个目标音。 */
+export function pickTarget(pool: PianoKey[]): PianoKey {
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 export interface PianoKey {
   note: string; // 如 "C4" / "C#4"
   freq: number;

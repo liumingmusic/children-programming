@@ -1,6 +1,16 @@
 // 钓鱼 · 纯函数核心（无 DOM 可测试）。
 // 节奏收竿玩法：底部光条上有一个来回滑动的指针，绿区在中央。
 // 指针进入绿区时收竿 -> 钓到鱼（按大小计分）；否则算失误。失误满则结束。
+// 增强：5 关按累计钓到鱼数递进（绿区变窄）+ 连击倍率（连续钓到鱼鱼更大）。
+
+import { comboMult as comboMultFn, levelTarget as levelTargetFn, MAX_LEVEL as MAX_LEVEL_FN } from "@/games/lib/enhance";
+
+export const MAX_LEVEL = MAX_LEVEL_FN;
+export const comboMult = comboMultFn;
+/** 第 level 关需累计钓到的鱼数。 */
+export function levelTargetFor(level: number): number {
+  return levelTargetFn(5, 5, level);
+}
 
 export const W = 360;
 export const H = 540;
@@ -8,7 +18,7 @@ export const BAR_W = 280;
 export const BAR_H = 26;
 export const BAR_X = (W - BAR_W) / 2;
 export const BAR_Y = H - 150;
-export const ZONE_HALF = 34; // 绿区半宽
+export const ZONE_HALF = 34; // 绿区半宽（第 1 关）
 export const MARKER_SPEED = 3.0; // 弧度/秒
 export const MAX_MISS = 5;
 export const REEL_COOLDOWN = 0.35;
@@ -23,6 +33,12 @@ export interface GameState {
   alive: boolean;
   pos: number; // 指针在光条上的位置 0..BAR_W
   cooldown: number;
+  level: number;
+  levelTarget: number;
+  combo: number;
+  comboBest: number;
+  cleared: boolean;
+  zoneHalf: number;
   rng: () => number;
   lastValue: number;
   flash: number; // 命中/失误的视觉反馈计时
@@ -57,6 +73,12 @@ export function createState(seed?: number): GameState {
     alive: true,
     pos: markerPos(0),
     cooldown: 0,
+    level: 1,
+    levelTarget: levelTargetFor(1),
+    combo: 0,
+    comboBest: 0,
+    cleared: false,
+    zoneHalf: ZONE_HALF,
     rng,
     lastValue: 0,
     flash: 0,
@@ -72,6 +94,11 @@ export function step(s: GameState, dt: number, input: Input): GameState {
   let score = s.score;
   let catches = s.catches;
   let misses = s.misses;
+  let combo = s.combo;
+  let comboBest = s.comboBest;
+  let level = s.level;
+  let levelTarget = s.levelTarget;
+  let cleared = s.cleared;
   let lastValue = s.lastValue;
   let flash = Math.max(0, s.flash - dt);
   let flashGood = s.flashGood;
@@ -80,21 +107,36 @@ export function step(s: GameState, dt: number, input: Input): GameState {
   if (input.reel && cooldown <= 0) {
     const center = BAR_W / 2;
     cooldown = REEL_COOLDOWN;
-    if (Math.abs(pos - center) <= ZONE_HALF) {
+    const zone = Math.max(18, ZONE_HALF - (level - 1) * 4);
+    if (Math.abs(pos - center) <= zone) {
       const value = FISH_MIN + Math.floor(s.rng() * (FISH_MAX - FISH_MIN + 1));
-      score += value;
+      const gained = Math.round(value * comboMult(combo + 1));
+      score += gained;
       catches += 1;
-      lastValue = value;
+      combo += 1;
+      comboBest = Math.max(comboBest, combo);
+      lastValue = gained;
       flash = 0.4;
       flashGood = true;
+      // 关卡递进
+      if (catches >= levelTarget) {
+        if (level < MAX_LEVEL) {
+          level += 1;
+          levelTarget = levelTargetFor(level);
+        } else if (!cleared) {
+          cleared = true;
+        }
+      }
     } else {
       misses += 1;
+      combo = 0;
       lastValue = 0;
       flash = 0.4;
       flashGood = false;
     }
   }
 
+  const zoneHalf = Math.max(18, ZONE_HALF - (level - 1) * 4);
   const alive = misses < MAX_MISS;
-  return { ...s, t, pos, score, catches, misses, alive, cooldown, lastValue, flash, flashGood };
+  return { ...s, t, pos, score, catches, misses, alive, cooldown, level, levelTarget, combo, comboBest, cleared, zoneHalf, lastValue, flash, flashGood };
 }

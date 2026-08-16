@@ -1,5 +1,15 @@
 // 太空跑酷 · 纯函数核心（无 DOM 可测试）。
 // 竖屏逻辑分辨率。玩家固定在左侧，小行星从右向左飞来，跳跃躲避。
+// 增强：5 关按累计躲过的小行星数递进（更快更密）+ 连击倍率（连续躲过累积加分）。
+
+import { comboMult as comboMultFn, levelTarget as levelTargetFn, MAX_LEVEL as MAX_LEVEL_FN } from "@/games/lib/enhance";
+
+export const MAX_LEVEL = MAX_LEVEL_FN;
+export const comboMult = comboMultFn;
+/** 第 level 关需累计躲过的小行星数。 */
+export function levelTargetFor(level: number): number {
+  return levelTargetFn(8, 8, level);
+}
 
 export const W = 360;
 export const H = 540;
@@ -32,6 +42,12 @@ export interface GameState {
   spawnTimer: number;
   nextGap: number;
   hitCooldown: number;
+  level: number;
+  levelTarget: number;
+  cleared: number; // 躲过的小行星数
+  combo: number;
+  comboBest: number;
+  won: boolean; // 通关
   rng: () => number;
 }
 
@@ -63,6 +79,12 @@ export function createState(seed?: number): GameState {
     spawnTimer: 0.9,
     nextGap: 1.4,
     hitCooldown: 0,
+    level: 1,
+    levelTarget: levelTargetFor(1),
+    cleared: 0,
+    combo: 0,
+    comboBest: 0,
+    won: false,
     rng,
   };
 }
@@ -77,6 +99,7 @@ function aabb(
 export function step(s: GameState, dt: number, input: Input): GameState {
   if (!s.alive) return s;
   const t = s.t + dt;
+  const obstSpeed = OBST_SPEED + (s.level - 1) * 30;
 
   // 重力 / 跳跃
   let py = s.py;
@@ -94,10 +117,10 @@ export function step(s: GameState, dt: number, input: Input): GameState {
     grounded = true;
   }
 
-  // 小行星左移
-  const obstacles = s.obstacles
-    .map((o) => ({ ...o, x: o.x - OBST_SPEED * dt }))
-    .filter((o) => o.x + o.w > -20);
+  // 小行星左移 + 统计躲过数
+  const moved = s.obstacles.map((o) => ({ ...o, x: o.x - obstSpeed * dt }));
+  const passed = moved.filter((o) => o.x + o.w <= -20).length;
+  const obstacles = moved.filter((o) => o.x + o.w > -20);
 
   // 碰撞
   let lives = s.lives;
@@ -114,7 +137,7 @@ export function step(s: GameState, dt: number, input: Input): GameState {
     }
   }
 
-  // 生成小行星
+  // 生成小行星（关卡越高越密）
   let spawnTimer = s.spawnTimer - dt;
   let nextGap = s.nextGap;
   if (spawnTimer <= 0) {
@@ -122,14 +145,38 @@ export function step(s: GameState, dt: number, input: Input): GameState {
     const h = 34 + s.rng() * 56;
     obstacles.push({ x: W + 10, w, h });
     spawnTimer = nextGap;
-    nextGap = 0.8 + s.rng() * 0.9;
+    nextGap = Math.max(0.5, 0.8 + s.rng() * 0.9 - (s.level - 1) * 0.06);
   }
 
+  // 躲过 + 连击 + 关卡递进
+  let cleared = s.cleared + passed;
+  let combo = s.combo;
+  let comboBest = s.comboBest;
+  let level = s.level;
+  let levelTarget = s.levelTarget;
+  let won = s.won;
+  let points = s.score - Math.floor(s.t * SCORE_PER_SEC);
+  if (passed > 0) {
+    for (let i = 0; i < passed; i++) {
+      combo += 1;
+      comboBest = Math.max(comboBest, combo);
+      points += Math.round(5 * comboMult(combo));
+    }
+    while (level < MAX_LEVEL && cleared >= levelTarget) {
+      level += 1;
+      levelTarget = levelTargetFor(level);
+    }
+    if (level >= MAX_LEVEL && cleared >= levelTargetFor(MAX_LEVEL)) won = true;
+  }
+  // 被击中则连击清零
+  if (lives < s.lives) combo = 0;
+
   const alive = lives > 0;
-  const score = Math.floor(t * SCORE_PER_SEC);
+  const score = Math.floor(t * SCORE_PER_SEC) + points;
 
   return {
     ...s, t, py, vy, grounded, obstacles,
     spawnTimer, nextGap, lives, hitCooldown, alive, score,
+    level, levelTarget, cleared, combo, comboBest, won,
   };
 }

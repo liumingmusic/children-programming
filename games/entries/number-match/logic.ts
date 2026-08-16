@@ -1,4 +1,13 @@
-// 数字消消乐 · 纯函数工具（牌组生成）。
+// 数字消消乐 · 纯函数工具（牌组生成 + 关卡/连击增强）。
+
+import { levelTarget as levelTargetFn, MAX_LEVEL } from "@/games/lib/enhance";
+
+export const MAX_LEVELS = MAX_LEVEL;
+
+/** 第 level 关的牌数：8 → 16（4 列网格 2..4 行）。 */
+export function levelTargetFor(level: number): number {
+  return levelTargetFn(8, 2, level);
+}
 
 export interface Tile {
   id: number;

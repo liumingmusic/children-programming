@@ -5,11 +5,22 @@ import { useHighScore } from "@/games/hooks/useHighScore";
 import { useGameLoop } from "@/games/hooks/useGameLoop";
 import { useCanvasRef } from "@/games/hooks/useCanvasRef";
 import {
+  sfx,
+  spawnBurst,
+  stepParticles,
+  drawParticles,
+  useMuted,
+  type Particle,
+} from "@/games/hooks/useGameJuice";
+import LevelBanner from "@/games/components/LevelBanner";
+import SoundToggle from "@/games/components/SoundToggle";
+import {
   W,
   H,
   SHIP_Y,
   SHIP_W,
   SHIP_H,
+  MAX_LEVEL,
   createState,
   step,
   type GameState,
@@ -46,16 +57,27 @@ export default function PlanetRace() {
   const { high, submit } = useHighScore("planet-race");
   const [phase, setPhase] = useState<Phase>("idle");
   const [finalScore, setFinalScore] = useState(0);
+  const [muted, toggleMute] = useMuted();
+  const [banner, setBanner] = useState<{ text: string; key: number } | null>(null);
   // 窄屏（手机）检测：竖屏手机屏幕小，星球赛车竖着玩太憋屈，引导用平板/电脑。
   const [isNarrow, setIsNarrow] = useState(false);
 
   const { canvasRef, ensureSize } = useCanvasRef(W, H);
   const stateRef = useRef<GameState>(createState());
+  const prevRef = useRef<GameState>(createState());
   const inputRef = useRef<Input>({ dir: 0, targetX: null });
   const keysRef = useRef({ left: false, right: false });
   const pointerDownRef = useRef(false);
   const endedRef = useRef(false);
   const bgRef = useRef<BgStar[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
+  const bannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showBanner = useCallback((text: string) => {
+    setBanner({ text, key: Date.now() });
+    if (bannerTimer.current) clearTimeout(bannerTimer.current);
+    bannerTimer.current = setTimeout(() => setBanner(null), 1400);
+  }, []);
 
   // 监听视口宽度：手机（≤640px，多为竖屏）直接提示用更大屏设备，不进入游戏。
   useEffect(() => {
@@ -156,13 +178,23 @@ export default function PlanetRace() {
     ctx.fill();
     ctx.restore();
 
+    // 粒子
+    drawParticles(ctx, particlesRef.current);
+
     // HUD
     ctx.fillStyle = "#E1F5EE";
-    ctx.font = "bold 18px system-ui, sans-serif";
+    ctx.font = "bold 16px system-ui, sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(`得分 ${s.score}`, 12, 28);
+    ctx.fillText(`第 ${s.level}/${MAX_LEVEL} 关`, 12, 24);
+    ctx.fillText(`得分 ${s.score}`, 12, 44);
+    if (s.combo > 1) {
+      ctx.fillStyle = "#FFD65A";
+      ctx.textAlign = "right";
+      ctx.fillText(`连击 ×${s.combo}`, W - 12, 24);
+    }
+    ctx.fillStyle = "#E1F5EE";
     ctx.textAlign = "right";
-    ctx.fillText(`⭐ ${s.collected}`, W - 12, 28);
+    ctx.fillText(`⭐ ${s.collected}/${s.levelTarget}`, W - 12, 44);
   }, []);
 
   const end = useCallback(() => {
@@ -176,10 +208,13 @@ export default function PlanetRace() {
 
   const start = useCallback(() => {
     endedRef.current = false;
-    stateRef.current = createState();
+    const s0 = createState();
+    stateRef.current = s0;
+    prevRef.current = s0;
     inputRef.current = { dir: 0, targetX: null };
     keysRef.current = { left: false, right: false };
     pointerDownRef.current = false;
+    particlesRef.current = [];
     setFinalScore(0);
     setPhase("playing");
   }, []);
@@ -245,13 +280,33 @@ export default function PlanetRace() {
       inputRef.current.targetX != null
         ? { dir: 0, targetX: inputRef.current.targetX }
         : { dir, targetX: null };
+    const prev = prevRef.current;
     const ns = step(s, Math.min(dt, 0.034), input);
+    stepParticles(particlesRef.current, dt);
+
+    if (ns.collected > prev.collected) {
+      if (!muted) sfx.catch();
+      spawnBurst(particlesRef.current, ns.shipX, SHIP_Y - 10, "#FFD65A", 12, 200);
+      if (ns.combo >= 3 && !muted) sfx.combo(ns.combo);
+    }
+    if (ns.level > prev.level) {
+      if (ns.level >= MAX_LEVEL) {
+        showBanner("🏆 全部通关！继续飞");
+        if (!muted) sfx.win();
+      } else {
+        showBanner(`第 ${ns.level} 关 · 陨石更密`);
+        if (!muted) sfx.levelup();
+      }
+    }
+
     stateRef.current = ns;
+    prevRef.current = ns;
     draw(ns);
     if (!ns.alive) end();
   }, phase === "playing");
 
   const best = Math.max(high, finalScore);
+  const s = stateRef.current;
 
   // 手机端：屏幕太小，星球赛车体验不好，引导用平板/电脑访问。
   if (isNarrow) {
@@ -275,8 +330,9 @@ export default function PlanetRace() {
         <div className="text-5xl">🚀🪐</div>
         <p className="max-w-sm text-[#5F5E5A]">
           驾驶<span className="font-medium text-[#0F6E56]">二零飞船</span>绕星球飞行！
-          左右移动躲开<span className="font-medium text-[#8a8f99]">陨石</span>，
-          吃掉<span className="font-medium text-[#FFD65A]">星星</span>加分。撞到陨石就结束，看你能跑多远！
+          左右移动躲开<span className="font-medium text-[#8a8f99]">陨石</span>，吃掉
+          <span className="font-medium text-[#FFD65A]">星星</span>加分。收集星星越多关卡越高、世界越快；
+          <span className="font-medium text-[#B7791F]">连续吃星</span>还有连击加分。撞到陨石就结束，看你能跑多远！
         </p>
         <p className="text-sm text-[#5F5E5A]">
           💡 用 <span className="font-mono">← →</span> 或 <span className="font-mono">A D</span>，手机直接拖动飞船
@@ -287,7 +343,7 @@ export default function PlanetRace() {
         >
           开始飞行
         </button>
-        {high > 0 && <p className="text-sm text-[#5F5E5A]">历史最高分：{high}</p>}
+        {high > 0 && <p className="text-sm text-[#5F5E56]">历史最高分：{high}</p>}
       </div>
     );
   }
@@ -299,8 +355,10 @@ export default function PlanetRace() {
         <div className="grid w-full max-w-xs grid-cols-2 gap-3">
           <Stat label="本次得分" value={finalScore} />
           <Stat label="历史最高" value={best} />
-          <Stat label="收集星星" value={stateRef.current.collected} />
-          <Stat label="坚持时间" value={`${stateRef.current.t.toFixed(1)}s`} />
+          <Stat label="收集星星" value={s.collected} />
+          <Stat label="到达关卡" value={`第 ${s.level} 关`} />
+          <Stat label="最高连击" value={s.comboBest} />
+          <Stat label="通关" value={s.cleared ? "已达成 🏆" : "未达成"} />
         </div>
         <button
           onClick={start}
@@ -315,8 +373,13 @@ export default function PlanetRace() {
   // playing
   return (
     <div className="flex flex-col items-center">
-      <div className="mb-2 w-full max-w-md rounded-xl bg-[#E1F5EE] px-4 py-1.5 text-center text-sm text-[#0F6E56]">
-        历史最高 {high} ｜ 撞到陨石就结束，收集星星得分
+      <div className="relative mb-2 w-full max-w-md">
+        <div className="rounded-xl bg-[#E1F5EE] px-4 py-1.5 text-center text-sm text-[#0F6E56]">
+          历史最高 {high} ｜ 第 {s.level}/{MAX_LEVEL} 关 ｜ 连击 {s.combo}
+        </div>
+        <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <SoundToggle />
+        </div>
       </div>
       <div
         className="relative w-full max-w-md overflow-hidden rounded-2xl"
@@ -331,6 +394,7 @@ export default function PlanetRace() {
           onPointerLeave={onPointerUp}
           className="absolute inset-0 h-full w-full"
         />
+        {banner && <LevelBanner key={banner.key} text={banner.text} />}
       </div>
     </div>
   );

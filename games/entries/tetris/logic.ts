@@ -1,5 +1,15 @@
 // 俄罗斯方块 · 纯函数核心（无 DOM 可测试）。
 // 7 种方块 + 7-bag 随机器 + 旋转/墙踢/消行。状态用不可变更新，便于单测。
+// 增强：5 关按累计消除行数递进（每 10 行升关、下落更快）+ 连击倍率（连续消行）。
+
+import { comboMult as comboMultFn, MAX_LEVEL as MAX_LEVEL_FN } from "@/games/lib/enhance";
+
+export const MAX_LEVEL = MAX_LEVEL_FN;
+export const comboMult = comboMultFn;
+/** 第 level 关需累计消除的行数（每关 +10 行）。 */
+export function levelTargetFor(level: number): number {
+  return level * 10;
+}
 
 export const COLS = 10;
 export const ROWS = 18;
@@ -47,6 +57,11 @@ export interface GameState {
   bag: number[];
   score: number;
   lines: number;
+  level: number;
+  levelTarget: number;
+  combo: number;
+  comboBest: number;
+  cleared: boolean;
   alive: boolean;
   rng: () => number;
   dropTimer: number;
@@ -163,6 +178,11 @@ export function createState(seed?: number): GameState {
     bag: second.bag,
     score: 0,
     lines: 0,
+    level: 1,
+    levelTarget: levelTargetFor(1),
+    combo: 0,
+    comboBest: 0,
+    cleared: false,
     alive: true,
     rng,
     dropTimer: 0,
@@ -173,6 +193,33 @@ export function createState(seed?: number): GameState {
   };
 }
 
+/** 锁定方块后结算：消行计分（连击倍率）+ 关卡递进。 */
+function lockResult(
+  board: Cell[][],
+  baseScore: number,
+  lines: number,
+  combo: number,
+  level: number
+): { board: Cell[][]; score: number; lines: number; combo: number; level: number; cleared: boolean } {
+  const cl = clearLines(board);
+  let score = baseScore;
+  let newCombo = combo;
+  let newLevel = level;
+  let cleared = false;
+  if (cl.cleared > 0) {
+    const lineScore = LINE_SCORES[cl.cleared] ?? 800;
+    newCombo = combo + 1;
+    const mult = comboMult(newCombo, 4, 3, 0.5);
+    score += Math.round(lineScore * mult);
+    lines += cl.cleared;
+    while (newLevel < MAX_LEVEL && lines >= levelTargetFor(newLevel)) newLevel += 1;
+    if (newLevel >= MAX_LEVEL && lines >= levelTargetFor(MAX_LEVEL)) cleared = true;
+  } else {
+    newCombo = 0;
+  }
+  return { board: cl.board, score, lines, combo: newCombo, level: newLevel, cleared };
+}
+
 export function step(s: GameState, dt: number, input: Input): GameState {
   if (!s.alive) return s;
   let board: Cell[][] = s.board.map((r) => r.slice());
@@ -181,9 +228,13 @@ export function step(s: GameState, dt: number, input: Input): GameState {
   let next = s.next;
   let score = s.score;
   let lines = s.lines;
+  let combo = s.combo;
+  let comboBest = s.comboBest;
+  let level = s.level;
+  let cleared = s.cleared;
   let alive: boolean = s.alive;
   let dropTimer = s.dropTimer;
-  const dropInterval = input.soft ? SOFT_INTERVAL : NORMAL_INTERVAL;
+  const dropInterval = input.soft ? SOFT_INTERVAL : NORMAL_INTERVAL * Math.pow(0.82, Math.max(0, level - 1));
   let prevRotate = input.rotate;
   let prevHard = input.hard;
   let hDir = s.hDir;
@@ -209,21 +260,40 @@ export function step(s: GameState, dt: number, input: Input): GameState {
   // 硬降（边沿触发）：直接落底并锁定
   if (input.hard && !s.prevHard) {
     while (!collide(board, { ...cur, y: cur.y + 1 })) cur = { ...cur, y: cur.y + 1 };
-    score += 2;
     writePiece(board, cur);
-    const cl = clearLines(board);
-    board = cl.board;
-    if (cl.cleared > 0) {
-      lines += cl.cleared;
-      score += LINE_SCORES[cl.cleared] ?? 800;
-    }
+    const lr = lockResult(board, score + 2, lines, combo, level);
+    board = lr.board;
+    score = lr.score;
+    lines = lr.lines;
+    combo = lr.combo;
+    level = lr.level;
+    cleared = lr.cleared;
     const sp = spawnNext({ ...s, board, bag, next, score, lines });
     cur = sp.cur;
     next = sp.next;
     bag = sp.bag;
     alive = sp.alive;
     dropTimer = 0;
-    return { ...s, board, cur, next, bag, score, lines, alive, dropTimer, prevRotate, prevHard, hDir, hTimer };
+    return {
+      ...s,
+      board,
+      cur,
+      next,
+      bag,
+      score,
+      lines,
+      level,
+      levelTarget: levelTargetFor(level),
+      combo,
+      comboBest: Math.max(comboBest, combo),
+      cleared,
+      alive,
+      dropTimer,
+      prevRotate,
+      prevHard,
+      hDir,
+      hTimer,
+    };
   }
 
   // 重力下落
@@ -235,12 +305,13 @@ export function step(s: GameState, dt: number, input: Input): GameState {
       cur = { ...cur, y: cur.y + 1 };
     } else {
       writePiece(board, cur);
-      const cl = clearLines(board);
-      board = cl.board;
-      if (cl.cleared > 0) {
-        lines += cl.cleared;
-        score += LINE_SCORES[cl.cleared] ?? 800;
-      }
+      const lr = lockResult(board, score, lines, combo, level);
+      board = lr.board;
+      score = lr.score;
+      lines = lr.lines;
+      combo = lr.combo;
+      level = lr.level;
+      cleared = lr.cleared;
       const sp = spawnNext({ ...s, board, bag, next, score, lines });
       cur = sp.cur;
       next = sp.next;
@@ -249,5 +320,24 @@ export function step(s: GameState, dt: number, input: Input): GameState {
     }
   }
 
-  return { ...s, board, cur, next, bag, score, lines, alive, dropTimer, prevRotate, prevHard, hDir, hTimer };
+  return {
+    ...s,
+    board,
+    cur,
+    next,
+    bag,
+    score,
+    lines,
+    level,
+    levelTarget: levelTargetFor(level),
+    combo,
+    comboBest: Math.max(comboBest, combo),
+    cleared,
+    alive,
+    dropTimer,
+    prevRotate,
+    prevHard,
+    hDir,
+    hTimer,
+  };
 }

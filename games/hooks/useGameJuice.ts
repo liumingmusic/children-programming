@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 
 // 游戏「手感增强」工具包：
 //  - sfx：WebAudio 合成音效，无需任何音频文件，首次用户手势后惰性初始化 AudioContext
@@ -145,6 +145,40 @@ export function drawParticles(ctx: CanvasRenderingContext2D, arr: Particle[]) {
     ctx.fill();
   }
   ctx.globalAlpha = 1;
+}
+
+// ---------------------------------------------------------------- DOM 粒子迸发
+// canvas 游戏用 spawnBurst 画粒子；DOM/音乐游戏用 useBurst 渲染 emoji 浮字。
+
+export interface Burst {
+  id: number;
+  emoji: string;
+  dx: number; // 横向偏移（px）
+  dy: number; // 起始纵向偏移（px）
+}
+
+const DEFAULT_BURST_EMOJIS = ["⭐", "✨", "🌟", "💫"];
+
+/** 在相对定位容器内渲染上浮 emoji 迸发。muted 时不触发。 */
+export function useBurst() {
+  const [bursts, setBursts] = useState<Burst[]>([]);
+  const idRef = useRef(0);
+
+  const pop = useCallback((n = 6, emojis: string[] = DEFAULT_BURST_EMOJIS) => {
+    if (muted) return;
+    const items: Burst[] = Array.from({ length: n }, () => ({
+      id: idRef.current++,
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+      dx: (Math.random() * 2 - 1) * 70,
+      dy: -10 - Math.random() * 30,
+    }));
+    setBursts((b) => [...b, ...items]);
+    window.setTimeout(() => {
+      setBursts((b) => b.filter((x) => !items.some((it) => it.id === x.id)));
+    }, 900);
+  }, []);
+
+  return { bursts, pop };
 }
 
 // ---------------------------------------------------------------- 静音开关

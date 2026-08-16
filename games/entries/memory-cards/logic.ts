@@ -1,6 +1,15 @@
-// 记忆翻牌 · 纯函数工具（洗牌与牌组生成）。
+// 记忆翻牌 · 纯函数工具（洗牌与牌组生成 + 关卡/连击增强）。
+
+import { levelTarget as levelTargetFn, MAX_LEVEL } from "@/games/lib/enhance";
 
 export const PAIR_EMOJIS = ["🌟", "🌙", "🪐", "🚀", "☄️", "🌍", "🔭", "👽"];
+
+export const MAX_LEVELS = MAX_LEVEL;
+
+/** 第 level 关的牌对数：4 → 8（4 列网格恰好 8..16 张）。 */
+export function levelTargetFor(level: number): number {
+  return levelTargetFn(4, 1, level);
+}
 
 export interface Card {
   id: number;
