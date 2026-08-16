@@ -290,7 +290,7 @@ export default function Breakout() {
     <div className="flex flex-col items-center">
       <div className="mb-2 flex w-full max-w-md items-center justify-between rounded-xl bg-[#E1F5EE] px-4 py-1.5 text-sm text-[#0F6E56]">
         <span>
-          第 {s.level} 关 ｜ 剩 {s.bricks.filter((b) => b.alive).length} 块
+          第 {s.level}/{MAX_LEVEL} 关 ｜ 剩 {s.bricks.filter((b) => b.alive).length} 块
           {s.cleared ? " ｜ 🏆已通关" : ""}
         </span>
         <span className="flex items-center gap-2">
