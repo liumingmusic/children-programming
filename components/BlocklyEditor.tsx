@@ -4,6 +4,8 @@ import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
+import { buildFlyoutToolbox } from "@/lib/toolbox-category";
+import { collectScripts } from "@/lib/scripts";
 import type { ToolboxEntry } from "@/lib/toolbox-category";
 import type { Runtime } from "@/lib/runtime";
 
@@ -40,11 +42,18 @@ interface BlocklyEditorProps {
    * 设为 false 则保留原生 flyout（如只读演示/回放视图）。
    */
   disableNativeFlyout?: boolean;
+  /**
+   * 原生「分类 flyout」要展示的分类（可拖拽积木，替代外部手风琴）。
+   * 传入该数组时，会自动关闭外部手风琴（disableNativeFlyout 置 false）、
+   * 用 buildFlyoutToolbox(categories) 注入带分类与配色的可拖拽工具箱。
+   * 不传则维持现状（外部手风琴或只读视图），互不影响。
+   */
+  toolboxCategories?: string[];
 }
 
 const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
   function BlocklyEditor(
-    { onChange, onAutoSave, bootstrapXml, onFlush, disableNativeFlyout = true },
+    { onChange, onAutoSave, bootstrapXml, onFlush, disableNativeFlyout = true, toolboxCategories },
     ref
   ) {
     const blocklyDiv = useRef<HTMLDivElement>(null);
@@ -123,7 +132,10 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
       };
       // 不传 toolbox → 不创建原生 flyout，画布占满整块区域，
       // 由外部手风琴面板负责「点击添加积木」。
-      if (!disableNativeFlyout) {
+      // 若传入 toolboxCategories，则注入「分类 flyout」（可拖拽），优先于 disableNativeFlyout 的扁平回退。
+      if (toolboxCategories) {
+        injectOptions.toolbox = buildFlyoutToolbox(toolboxCategories);
+      } else if (!disableNativeFlyout) {
         injectOptions.toolbox = TOOLBOX;
       }
 
@@ -232,27 +244,9 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
       run: async (runtime: Runtime) => {
         const workspace = workspaceRef.current;
         if (!workspace) return;
-        const topBlocks = workspace.getTopBlocks(true);
-        let whenStart = "";
-        let whenStageClicked = "";
-        const whenKeyPressed: { key: string; code: string }[] = [];
-        const whenReceived: { message: string; code: string }[] = [];
-        for (const block of topBlocks) {
-          const type = block.type;
-          if (type === "maker_when_start") {
-            whenStart = javascriptGenerator.blockToCode(block).toString();
-          } else if (type === "maker_when_stage_clicked") {
-            whenStageClicked = javascriptGenerator.blockToCode(block).toString();
-          } else if (type === "maker_when_key_pressed") {
-            const key = block.getFieldValue("KEY") || "up";
-            const code = javascriptGenerator.blockToCode(block).toString();
-            whenKeyPressed.push({ key, code });
-          } else if (type === "maker_when_receive") {
-            const msg = block.getFieldValue("MSG") || "出发";
-            const code = javascriptGenerator.blockToCode(block).toString();
-            whenReceived.push({ message: msg, code });
-          }
-        }
+        // 用 collectScripts 收集事件脚本：会自动把顶层「定义积木」的函数声明
+        // 前置到每个事件脚本（修复「函数已定义却被丢弃 → ReferenceError」的 bug）。
+        const { whenStart, whenStageClicked, whenKeyPressed, whenReceived } = collectScripts(workspace);
         runtime.setScripts({ whenStart, whenStageClicked, whenKeyPressed, whenReceived });
         await runtime.handleRunStart();
         // 演示用自动触发：有「当舞台被点击」脚本时，自动模拟一次舞台点击（无论是否同时有

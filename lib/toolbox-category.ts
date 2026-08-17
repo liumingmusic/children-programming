@@ -73,3 +73,36 @@ export const TOOLBOX_ITEM_BY_TYPE: Record<string, ToolboxItem> = (() => {
   }
   return map;
 })();
+
+/** 全部分类名（按 CATEGORIZED_TOOLBOX 顺序），供页面启用原生拖拽 flyout 时传全部分类。 */
+export const ALL_TOOLBOX_CATEGORIES: string[] = CATEGORIZED_TOOLBOX.map((g) => g.category);
+
+/**
+ * 构建 Blockly 原生「分类 flyout」工具箱（可拖拽），用于替代外部手风琴 + 点击添加。
+ * 把现有 CATEGORIZED_TOOLBOX 的分组与配色直接映射成 Blockly 嵌套分类，
+ * 每个分类下是可拖出的积木（含默认 fields / shadow inputs，拖出效果与原来一致）。
+ *
+ * @param categories 可选：只保留这些分类（按学龄裁剪工具箱用）。不传则展示全部。
+ * @returns Blockly toolbox 配置对象（kind: "categoryToolbox"）。
+ */
+export function buildFlyoutToolbox(categories?: string[]) {
+  const groups = categories
+    ? CATEGORIZED_TOOLBOX.filter((g) => categories.includes(g.category))
+    : CATEGORIZED_TOOLBOX;
+
+  return {
+    kind: "categoryToolbox" as const,
+    contents: groups.map((g) => ({
+      kind: "category" as const,
+      name: g.category,
+      colour: g.color, // 分类色标，让 flyout 与原有手风琴配色一致
+      contents: g.items.map((item) => {
+        const entry = item.entry;
+        const node: Record<string, unknown> = { kind: "block", type: entry.type };
+        if (entry.fields && Object.keys(entry.fields).length) node.fields = entry.fields;
+        if (entry.inputs && Object.keys(entry.inputs).length) node.inputs = entry.inputs;
+        return node;
+      }),
+    })),
+  };
+}

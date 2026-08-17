@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Play, RotateCcw, Save, CheckCircle, BookOpen, Info, X } from "lucide-react";
 import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
-import ToolboxAccordion from "@/components/ToolboxAccordion";
 import StagePlayer from "@/components/StagePlayer";
 import DemoOverlay from "@/components/DemoOverlay";
 import ErLingAvatar from "@/components/ErLingAvatar";
@@ -20,6 +19,7 @@ import { getNextProject, getStageOfProject, getProject } from "@/courses";
 import { loadProject, saveProject, markProgress, getProgress, getAllProgress, recordSessionTime } from "@/lib/db";
 import { computeSteps, coach, isGoalAchieved } from "@/lib/steps";
 import { isUnlocked, getPreviousSlug } from "@/lib/path";
+import { ALL_TOOLBOX_CATEGORIES } from "@/lib/toolbox-category";
 
 const STAGE_WIDTH = 480;
 const STAGE_HEIGHT = 360;
@@ -553,9 +553,6 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           </section>
         ) : (
           <>
-            <ToolboxAccordion
-              onPick={(item) => editorRef.current?.addBlock(item.doc.id, item.entry)}
-            />
             <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
               <h2 className="mb-2 text-sm font-medium text-[#04342C]">积木工作区</h2>
               <div className="min-h-0 flex-1">
@@ -565,6 +562,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
                   onAutoSave={scheduleAutoSave}
                   bootstrapXml={bootstrapXml}
                   onFlush={flushXml}
+                  toolboxCategories={ALL_TOOLBOX_CATEGORIES}
                 />
               </div>
             </section>
