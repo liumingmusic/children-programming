@@ -109,6 +109,63 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
       }, 0);
     }, []);
 
+    // 内部：把积木放到指定位置。dropCoord 为绝对 clientX/Y（来自 HTML5 drop 事件），
+    // 不传则放到当前可视区域左上角附近（点击添加的传统行为）。
+    // 抽到外层是为了让 useImperativeHandle 的 addBlock 与 JSX 的 onDrop 共享同一份逻辑。
+    const addBlockInternal = useCallback(
+      (
+        type: string,
+        entry?: ToolboxEntry,
+        dropCoord?: { x: number; y: number }
+      ) => {
+        const workspace = workspaceRef.current;
+        if (!workspace) return;
+        const state: Record<string, unknown> = { type };
+        if (entry?.fields && Object.keys(entry.fields).length) {
+          state.fields = entry.fields;
+        }
+        if (entry?.inputs && Object.keys(entry.inputs).length) {
+          state.inputs = entry.inputs;
+        }
+        let block: Blockly.BlockSvg | null = null;
+        try {
+          block = Blockly.serialization.blocks.append(
+            state as unknown as Parameters<typeof Blockly.serialization.blocks.append>[0],
+            workspace
+          ) as Blockly.BlockSvg | null;
+        } catch (e) {
+          console.error("addBlock failed", e);
+          return;
+        }
+        if (!block) return;
+        // 计算目标位置：drop 坐标取拖入点；否则取当前可视区左上角附近。
+        let targetX: number;
+        let targetY: number;
+        if (dropCoord && blocklyDiv.current) {
+          const rect = blocklyDiv.current.getBoundingClientRect();
+          // 把 clientX/Y 换算到 workspace 内部坐标（考虑缩放与视口偏移）。
+          const metrics = workspace.getMetrics();
+          const viewLeft = metrics && metrics.viewLeft != null ? metrics.viewLeft : 0;
+          const viewTop = metrics && metrics.viewTop != null ? metrics.viewTop : 0;
+          const scale = workspace.getScale();
+          const offsetX = (dropCoord.x - rect.left) / scale;
+          const offsetY = (dropCoord.y - rect.top) / scale;
+          targetX = viewLeft + offsetX;
+          targetY = viewTop + offsetY;
+        } else {
+          const metrics = workspace.getMetrics();
+          targetX = (metrics && metrics.viewLeft != null ? metrics.viewLeft : 0) + 40;
+          targetY = (metrics && metrics.viewTop != null ? metrics.viewTop : 0) + 40;
+        }
+        // 让积木左上角落在目标位置附近，并加一点随机偏移避免多块完全重叠。
+        const w = block.getHeightWidth().width;
+        const h = block.getHeightWidth().height;
+        block.moveBy(targetX - w / 2 + Math.random() * 24, targetY - h / 2 + Math.random() * 24);
+        block.select();
+      },
+      []
+    );
+
     useEffect(() => {
       if (!blocklyDiv.current || workspaceRef.current) return;
 
@@ -190,78 +247,72 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
       };
     }, [onChange, doLoadXml]);
 
-    useImperativeHandle(ref, () => ({
-      getXml: () => {
-        const workspace = workspaceRef.current;
-        if (!workspace) return "";
-        const xml = Blockly.utils.xml.domToText(Blockly.Xml.workspaceToDom(workspace));
-        latestXmlRef.current = xml;
-        return xml;
-      },
-      getCode: () => {
-        const workspace = workspaceRef.current;
-        if (!workspace) return "";
-        return javascriptGenerator.workspaceToCode(workspace).toString();
-      },
-      loadXml: (xml: string) => doLoadXml(xml),
-      markSaved: () => {
-        dirtyRef.current = false;
-      },
-      resetWorkspace: () => {
-        const workspace = workspaceRef.current;
-        if (!workspace) return;
-        workspace.clear();
-        dirtyRef.current = true; // 清空也是改动，退出时会被 flush（若用户未另存）
-      },
-      addBlock: (type: string, entry?: ToolboxEntry) => {
-        const workspace = workspaceRef.current;
-        if (!workspace) return;
-        const state: Record<string, unknown> = { type };
-        if (entry?.fields && Object.keys(entry.fields).length) {
-          state.fields = entry.fields;
-        }
-        if (entry?.inputs && Object.keys(entry.inputs).length) {
-          state.inputs = entry.inputs;
-        }
-        let block: Blockly.BlockSvg | null = null;
-        try {
-          block = Blockly.serialization.blocks.append(
-            state as unknown as Parameters<typeof Blockly.serialization.blocks.append>[0],
-            workspace
-          ) as Blockly.BlockSvg | null;
-        } catch (e) {
-          console.error("addBlock failed", e);
-          return;
-        }
-        if (!block) return;
-        // 放到当前可视区域左上角附近（带轻微随机偏移，避免连续添加叠在一起）。
-        const metrics = workspace.getMetrics();
-        const baseX = (metrics && metrics.viewLeft != null ? metrics.viewLeft : 0) + 40;
-        const baseY = (metrics && metrics.viewTop != null ? metrics.viewTop : 0) + 40;
-        block.moveBy(baseX + Math.random() * 24, baseY + Math.random() * 24);
-        block.select();
-      },
-      run: async (runtime: Runtime) => {
-        const workspace = workspaceRef.current;
-        if (!workspace) return;
-        // 用 collectScripts 收集事件脚本：会自动把顶层「定义积木」的函数声明
-        // 前置到每个事件脚本（修复「函数已定义却被丢弃 → ReferenceError」的 bug）。
-        const { whenStart, whenStageClicked, whenKeyPressed, whenReceived } = collectScripts(workspace);
-        runtime.setScripts({ whenStart, whenStageClicked, whenKeyPressed, whenReceived });
-        await runtime.handleRunStart();
-        // 演示用自动触发：有「当舞台被点击」脚本时，自动模拟一次舞台点击（无论是否同时有
-        // 「当开始运行」，便于「两个事件组合」类项目在「看示范」时也能把点击分支跑出来）；
-        // 否则若有「按下按键」脚本、且没有点击事件，自动模拟一次按键，让键盘操控项目也有可见演示。
-        if (whenStageClicked) {
-          await runtime.handleStageClick(0, 0);
-        } else if (whenKeyPressed.length) {
-          await runtime.handleKeyPressed(whenKeyPressed[0].key);
-        }
-      },
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        getXml: () => {
+          const workspace = workspaceRef.current;
+          if (!workspace) return "";
+          const xml = Blockly.utils.xml.domToText(Blockly.Xml.workspaceToDom(workspace));
+          latestXmlRef.current = xml;
+          return xml;
+        },
+        getCode: () => {
+          const workspace = workspaceRef.current;
+          if (!workspace) return "";
+          return javascriptGenerator.workspaceToCode(workspace).toString();
+        },
+        loadXml: (xml: string) => doLoadXml(xml),
+        markSaved: () => {
+          dirtyRef.current = false;
+        },
+        resetWorkspace: () => {
+          const workspace = workspaceRef.current;
+          if (!workspace) return;
+          workspace.clear();
+          dirtyRef.current = true; // 清空也是改动，退出时会被 flush（若用户未另存）
+        },
+        addBlock: (type: string, entry?: ToolboxEntry) => addBlockInternal(type, entry),
+        run: async (runtime: Runtime) => {
+          const workspace = workspaceRef.current;
+          if (!workspace) return;
+          // 用 collectScripts 收集事件脚本：会自动把顶层「定义积木」的函数声明
+          // 前置到每个事件脚本（修复「函数已定义却被丢弃 → ReferenceError」的 bug）。
+          const { whenStart, whenStageClicked, whenKeyPressed, whenReceived } = collectScripts(workspace);
+          runtime.setScripts({ whenStart, whenStageClicked, whenKeyPressed, whenReceived });
+          await runtime.handleRunStart();
+          // 演示用自动触发：有「当舞台被点击」脚本时，自动模拟一次舞台点击（无论是否同时有
+          // 「当开始运行」，便于「两个事件组合」类项目在「看示范」时也能把点击分支跑出来）；
+          // 否则若有「按下按键」脚本、且没有点击事件，自动模拟一次按键，让键盘操控项目也有可见演示。
+          if (whenStageClicked) {
+            await runtime.handleStageClick(0, 0);
+          } else if (whenKeyPressed.length) {
+            await runtime.handleKeyPressed(whenKeyPressed[0].key);
+          }
+        },
+      }),
+      [doLoadXml, addBlockInternal]
+    );
 
     return (
-      <div className="relative h-full w-full overflow-hidden rounded-xl border border-black/10 bg-white">
+      <div
+        className="relative h-full w-full overflow-hidden rounded-xl border border-black/10 bg-white"
+        // 接收手风琴侧栏的 HTML5 拖放积木：dataTransfer 里带积木 type，
+        // 这里 preventDefault 阻止浏览器默认（防止直接打开新标签页），
+        // 并调用 addBlock 把积木放到 drop 位置附近。
+        onDragOver={(e) => {
+          if (e.dataTransfer.types.includes("application/x-blockly-type")) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+          }
+        }}
+        onDrop={(e) => {
+          const type = e.dataTransfer.getData("application/x-blockly-type");
+          if (!type) return;
+          e.preventDefault();
+          addBlockInternal(type, undefined, { x: e.clientX, y: e.clientY });
+        }}
+      >
         <div ref={blocklyDiv} className="h-full w-full" />
       </div>
     );

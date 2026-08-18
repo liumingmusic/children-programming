@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Play, RotateCcw, Save, Trash2, FolderHeart, Sparkles, X, Wand2 } from "lucide-react";
 import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
+import ToolboxAccordion from "@/components/ToolboxAccordion";
 import StagePlayer from "@/components/StagePlayer";
 import ErLingAvatar from "@/components/ErLingAvatar";
 import StudioReplayOverlay from "@/components/StudioReplayOverlay";
@@ -388,7 +389,14 @@ export default function StudioClient() {
           </div>
         </aside>
 
-        {/* 中间积木编辑区：原生可拖拽分类 flyout（不再用点击添加的手风琴） */}
+        {/* 积木工具箱（手风琴）—— 常驻左侧侧栏，按学龄裁剪分类；
+            积木支持点击添加或拖拽到工作区。 */}
+        <ToolboxAccordion
+          categories={toolboxCategories}
+          onPick={(item) => editorRef.current?.addBlock(item.doc.id, item.entry)}
+        />
+
+        {/* 中间积木编辑区 */}
         <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
           <h2 className="mb-2 text-sm font-medium text-[#04342C]">积木工作区</h2>
           <div className="min-h-0 flex-1">
@@ -398,7 +406,6 @@ export default function StudioClient() {
               onAutoSave={scheduleAutoSave}
               bootstrapXml={bootstrapXml}
               onFlush={flushXml}
-              toolboxCategories={toolboxCategories}
             />
           </div>
         </section>
