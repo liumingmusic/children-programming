@@ -1,0 +1,42 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/0u-ulbo3aw4x6.js","/children-programming/_next/static/chunks/3xzu9w9wlmn4s.js","/children-programming/_next/static/chunks/3gvmqzz34trga.js","/children-programming/_next/static/chunks/2lz98hfmevkc5.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T68c,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_set_var">
+          <field name="NAME">开始</field>
+          <value name="VALUE"><block type="maker_now"></block></value>
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">5</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_set_var">
+                  <field name="NAME">结束</field>
+                  <value name="VALUE"><block type="maker_now"></block></value>
+                  <next>
+                    <block type="maker_say">
+                      <value name="TEXT">
+                        <block type="maker_sub">
+                          <value name="A"><block type="maker_get_var"><field name="NAME">结束</field></block></value>
+                          <value name="B"><block type="maker_get_var"><field name="NAME">开始</field></block></value>
+                        </block>
+                      </value>
+                      <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"var_timer","category":"var","title":"计时器挑战","ageGroup":"9-12 岁","description":"用「当前时间」积木算出身手有多快。","missionBrief":"开始前记下「当前时间」放进变量，做完事情后再取一次相减，就得到用了多少毫秒——这就是计时器。","erLingHint":"① 当开始运行：把变量 开始 设为 当前时间；② 重复 5 次（移动 30）；③ 把变量 结束 设为 当前时间；④ 说（结束 - 开始）。","steps":[{"id":1,"title":"记录开始时间"},{"id":2,"title":"事后记录结束时间并相减"},{"id":3,"title":"运行看到用时"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/0u-ulbo3aw4x6.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3xzu9w9wlmn4s.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/3gvmqzz34trga.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2lz98hfmevkc5.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"k8isU9Cp2-QPhlT26LOGE"}
+6:null

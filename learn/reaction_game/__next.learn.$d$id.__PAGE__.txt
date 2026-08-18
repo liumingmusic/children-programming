@@ -1,0 +1,41 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/0u-ulbo3aw4x6.js","/children-programming/_next/static/chunks/3xzu9w9wlmn4s.js","/children-programming/_next/static/chunks/3gvmqzz34trga.js","/children-programming/_next/static/chunks/2lz98hfmevkc5.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T7eb,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_var"><field name="NAME">score</field><value name="VALUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="140">
+      <field name="KEY">left</field>
+      <statement name="STACK">
+        <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">-90</field></shadow></value>
+          <next><block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value></block></next>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="300">
+      <field name="KEY">right</field>
+      <statement name="STACK">
+        <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+          <next><block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value></block></next>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="460">
+      <field name="KEY">down</field>
+      <statement name="STACK">
+        <block type="controls_if">
+          <value name="IF0"><block type="maker_touching_apple"></block></value>
+          <statement name="DO0">
+            <block type="maker_change_var"><field name="NAME">score</field><value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              <next><block type="maker_say"><value name="TEXT"><shadow type="text"><field name="TEXT">好快！</field></shadow></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block></next>
+            </block>
+          </statement>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"reaction_game","category":"key","title":"反应力小游戏","ageGroup":"9-12 岁","description":"一颗苹果从天而降，用方向键移到它正下方，在它落到你身上的瞬间按下键接住，比谁手快。","missionBrief":"考验你的反应力！苹果会落下来，用「当按下 ← / →」把二零移到苹果下方，当它和二零重叠时用「当按下 ↓」接住它、分数 +1。接得越准越多分越高！","erLingHint":"① 拖「当开始运行」放「把变量 score 设为 0」；② 拖「当按下 ← / →」放「转向 ±90」再「移动 40」让二零左右移动；③ 拖「当按下 ↓」放「如果 碰到苹果 那么 变量 score 增加 1、说 好快！」；④ 点运行，盯紧下落的苹果，移到它下面、重叠的那一刻按 ↓ 接住。","steps":[{"id":1,"title":"使用「当按下方向键」事件移动对准"},{"id":2,"title":"在重叠瞬间按键接住苹果（用到变量）"},{"id":3,"title":"运行看到苹果落下与被接住"}],"scene":{"apples":[{"x":0,"y":150,"vy":1.2,"r":18}]},"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/0u-ulbo3aw4x6.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3xzu9w9wlmn4s.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/3gvmqzz34trga.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2lz98hfmevkc5.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"k8isU9Cp2-QPhlT26LOGE"}
+6:null

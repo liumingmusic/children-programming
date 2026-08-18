@@ -1,0 +1,81 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js","/children-programming/_next/static/chunks/0u-ulbo3aw4x6.js","/children-programming/_next/static/chunks/3xzu9w9wlmn4s.js","/children-programming/_next/static/chunks/3gvmqzz34trga.js","/children-programming/_next/static/chunks/2lz98hfmevkc5.js"],"default"]
+9:I[97367,["/children-programming/_next/static/chunks/05-c3ty_6dwfk.js","/children-programming/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+a:"$Sreact.suspense"
+3:T1192,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_set_var"><field name="NAME">score</field><value name="VALUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="140">
+      <field name="KEY">up</field>
+      <statement name="STACK">
+        <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+          <next><block type="controls_if">
+            <value name="IF0"><block type="maker_touching_star"></block></value>
+            <statement name="DO0">
+              <block type="maker_change_var"><field name="NAME">score</field><value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                <next><block type="maker_say"><value name="TEXT"><shadow type="text"><field name="TEXT">碎啦！</field></shadow></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block></next>
+              </block>
+            </statement>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="320">
+      <field name="KEY">down</field>
+      <statement name="STACK">
+        <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">-40</field></shadow></value>
+          <next><block type="controls_if">
+            <value name="IF0"><block type="maker_touching_star"></block></value>
+            <statement name="DO0">
+              <block type="maker_change_var"><field name="NAME">score</field><value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                <next><block type="maker_say"><value name="TEXT"><shadow type="text"><field name="TEXT">碎啦！</field></shadow></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block></next>
+              </block>
+            </statement>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="500">
+      <field name="KEY">left</field>
+      <statement name="STACK">
+        <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">-90</field></shadow></value>
+          <next><block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+            <next><block type="controls_if">
+              <value name="IF0"><block type="maker_touching_star"></block></value>
+              <statement name="DO0">
+                <block type="maker_change_var"><field name="NAME">score</field><value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                  <next><block type="maker_say"><value name="TEXT"><shadow type="text"><field name="TEXT">碎啦！</field></shadow></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block></next>
+                </block>
+              </statement>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="700">
+      <field name="KEY">right</field>
+      <statement name="STACK">
+        <block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+          <next><block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+            <next><block type="controls_if">
+              <value name="IF0"><block type="maker_touching_star"></block></value>
+              <statement name="DO0">
+                <block type="maker_change_var"><field name="NAME">score</field><value name="DELTA"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                  <next><block type="maker_say"><value name="TEXT"><shadow type="text"><field name="TEXT">碎啦！</field></shadow></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block></next>
+                </block>
+              </statement>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"breakout_intro","category":"key","title":"打砖块入门","ageGroup":"9-12 岁","description":"用键盘操控小球，撞碎顶部排列的砖块，看你能打碎几块。","missionBrief":"顶上一排砖块等着被撞碎！写一个操控程序：用「当按下」方向键让小球移动或转向，一「碰到星星（砖块）」就算打碎一块、分数 +1。把整排砖块都撞碎吧！","erLingHint":"① 拖「当开始运行」放「把变量 score 设为 0」；② 拖四个「当按下」方向键：↑/↓ 放「移动 40」、←/→ 放「转向 ±90」再「移动 40」；③ 在每个方向键里都接「如果 碰到星星 那么 变量 score 增加 1、说 碎啦！」；④ 点运行，用方向键把小球开去撞砖块。","steps":[{"id":1,"title":"使用「当按下方向键」事件操控小球"},{"id":2,"title":"撞到砖块（星星）就打碎并加分"},{"id":3,"title":"运行看到小球撞碎砖块"}],"stars":[{"x":120,"y":130},{"x":60,"y":130},{"x":"$-0","y":130},{"x":-60,"y":130},{"x":-120,"y":130}],"defaultXml":"$3"}}],["$L4","$L5","$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"k8isU9Cp2-QPhlT26LOGE"}
+4:["$","script","script-0",{"src":"/children-programming/_next/static/chunks/0u-ulbo3aw4x6.js","async":true}]
+5:["$","script","script-1",{"src":"/children-programming/_next/static/chunks/3xzu9w9wlmn4s.js","async":true}]
+6:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/3gvmqzz34trga.js","async":true}]
+7:["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2lz98hfmevkc5.js","async":true}]
+8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
+b:null
