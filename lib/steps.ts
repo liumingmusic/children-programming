@@ -728,7 +728,7 @@ export function computeSteps(
  */
 export function isGoalAchieved(
   project: CourseProject,
-  state: { actor: { x: number; y: number }; stars: { collected: boolean }[] },
+  state: { actor: { x: number; y: number }; stars: { collected: boolean }[]; penPaths?: { points: { x: number; y: number }[] }[] },
   _logs?: string[]
 ): boolean {
   const allMarks = project.scene?.marks ?? [];
@@ -750,6 +750,53 @@ export function isGoalAchieved(
     return goalMarks.some(
       (m) => Math.hypot(state.actor.x - m.x, state.actor.y - m.y) < 55
     );
+  }
+  // 几何判定：从绘制轨迹识别「闭合多边形」「正方形」。
+  const segLengths = (points: { x: number; y: number }[]) => {
+    const segs: number[] = [];
+    for (let i = 1; i < points.length; i++) {
+      const a = points[i - 1], b = points[i];
+      const len = Math.hypot(b.x - a.x, b.y - a.y);
+      if (len > 1) segs.push(len);
+    }
+    return segs;
+  };
+  const totalSegments = (paths: { points: { x: number; y: number }[] }[]) =>
+    (paths ?? []).reduce((sum, p) => sum + segLengths(p.points).length, 0);
+  const hasClosedPolygon = (paths: { points: { x: number; y: number }[] }[], minSides: number) =>
+    (paths ?? []).some((p) => {
+      const segs = segLengths(p.points);
+      if (segs.length < minSides) return false;
+      const max = Math.max(...segs), min = Math.min(...segs);
+      if (max / min > 1.4) return false; // 不等长 → 不是正多边形
+      const first = p.points[0], last = p.points[p.points.length - 1];
+      if (Math.hypot(last.x - first.x, last.y - first.y) > max * 0.5) return false; // 不闭合
+      return true;
+    });
+  const isSquareStroke = (points: { x: number; y: number }[]) => {
+    const segs = segLengths(points);
+    if (segs.length !== 4) return false;
+    const max = Math.max(...segs), min = Math.min(...segs);
+    if (max / min > 1.4) return false; // 不等长
+    for (let i = 0; i < segs.length - 1; i++) {
+      const v1x = points[i + 1].x - points[i].x, v1y = points[i + 1].y - points[i].y;
+      const v2x = points[i + 2].x - points[i + 1].x, v2y = points[i + 2].y - points[i + 1].y;
+      const dot = v1x * v2x + v1y * v2y;
+      if (Math.abs(dot) > 0.3 * segs[i] * segs[i + 1]) return false; // 相邻边不垂直
+    }
+    return true;
+  };
+  const hasSquare = (paths: { points: { x: number; y: number }[] }[]) =>
+    (paths ?? []).some((p) => isSquareStroke(p.points));
+
+  // 自定义积木（函数）类：必须真正画出图形，不能「有函数定义就算完成」——
+  // 这是修复「随便搭积木也能通过校验」的核心。
+  if (FN_SLUGS.includes(project.slug)) {
+    const paths = state.penPaths ?? [];
+    if (project.slug === "fn_square") return hasSquare(paths);
+    if (project.slug === "fn_polygon") return hasClosedPolygon(paths, 3);
+    // 其余自定义积木项目：至少画出不少于 4 条线段，证明「真的用积木绘制了」。
+    return totalSegments(paths) >= 4;
   }
   // 其余（绘图/事件/条件/无标记序列）：以步骤判定为准
   return true;
