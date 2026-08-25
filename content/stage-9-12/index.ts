@@ -17,6 +17,7 @@ import { var_timerProject } from "./b/var_timer";
 import { var_bestProject } from "./b/var_best";
 import { stage9MultiProjects } from "./c";
 import { stage9KeyProjects } from "./d";
+import { stage9StoryProjects } from "./i";
 
 export const stage9Projects: CourseProject[] = [
   fn_squareProject,
@@ -37,4 +38,5 @@ export const stage9Projects: CourseProject[] = [
   var_bestProject,
   ...stage9MultiProjects,
   ...stage9KeyProjects,
+  ...stage9StoryProjects,
 ];

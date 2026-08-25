@@ -202,6 +202,8 @@ export interface StageState {
   movedDistance: number;
   /** 已注册的按键处理器数量：供「键盘操控」类项目完成判定（必须真的配置了按键事件，空程序则为 0）。 */
   keyHandlers: number;
+  /** 已注册的舞台点击处理器数量：供「交互绘本 / 点击类」项目完成判定（必须真的配置了点击事件，空程序则为 0）。 */
+  clickHandlers: number;
   /** 程序是否真正 engage 了伙伴角色（控制/广播/触碰/测量）：供「多角色」类完成判定（空程序为 false）。 */
   companionEngaged?: boolean;
 }
@@ -813,13 +815,15 @@ export class Runtime {
       movedDistance: 0,
       // 已注册按键处理器数量：供「键盘操控」类项目完成判定（空程序为 0）。
       keyHandlers: 0,
+      // 已注册舞台点击处理器数量：供「交互绘本 / 点击类」项目完成判定（空程序为 0）。
+      clickHandlers: this.scripts.whenStageClicked ? 1 : 0,
     };
     // 时间轴引擎：构造即初始化（与 action 队列完全隔离，旧项目不调用它的方法即无副作用）
     this.timeline = new TimelineEngine(this);
   }
 
   getState() {
-    return { ...this.state, vars: { ...this.vars }, keyHandlers: this.scripts.whenKeyPressed?.length ?? 0, companionEngaged: this.companionEngaged };
+    return { ...this.state, vars: { ...this.vars }, keyHandlers: this.scripts.whenKeyPressed?.length ?? 0, clickHandlers: this.scripts.whenStageClicked ? 1 : 0, companionEngaged: this.companionEngaged };
   }
 
   /** 供时间轴引擎触发渲染（emit 为 private，这里暴露一个安全的通知入口）。 */

@@ -106,6 +106,12 @@ const D_GAME: Record<string, { collide: string; score: boolean }> = {
   reaction_game: { collide: "__runtime.touchingApple(", score: true },
 };
 
+/** 分类 I · 交互绘本与故事（9-12 阶段）。判定基于真实 JS 标记：必须真的配置了「舞台点击事件」（空程序则为 0）。
+ * 交互绘本的本质是「点击触发」，完成判定以注册点击处理器数量为信号（与键盘类同思路，时序安全）。 */
+const STORY9_SLUGS = [
+  "story_branch", "story_clickable", "story_adventure", "story_growth", "story_science", "story_card",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -546,6 +552,23 @@ export function computeSteps(
         else if (id === 2) done = hasAddTrack && hasWhenAt;
         else if (id === 3) done = hasTimeline && hasAddTrack;
       }
+    } else if (STORY9_SLUGS.includes(project.slug)) {
+      // 分类 I · 交互绘本与故事（9-12）：基于真实 JS 标记 / 运行日志判定「当开始运行 + 舞台点击 + 讲出/表现出故事内容」。
+      // 交互绘本的本质是「点击触发」，故第 2 步以「舞台被点击」日志为信号。
+      const finished = logs.includes("[系统] 程序执行完毕");
+      const startFired = logs.some((l) => l.includes("开始执行程序"));
+      const clickFired = logs.some((l) => l.includes("舞台被点击"));
+      const sayCount = countMark(code, "__runtime.say(");
+      const controlCount = countMark(code, "__runtime.controlActor(");
+      const sceneCount = countMark(code, "__runtime.setScene(");
+      const hasShow = code.includes("__runtime.showActor(");
+      const hasHide = code.includes("__runtime.hideActor(");
+      const hasSize = code.includes("__runtime.setSize(") || code.includes("__runtime.changeSize(");
+      // 「讲出 / 表现出故事内容」任一信号即可（说话、切换场景、控制伙伴、显隐、改变大小）。
+      const contentMark = sayCount >= 1 || sceneCount >= 1 || controlCount >= 1 || hasShow || hasHide || hasSize;
+      if (id === 1) done = startFired;
+      else if (id === 2) done = clickFired;
+      else if (id === 3) done = contentMark && finished;
     } else if (PBL_SLUGS.includes(project.slug)) {
       // 分类 11 · 综合创意 / 毕业项目：每个项目组合多种本领，判定基于真实 JS 标记。
       const finished = logs.includes("[系统] 程序执行完毕");
@@ -741,6 +764,8 @@ export function isGoalAchieved(
     companionEngaged?: boolean;
     /** 已注册按键处理器数量（键盘类完成判定用）。 */
     keyHandlers?: number;
+    /** 已注册舞台点击处理器数量（交互绘本类完成判定用）。 */
+    clickHandlers?: number;
   },
   _logs?: string[]
 ): boolean {
@@ -848,6 +873,13 @@ export function isGoalAchieved(
   // 完成判定在「当开始运行」跑完时触发，按键在其后才执行，故校验注册数而非「真的按过」（时序安全，杜绝空程序通过）。
   if (KEY_SLUGS.includes(project.slug) || project.slug in D_GAME) {
     return (state.keyHandlers ?? 0) > 0;
+  }
+
+  // 分类 I · 交互绘本与故事：必须真的配置了「舞台点击事件」处理器。
+  // 绘本/故事本质是「点击触发」，与键盘类同理——完成判定在「当开始运行」跑完时触发，点击在其后才派发，
+  // 故校验注册数而非「真的点过」（时序安全，杜绝空程序通过）。
+  if (STORY9_SLUGS.includes(project.slug)) {
+    return (state.clickHandlers ?? 0) > 0;
   }
 
   // 其余（绘图/事件/条件/无标记序列）：以步骤判定为准
@@ -1242,6 +1274,11 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 2) return "「控制角色 二零」带队向前走，「控制角色 三七」用「如果 到二零的距离 大于 40 那么 移动」紧紧跟在后面，排成一支队伍。";
       if (stepId === 3) return "点「运行」，看两只小动物是不是整齐地列队前进。";
     }
+  }
+  if (STORY9_SLUGS.includes(slug)) {
+    if (stepId === 1) return "拖一个绿色「当开始运行」事件，作为绘本翻开的第一页。";
+    if (stepId === 2) return "再拖一个蓝色「当舞台被点击」事件——这是绘本能「翻页 / 互动」的关键，点舞台才会触发下一页。";
+    if (stepId === 3) return "在「当舞台被点击」里放「说」「切换场景」或「控制角色 三七」，点「运行」后再点舞台，看故事是不是真的讲出来了。";
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
 }
