@@ -40,8 +40,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [stageState, setStageState] = useState<StageState>({
     width: STAGE_WIDTH,
     height: STAGE_HEIGHT,
-    actor: { id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true },
-    actors: [{ id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true }],
+    actor: { id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true, acted: false },
+    actors: [{ id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true, acted: false }],
     penPaths: [],
     currentPath: null,
     penColor: 0,
@@ -56,6 +56,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     log: [],
     vars: {},
     movedDistance: 0,
+    keyHandlers: 0,
   });
   const [logs, setLogs] = useState<string[]>([]);
   const [generatedCode, setGeneratedCode] = useState("");

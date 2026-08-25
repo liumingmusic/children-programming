@@ -402,3 +402,12 @@
 - **测试**：新增 `tests/var-goal.test.ts`（17 例）——真实 Runtime 跑 8 个VAR默认XML断言通过，合成「随便搭」轨迹断言不通过；VAR 测试 17/17 通过。
 - **回归守卫**：`tests/all-projects-smoke.test.ts`（105 项目 codegen 冒烟）+ stage9/fn-goal/var-goal/steps 等共 106 断言通过；执行类 stage9/sequence/draw/math 等 86 项通过——确认 `controls_if` 改动未破坏任何项目代码生成。
 - **验证**：构建须以 `NODE_OPTIONS=""` 清除沙箱注入的 `--use-system-ca`（Next.js 16 Turbopack worker 拒绝该变量）。相关测试全绿；部署后线上 `learn/var_*` 应返回 200。
+
+### 2026-08-17 · 收紧多角色 / 键盘类完成判定（消灭 P0 收尾的最后两类）
+- **根因**：与 FN/VAR 同一 P0 缺陷——`isGoalAchieved` 末尾 `return true` 仍兜底覆盖 **分类 C·多角色（8 项）** 与 **分类 D·键盘（8 项）**，空程序也能通过校验。
+- **分类 C·多角色修复**：新增 `companionEngaged` 运行时信号——程序「真正引用了伙伴角色」即视为 engage（`controlActor` 切到非 erling 角色 / `broadcast` 广播 / `touchingActor` 触碰伙伴 / `distanceTo` 测量伙伴，四处均置位）。`isGoalAchieved` 的 `MULTI_SLUGS` 分支返回 `state.companionEngaged === true`。
+  - 设计取舍：初版用「伙伴角色 `acted`（执行过动作）」做信号，但 cat_mouse / guardian_dodge / two_player / animal_queue 的伙伴是**被动目标**（小老鼠 / 守护对象 / 排队跟随者），演示里并不「动」，故改用「是否 engage 伙伴」更贴合——既拦住空程序，又不误杀合法演示。
+  - 运行时配套：`ActorState` 加 `acted`（performAction 执行任一动作即置位，保留作诊断）、`StageState` 加 `companionEngaged`；发声类 action（playNote/playChord/playDrum/playRandomNote/playToneByMouseX）补齐 `actorId` 以便合唱等场景精确归因；`getState` 合并 `companionEngaged` 与 `keyHandlers`。
+- **分类 D·键盘修复**：键盘游戏完成判定在「当开始运行」跑完时触发，而按键处理器在其后才执行（时序上项目永远无法靠「真的按过」完成），故校验**注册按键处理器数量 `keyHandlers > 0`**（`KEY_SLUGS` + `D_GAME` 共 8 项全部覆盖）。`StageState` 新增必填 `keyHandlers` 字段，`getState` 合并 `this.scripts.whenKeyPressed.length`。
+- **测试**：新增 `tests/multi-key-goal.test.ts`（34 例）——8 个 MULTI「看示范」断言 `companionEngaged` 为真且判定通过，8 个 KEY「看示范」断言 `keyHandlers>0` 且判定通过；两类各 8 个「空程序」断言判定不通过；另含 2 个 synthetic 守卫。配套更新 `LearnPageClient` / `StudioClient` 的 `StageState` 字面量（补 `keyHandlers`、`acted`）。
+- **验证**：`NODE_OPTIONS=""` 全量测试相关套件 74 项全绿（`multi-key-goal`/`var-goal`/`fn-goal`/`stage9-multiactor`/`stage9-fn-var`/`all-projects-smoke`）；类型检查零错误。

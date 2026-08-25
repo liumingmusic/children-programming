@@ -39,8 +39,8 @@ const STAGE_LABELS: Record<string, string> = {
 const INITIAL_STATE: StageState = {
   width: STAGE_WIDTH,
   height: STAGE_HEIGHT,
-  actor: { id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true },
-  actors: [{ id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true }],
+  actor: { id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true, acted: false },
+  actors: [{ id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true, acted: false }],
   penPaths: [],
   currentPath: null,
   penColor: 0,
@@ -51,6 +51,7 @@ const INITIAL_STATE: StageState = {
   log: [],
   vars: {},
   movedDistance: 0,
+  keyHandlers: 0,
 };
 
 /** 灵感小贴士：开放式创作的触发点（不做步骤判定，仅给方向）。 */

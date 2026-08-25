@@ -60,6 +60,8 @@ export interface ActorState {
   expression?: "normal" | "happy" | "angry" | "surprised" | "sleepy";
   /** 是否可见（「显示/隐藏角色」积木控制；变魔术项目用）。 */
   visible: boolean;
+  /** 该角色是否真正执行过动作（移动/转向/说话/发声/广播）。用于「多角色」类项目的完成判定：伙伴角色必须真正动过，杜绝空程序通过校验。 */
+  acted?: boolean;
 }
 
 /** 舞台场景（多场景切换，分类7·故事「一天的生活」用）。仅作背景区分，不影响坐标。 */
@@ -198,6 +200,10 @@ export interface StageState {
   vars: Record<string, number>;
   /** 累计移动距离：供「用变量控制移动」类项目（如 var_speed）校验「真的动了」。 */
   movedDistance: number;
+  /** 已注册的按键处理器数量：供「键盘操控」类项目完成判定（必须真的配置了按键事件，空程序则为 0）。 */
+  keyHandlers: number;
+  /** 程序是否真正 engage 了伙伴角色（控制/广播/触碰/测量）：供「多角色」类完成判定（空程序为 false）。 */
+  companionEngaged?: boolean;
 }
 
 // 画笔默认粗细（屏幕像素）。项目里未放「设置画笔粗细」积木时使用此值。
@@ -376,6 +382,7 @@ function makeActor(id: string, species: Species, name: string, x = 0, y = 0, ang
     size: 1,
     expression: "normal",
     visible: true,
+    acted: false,
   };
 }
 
@@ -748,6 +755,8 @@ export class Runtime {
   private appleRaf: number | null = null;
   /** 当前被「控制角色」积木选中的角色 id；默认二零，保证旧项目行为不变。 */
   private currentActorId: string = "erling";
+  /** 程序是否真正「 engage 了伙伴角色」（控制它 / 广播给它 / 触碰或测量它）。供「多角色」类完成判定：空程序不会 engage，杜绝随便搭通过校验。 */
+  private companionEngaged = false;
   /** 当前处于「落笔」状态的角色 id（画笔路径归属于落笔的那位角色）。默认二零。 */
   private drawingActorId: string = "erling";
   /** 时间轴子系统（分类10·科学）。所有 timeline 能力都委托给它，与 action 队列完全隔离。 */
@@ -802,13 +811,15 @@ export class Runtime {
       vars: {} as Record<string, number>,
       // 累计移动距离：供「用变量控制移动」类项目（如 var_speed）校验「真的动了」。
       movedDistance: 0,
+      // 已注册按键处理器数量：供「键盘操控」类项目完成判定（空程序为 0）。
+      keyHandlers: 0,
     };
     // 时间轴引擎：构造即初始化（与 action 队列完全隔离，旧项目不调用它的方法即无副作用）
     this.timeline = new TimelineEngine(this);
   }
 
   getState() {
-    return { ...this.state, vars: { ...this.vars } };
+    return { ...this.state, vars: { ...this.vars }, keyHandlers: this.scripts.whenKeyPressed?.length ?? 0, companionEngaged: this.companionEngaged };
   }
 
   /** 供时间轴引擎触发渲染（emit 为 private，这里暴露一个安全的通知入口）。 */
@@ -881,6 +892,7 @@ export class Runtime {
     if (this.findActor(id)) {
       this.currentActorId = id;
       this.log(`[系统] 切换到控制角色 ${this.actorName(id)}`);
+      if (id !== "erling") this.companionEngaged = true; // 控制伙伴角色即视为 engage
     }
     this.emit();
   }
@@ -1194,27 +1206,28 @@ export class Runtime {
    * 使接收角色在广播的"瞬间"立即响应（近似 Scratch 的并行广播语义）。
    */
   broadcast(message: string) {
+    this.companionEngaged = true; // 广播即多角色协作，视为 engage 伙伴
     this.actions.push({ type: "broadcast", message, actorId: this.currentActorId });
   }
 
   // --- 音频（Web Audio 实时合成，排队播放，使旋律按顺序发声）---
   playNote(note: string, beats = 1) {
-    this.actions.push({ type: "playNote", note, beats: Math.max(0.25, beats) });
+    this.actions.push({ type: "playNote", note, beats: Math.max(0.25, beats), actorId: this.currentActorId });
     this.log(`[音频] 弹奏 ${note} 音`);
   }
 
   playDrum(kind: string) {
-    this.actions.push({ type: "playDrum", kind });
+    this.actions.push({ type: "playDrum", kind, actorId: this.currentActorId });
     this.log(`[音频] 敲响${kind}`);
   }
 
   playRandomNote() {
-    this.actions.push({ type: "playRandomNote" });
+    this.actions.push({ type: "playRandomNote", actorId: this.currentActorId });
     this.log("[音频] 随机弹奏一个音符");
   }
 
   playToneByMouseX() {
-    this.actions.push({ type: "playToneByMouseX" });
+    this.actions.push({ type: "playToneByMouseX", actorId: this.currentActorId });
     this.log("[音频] 按点击位置弹音");
   }
 
@@ -1224,7 +1237,7 @@ export class Runtime {
   }
 
   playChord(notes: string[]) {
-    this.actions.push({ type: "playChord", notes });
+    this.actions.push({ type: "playChord", notes, actorId: this.currentActorId });
     this.log(`[音频] 弹奏和弦 ${notes.join("+")}`);
   }
 
@@ -1263,6 +1276,7 @@ export class Runtime {
   touchingActor(otherId: string): boolean {
     const self = this.currentActor();
     const other = this.findActor(otherId);
+    if (otherId !== "erling") this.companionEngaged = true; // 触碰/判断伙伴角色即 engage
     if (!other || self.id === other.id) return false;
     const dx = self.x - other.x;
     const dy = self.y - other.y;
@@ -1274,6 +1288,7 @@ export class Runtime {
   distanceTo(otherId: string): number {
     const self = this.currentActor();
     const other = this.findActor(otherId);
+    if (otherId !== "erling") this.companionEngaged = true; // 测量伙伴角色距离即 engage
     if (!other) return Infinity;
     const dx = self.x - other.x;
     const dy = self.y - other.y;
@@ -1347,6 +1362,7 @@ export class Runtime {
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.penDown = false;
+    this.companionEngaged = false; // 每次运行重置 engage 标记
     this.state.running = true;
     this.runningType = type;
     this.startClouds();
@@ -1461,6 +1477,8 @@ export class Runtime {
   private performAction(action: Action): Promise<void> {
     // 解析「动作所属角色」：优先用入队时捕获的 actorId，否则回退到当前控制角色。
     const actor = this.findActor(action.actorId ?? this.currentActorId) ?? this.currentActor();
+    // 标记该角色「真正执行过动作」——供「多角色」类项目完成判定（伙伴角色必须 acted）。
+    actor.acted = true;
     return new Promise((resolve) => {
       switch (action.type) {
         case "broadcast": {

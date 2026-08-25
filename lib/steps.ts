@@ -735,6 +735,12 @@ export function isGoalAchieved(
     vars?: Record<string, number>;
     movedDistance?: number;
     log?: string[];
+    /** 各角色是否已真正执行过动作（多角色类完成判定用）。 */
+    actors?: { id: string; acted?: boolean }[];
+    /** 程序是否真正 engage 了伙伴角色（多角色类完成判定用）。 */
+    companionEngaged?: boolean;
+    /** 已注册按键处理器数量（键盘类完成判定用）。 */
+    keyHandlers?: number;
   },
   _logs?: string[]
 ): boolean {
@@ -828,6 +834,20 @@ export function isGoalAchieved(
       if (!goal.saidIncludes.some((s) => log.includes(s))) return false;
     }
     return true;
+  }
+
+  // 分类 C · 多角色与协作：程序必须真正 engage 了伙伴角色（控制它 / 广播给它 / 触碰或测量它）。
+  // 伙伴在很多项目里是被动目标（如猫追老鼠的小老鼠、守护判断的对象），并非都要「动」，
+  // 所以以「是否引用了伙伴角色」为信号，而非「伙伴是否执行了动作」。
+  // 空程序不会 engage → 判定不通过，杜绝「随便搭积木也能通过校验」。
+  if (MULTI_SLUGS.includes(project.slug)) {
+    return state.companionEngaged === true;
+  }
+
+  // 分类 D · 键盘与操控游戏：必须真的配置了按键处理器。
+  // 完成判定在「当开始运行」跑完时触发，按键在其后才执行，故校验注册数而非「真的按过」（时序安全，杜绝空程序通过）。
+  if (KEY_SLUGS.includes(project.slug) || project.slug in D_GAME) {
+    return (state.keyHandlers ?? 0) > 0;
   }
 
   // 其余（绘图/事件/条件/无标记序列）：以步骤判定为准
