@@ -13,6 +13,7 @@ export const var_timerProject: CourseProject = {
     { id: 2, title: "事后记录结束时间并相减" },
     { id: 3, title: "运行看到用时" },
   ],
+  goal: { vars: [{ name: "开始", min: 1e9 }, { name: "结束", min: 1e9 }] },
   defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
     <block type="maker_when_start" x="60" y="60">
       <statement name="STACK">

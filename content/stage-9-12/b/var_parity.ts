@@ -13,6 +13,7 @@ export const var_parityProject: CourseProject = {
     { id: 2, title: "用取余判断奇偶" },
     { id: 3, title: "运行看判断结果" },
   ],
+  goal: { vars: [{ name: "n", min: 0 }], saidIncludes: ["奇数", "偶数"] },
   defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
     <block type="maker_when_start" x="60" y="60">
       <statement name="STACK">

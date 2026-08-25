@@ -13,6 +13,7 @@ export const var_speedProject: CourseProject = {
     { id: 2, title: "让移动跟着变量走" },
     { id: 3, title: "运行看速度的效果" },
   ],
+  goal: { vars: [{ name: "速度", equals: 15 }], moved: true },
   defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
     <block type="maker_when_start" x="60" y="60">
       <statement name="STACK">

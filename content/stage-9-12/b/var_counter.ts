@@ -13,6 +13,7 @@ export const var_counterProject: CourseProject = {
     { id: 2, title: "让计数器跟着走增加" },
     { id: 3, title: "运行看到报出的步数" },
   ],
+  goal: { vars: [{ name: "步数", equals: 10 }] },
   defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
     <block type="maker_when_start" x="60" y="60">
       <statement name="STACK">

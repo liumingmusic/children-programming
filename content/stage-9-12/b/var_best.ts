@@ -13,6 +13,7 @@ export const var_bestProject: CourseProject = {
     { id: 2, title: "把得分写成最高分" },
     { id: 3, title: "运行并能读出最高分" },
   ],
+  goal: { vars: [{ name: "本局", equals: 50 }], saidIncludes: ["50"] },
   defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
     <block type="maker_when_start" x="60" y="60">
       <statement name="STACK">

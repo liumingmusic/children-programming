@@ -27,6 +27,30 @@ export interface CourseProject {
   timeline?: boolean;
   /** 角色阵容：除默认「二零」外，还上场的伙伴角色 id 列表（如 ["sanqi"]）。Runtime 据此实例化额外角色。 */
   cast?: string[];
+  /**
+   * 完成判定的「目标真值」——仅用于需要真实结果校验的分类（如 var 变量类）。
+   * isGoalAchieved 据此对运行时终态做断言，杜绝「随便搭积木也能通过」。
+   * - vars：要求某变量达到指定期望（equals 精确 / min 下限 / max 上限）。
+   * - drew：要求真实绘制（画笔轨迹 ≥ 4 段）。
+   * - moved：要求角色确实移动过（movedDistance > 0）。
+   * - saidIncludes：要求程序「说」出的文本里出现过任一子串（用于奇偶判断/最高分等输出型项目）。
+   */
+  goal?: GoalSpec;
+}
+
+/** 单个变量期望值。 */
+export interface GoalVarCheck {
+  name: string;
+  equals?: number;
+  min?: number;
+  max?: number;
+}
+/** 完成判定目标描述（数据驱动）。 */
+export interface GoalSpec {
+  vars?: GoalVarCheck[];
+  drew?: boolean;
+  moved?: boolean;
+  saidIncludes?: string[];
 }
 
 /** 舞台上的装饰标记（纯展示用，例如小旗子、宝藏箱、石头、箭头）。 */

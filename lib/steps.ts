@@ -728,7 +728,14 @@ export function computeSteps(
  */
 export function isGoalAchieved(
   project: CourseProject,
-  state: { actor: { x: number; y: number }; stars: { collected: boolean }[]; penPaths?: { points: { x: number; y: number }[] }[] },
+  state: {
+    actor: { x: number; y: number };
+    stars: { collected: boolean }[];
+    penPaths?: { points: { x: number; y: number }[] }[];
+    vars?: Record<string, number>;
+    movedDistance?: number;
+    log?: string[];
+  },
   _logs?: string[]
 ): boolean {
   const allMarks = project.scene?.marks ?? [];
@@ -798,6 +805,31 @@ export function isGoalAchieved(
     // 其余自定义积木项目：至少画出不少于 4 条线段，证明「真的用积木绘制了」。
     return totalSegments(paths) >= 4;
   }
+
+  // 变量类（var）：必须真正产出「目标结果」，不能「用了变量就算完成」。
+  // 这是与 FN 同一 P0 缺陷的收尾——逐项目用 goal 声明期望值，对运行时终态做断言。
+  if (VAR_SLUGS.includes(project.slug)) {
+    if (!project.goal) return false; // 未声明目标 → 不允许通过（杜绝随便搭）
+    const goal = project.goal;
+    const finalVars = state.vars ?? {};
+    if (goal.vars) {
+      for (const v of goal.vars) {
+        const val = finalVars[v.name];
+        if (typeof val !== "number") return false;
+        if (v.equals !== undefined && val !== v.equals) return false;
+        if (v.min !== undefined && val < v.min) return false;
+        if (v.max !== undefined && val > v.max) return false;
+      }
+    }
+    if (goal.drew && totalSegments(state.penPaths ?? []) < 4) return false;
+    if (goal.moved && (state.movedDistance ?? 0) < 1) return false;
+    if (goal.saidIncludes && goal.saidIncludes.length > 0) {
+      const log = (state.log ?? []).join("\n");
+      if (!goal.saidIncludes.some((s) => log.includes(s))) return false;
+    }
+    return true;
+  }
+
   // 其余（绘图/事件/条件/无标记序列）：以步骤判定为准
   return true;
 }

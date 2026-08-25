@@ -54,6 +54,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     ],
     running: false,
     log: [],
+    vars: {},
+    movedDistance: 0,
   });
   const [logs, setLogs] = useState<string[]>([]);
   const [generatedCode, setGeneratedCode] = useState("");

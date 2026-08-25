@@ -13,6 +13,7 @@ export const var_gradientProject: CourseProject = {
     { id: 2, title: "循环中让颜色渐变" },
     { id: 3, title: "运行看渐变条" },
   ],
+  goal: { vars: [{ name: "色", min: 1 }], drew: true },
   defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
     <block type="maker_when_start" x="60" y="60">
       <statement name="STACK">

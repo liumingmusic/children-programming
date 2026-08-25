@@ -384,3 +384,21 @@
 - **6-8 岁 · 纯积木**：工具箱过滤为 `["事件","运动","外观","画笔","控制","侦测","运算","声音","角色"]`（不含变量/函数），无代码预览区。
 - **9-12 岁 · 代码初探**：全量工具箱 + 显示「生成的 JavaScript（代码初探）」预览区，让孩子从积木过渡到看代码。
 - 工坊内可自由创作并 localStorage 本地保存（命名 / 我的作品 / 回放 / 删除）；任务页各阶段末尾 CTA 卡片 `Link href={\`/studio?stage=${current.id}\`}` 引导自由创作。
+
+---
+
+## 六、修复与质量记录
+
+### 2026-08-25 · 收紧函数类完成判定（修复「随便搭积木也能通过校验」）
+- **根因**：`lib/steps.ts` 的 `isGoalAchieved` 对「无 stars / 无目标标记」的分类（如自定义积木/变量类）兜底 `return true`，导致「用函数画正方形」这类项目只要程序跑完就判定完成，与「是否真正画出正方形」无关。
+- **修复**：在 `isGoalAchieved` 新增几何校验分支——`fn_square` 必须画出「等边 + 相邻垂直 + 闭合」的正方形，`fn_polygon` 必须画出「闭合多边形」，其余自定义积木至少要有真实笔画（≥4 段）。运行时已记录 `penPaths`（画笔轨迹），直接用于判定。
+- **测试**：新增 `tests/fn-goal.test.ts`，用真实 Runtime 跑「看示范」断言 `fn_square` / `fn_polygon` 判定通过，并用合成轨迹断言「直线 / 空轨迹 / 五边形 / 菱形」均判定不通过。
+- **验证**：相关测试 132 项通过，构建 167 页零错误，已部署 gh-pages（main `d406f272` → 线上 `fbafb6c`）。线上 `learn/fn_square`、`learn/fn_polygon` 返回 200。
+- **遗留**：`computeSteps` 的 FN/VAR 三步引导仍基于「真实 JS 标记」，完成与否统一由 `isGoalAchieved` 把关；`fn_square` 默认示范已验证真能画出正方形，「判定过、实际跑偏」隐患已消除。
+
+### 2026-08-25 · 收紧变量类完成判定 + 修复 if/else 生成器丢失
+- **变量类校验（P0 收尾）**：`isGoalAchieved` 新增 VAR 分支——`VAR_SLUGS` 8 个项目（counter/score/lives/speed/parity/gradient/timer/best）每个在 `CourseProject.goal` 上声明成功信号（变量终值 / 移动距离 / 说文本 / 真实笔画），无 `goal` 声明则 `return false`，彻底消除「随便搭积木也能通过校验」。运行时 state 快照新增 `vars`、`movedDistance` 字段（`lib/runtime.ts`），供校验读取变量终值与是否移动。
+- **附带修复（影响全平台）**：发现 `controls_if` 的「否则」分支在代码生成时整体丢失（`else {}` 为空）——根因是项目从未引入标准 `controls_if` 的 else 突变定义，`blockly/blocks` 未加载。在 `lib/blockly-blocks.ts` 注册带固定 `ELSE0` 输入的自定义 `controls_if` 积木 + 显式读 `ELSE0` 的生成器，所有用到 if/else 的项目（含 var_parity）恢复正常。
+- **测试**：新增 `tests/var-goal.test.ts`（17 例）——真实 Runtime 跑 8 个VAR默认XML断言通过，合成「随便搭」轨迹断言不通过；VAR 测试 17/17 通过。
+- **回归守卫**：`tests/all-projects-smoke.test.ts`（105 项目 codegen 冒烟）+ stage9/fn-goal/var-goal/steps 等共 106 断言通过；执行类 stage9/sequence/draw/math 等 86 项通过——确认 `controls_if` 改动未破坏任何项目代码生成。
+- **验证**：构建须以 `NODE_OPTIONS=""` 清除沙箱注入的 `--use-system-ca`（Next.js 16 Turbopack worker 拒绝该变量）。相关测试全绿；部署后线上 `learn/var_*` 应返回 200。

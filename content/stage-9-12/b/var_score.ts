@@ -13,6 +13,7 @@ export const var_scoreProject: CourseProject = {
     { id: 2, title: "让得分随动作增加" },
     { id: 3, title: "运行看到总分" },
   ],
+  goal: { vars: [{ name: "得分", equals: 50 }] },
   defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
     <block type="maker_when_start" x="60" y="60">
       <statement name="STACK">

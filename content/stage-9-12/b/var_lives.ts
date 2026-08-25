@@ -13,6 +13,7 @@ export const var_livesProject: CourseProject = {
     { id: 2, title: "让生命随受伤减少" },
     { id: 3, title: "运行看到生命变化" },
   ],
+  goal: { vars: [{ name: "生命", equals: 0 }] },
   defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
     <block type="maker_when_start" x="60" y="60">
       <statement name="STACK">

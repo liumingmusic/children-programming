@@ -94,6 +94,21 @@ export function registerCustomBlocks() {
         this.setPreviousStatement(false);
       },
     },
+    // 条件判断：修复「否则」分支丢失的缺陷——标准 controls_if 的 else 依赖 mutation，
+    // 而本项目未引入 blockly/blocks，突变不生效导致 ELSE0 子积木被丢弃、看示范静默失效。
+    // 这里显式把 ELSE0 输入常驻，独立于 mutation，确保「如果…那么…否则」完整可用。
+    controls_if: {
+      init() {
+        this.appendValueInput("IF0").setCheck("Boolean").appendField("如果");
+        this.appendStatementInput("DO0").appendField("那么");
+        this.appendStatementInput("ELSE0").appendField("否则");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(210);
+        this.setTooltip("条件成立时执行「那么」里的积木，否则执行「否则」里的积木");
+        this.setHelpUrl("");
+      },
+    },
     maker_when_stage_clicked: {
       init() {
         this.appendDummyInput().appendField("当舞台被点击");
@@ -1123,6 +1138,21 @@ export function registerCustomBlocks() {
   javascriptGenerator.forBlock["maker_when_stage_clicked"] = (block, generator) => {
     const stack = generator.statementToCode(block, "STACK");
     return stack;
+  };
+
+  // 条件判断「如果…那么…否则」：自定义生成器，显式读取 ELSE0 输入。
+  // 标准 controls_if 生成器依赖 mutation 内部标志判断有无 else，本项目未引入 blockly/blocks，
+  // 该标志不生效，导致「否则」分支被丢弃。这里直接按 ELSE0 是否连接子积木来决定是否输出 else。
+  javascriptGenerator.forBlock["controls_if"] = (block, generator) => {
+    const condition =
+      generator.valueToCode(block, "IF0", Order.NONE) || "false";
+    const branch0 = generator.statementToCode(block, "DO0");
+    const branch1 = generator.statementToCode(block, "ELSE0");
+    let code = `if (${condition}) {\n${branch0}}`;
+    if (branch1) {
+      code += ` else {\n${branch1}}`;
+    }
+    return code + "\n";
   };
 
   javascriptGenerator.forBlock["maker_move"] = (block, generator) => {

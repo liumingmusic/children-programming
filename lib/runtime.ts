@@ -194,6 +194,10 @@ export interface StageState {
   particles?: Particle[];
   running: boolean;
   log: string[];
+  /** 变量终值快照：供 isGoalAchieved 对「变量类」项目做真实结果校验（如 步数==10）。 */
+  vars: Record<string, number>;
+  /** 累计移动距离：供「用变量控制移动」类项目（如 var_speed）校验「真的动了」。 */
+  movedDistance: number;
 }
 
 // 画笔默认粗细（屏幕像素）。项目里未放「设置画笔粗细」积木时使用此值。
@@ -794,13 +798,17 @@ export class Runtime {
       particles: [],
       running: false,
       log: [],
+      // 变量终值快照：供 isGoalAchieved 对「变量类」项目做真实结果校验（如 步数==10）。
+      vars: {} as Record<string, number>,
+      // 累计移动距离：供「用变量控制移动」类项目（如 var_speed）校验「真的动了」。
+      movedDistance: 0,
     };
     // 时间轴引擎：构造即初始化（与 action 队列完全隔离，旧项目不调用它的方法即无副作用）
     this.timeline = new TimelineEngine(this);
   }
 
   getState() {
-    return this.state;
+    return { ...this.state, vars: { ...this.vars } };
   }
 
   /** 供时间轴引擎触发渲染（emit 为 private，这里暴露一个安全的通知入口）。 */
@@ -1468,6 +1476,7 @@ export class Runtime {
           // 使「脸朝的方向 == 移动方向」：angle=270(朝上) 时 dy=-sin(270)*steps=+steps → 世界 Y 增大=向上。
           const dx = action.steps * Math.cos(rad);
           const dy = -action.steps * Math.sin(rad);
+          this.state.movedDistance += Math.abs(action.steps);
           this.animateValue(
             { x: actor.x, y: actor.y },
             { x: actor.x + dx, y: actor.y + dy },
