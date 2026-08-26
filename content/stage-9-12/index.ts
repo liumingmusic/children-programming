@@ -20,6 +20,8 @@ import { stage9KeyProjects } from "./d";
 import { stage9StoryProjects } from "./i";
 import { stage9MusicProjects } from "./e";
 import { stage9MathProjects } from "./f";
+import { stage9ScienceProjects } from "./j";
+import { stage9ListProjects } from "./g";
 
 export const stage9Projects: CourseProject[] = [
   fn_squareProject,
@@ -43,4 +45,6 @@ export const stage9Projects: CourseProject[] = [
   ...stage9StoryProjects,
   ...stage9MusicProjects,
   ...stage9MathProjects,
+  ...stage9ScienceProjects,
+  ...stage9ListProjects,
 ];

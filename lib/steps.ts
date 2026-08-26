@@ -127,6 +127,28 @@ const MATH9_SLUGS = [
   "math_prime_sieve", "math_polygon", "math_coords",
 ];
 
+/** 分类 J · 科学探究（9-12 阶段，全 7 项）。复用分类 10·科学的时间轴引擎（marker_tween_prop / maker_orbit /
+ * maker_emit_* / maker_when_at_* 生成 __runtime.timeline 轨道），判定逻辑与 6-8 科学一致：
+ * 基于真实 JS 标记（hasTimeline / hasAddTrack / 能力轨道 tween·orbit·particles / hasWhenAt），
+ * 空程序（只 reset 无 addTrack）必然 step1 不通过，杜绝「随便搭积木也能通过」。
+ * 注意：时间轴项目在 LearnPageClient 走独立分支，完成判定只看 computeSteps（不进 isGoalAchieved），故此处仅补 computeSteps + coach。 */
+const SCIENCE9_SLUGS = [
+  "science_day_night", "science_seasons", "science_orbit", "science_water_cycle",
+  "science_grow", "science_sound", "science_light",
+];
+
+/** 分类 G · 列表与数据（9-12 阶段，全 8 项）。依赖「列表」运行时基石（setList / listAppend / listItem /
+ * listLength / listRemoveAt / listSetItem / getList）。
+ * 完成判定（isGoalAchieved）双保险：① state 里存在「非空列表」（证明新建并填充了列表）；
+ * ② 项目声明的 goal.saidIncludes 子串出现在运行日志（证明把列表内容展示了出来）。
+ * 空程序（只新建空表 / 不展示）必然不通过，杜绝「随便搭积木也能通过」。
+ * 注意：本项目为非时间轴（事件驱动「当开始运行」），isGoalAchieved 走非 timeline 分支，故此处 computeSteps 仅作三步引导 UI，
+ * 最终完成把关在 isGoalAchieved 的 LIST9 分支。 */
+const LIST9_SLUGS = [
+  "list_shopping", "list_rollcall", "list_ranking", "list_lottery",
+  "list_todo", "list_words", "list_scores", "list_queue",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -567,6 +589,48 @@ export function computeSteps(
         else if (id === 2) done = hasAddTrack && hasWhenAt;
         else if (id === 3) done = hasTimeline && hasAddTrack;
       }
+    } else if (SCIENCE9_SLUGS.includes(project.slug)) {
+      // 分类 J · 科学探究（9-12）：与 6-8 科学同套真实 JS 标记判定（时间轴引擎）。
+      // 时间轴项目在 LearnPageClient 走独立分支，完成判定只看 computeSteps（不进 isGoalAchieved），
+      // 故此处基于真实标记把关：空程序（只 reset 无 addTrack）必然 step1 不通过。
+      const hasTimeline = code.includes("__runtime.timeline.reset(10)");
+      const hasAddTrack = code.includes("__runtime.timeline.addTrack(");
+      const hasTween = code.includes('type: "tween"');
+      const hasOrbit = code.includes('type: "orbit"');
+      const hasParticle = code.includes('type: "particles"');
+      const hasWhenAt = code.includes('type: "whenAt"');
+      if (project.slug === "science_orbit") {
+        // 太阳系公转：公转轨道
+        if (id === 1) done = hasTimeline && hasOrbit;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "science_water_cycle") {
+        // 水循环：蒸发上升（tween）+ 下雨（particles）+ 解说
+        if (id === 1) done = hasTimeline && hasParticle;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else if (project.slug === "science_grow" || project.slug === "science_light") {
+        // 植物生长 / 光的折射：需要两条以上变化轨道（size+y 或 直线+斜向）
+        if (id === 1) done = hasTimeline && hasTween;
+        else if (id === 2) done = countMark(code, 'type: "tween"') >= 2 && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      } else {
+        // science_day_night / science_seasons / science_sound：单条 tween + 解说
+        if (id === 1) done = hasTimeline && hasTween;
+        else if (id === 2) done = hasAddTrack && hasWhenAt;
+        else if (id === 3) done = hasTimeline && hasAddTrack;
+      }
+    } else if (LIST9_SLUGS.includes(project.slug)) {
+      // 分类 G · 列表与数据（9-12）：三步引导基于真实 JS 标记——
+      // ① 新建了列表；② 往列表里加了内容；③ 把列表内容展示了出来（说 + 列表 reporter）。
+      const hasSetList = code.includes("__runtime.setList(");
+      const hasAppend = code.includes("__runtime.listAppend(") || code.includes("__runtime.listSetItem(") || code.includes("__runtime.listRemoveAt(");
+      const hasSay = code.includes("__runtime.say(");
+      const hasListReporter = code.includes("__runtime.getList(") || code.includes("__runtime.listItem(") || code.includes("__runtime.listLength(");
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (id === 1) done = hasSetList;
+      else if (id === 2) done = hasAppend;
+      else if (id === 3) done = hasSay && hasListReporter && finished;
     } else if (STORY9_SLUGS.includes(project.slug)) {
       // 分类 I · 交互绘本与故事（9-12）：基于真实 JS 标记 / 运行日志判定「当开始运行 + 舞台点击 + 讲出/表现出故事内容」。
       // 交互绘本的本质是「点击触发」，故第 2 步以「舞台被点击」日志为信号。
@@ -788,7 +852,7 @@ export function isGoalAchieved(
     actor: { x: number; y: number };
     stars: { collected: boolean }[];
     penPaths?: { points: { x: number; y: number }[] }[];
-    vars?: Record<string, number>;
+    vars?: Record<string, number | unknown[]>;
     movedDistance?: number;
     log?: string[];
     /** 各角色是否已真正执行过动作（多角色类完成判定用）。 */
@@ -923,6 +987,28 @@ export function isGoalAchieved(
   // 空程序（不发声）必然 sounded===false → 不通过（杜绝「随便搭积木也能通过」）。
   if (MUSIC9_SLUGS.includes(project.slug)) {
     return state.sounded === true;
+  }
+
+  // 分类 G · 列表与数据：必须真的「新建并填充列表」且「把列表内容展示出来」（杜绝随便搭）。
+  // 双保险：① state 里存在非空列表（setList + listAppend 跑过）；② 项目声明 goal.saidIncludes，
+  // 其任一子串出现在运行日志（证明说出了列表内容）。未声明 goal → 不允许通过。
+  if (LIST9_SLUGS.includes(project.slug)) {
+    if (!project.goal) return false;
+    const finalVars = state.vars ?? {};
+    const hasNonEmptyList = Object.values(finalVars).some(
+      (v) => Array.isArray(v) && v.length > 0
+    );
+    if (!hasNonEmptyList) return false;
+    const goal = project.goal;
+    if (goal.saidIncludes && goal.saidIncludes.length > 0) {
+      // 只比对「说」的输出（[二零] 前缀），避免「列表加入「苹果」」这类系统日志误命中 saidIncludes，
+      // 否则不展示列表、只往里加东西也能通过，违背「必须展示列表内容」的初衷。
+      const saidLog = (state.log ?? [])
+        .filter((l) => l.startsWith("[二零]"))
+        .join("\n");
+      if (!goal.saidIncludes.some((s) => saidLog.includes(s))) return false;
+    }
+    return true;
   }
 
   // 其余（绘图/事件/条件/无标记序列）：以步骤判定为准
@@ -1276,6 +1362,43 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 3) return "点「运行」播放时间轴，看月亮的脸变化吧！";
     }
   }
+  if (SCIENCE9_SLUGS.includes(slug)) {
+    if (slug === "science_day_night") {
+      if (stepId === 1) return "用橙色「当开始运行（时间轴）」开头，里面放「让零零的背景明暗从 0 渐变到 220」，天空会由亮变暗。";
+      if (stepId === 2) return "加「当时间到 5 秒 让零零说 地球自转一圈……」，时间走到那一刻就会自动冒出对话。";
+      if (stepId === 3) return "点「运行」，用下方时间轴控件播放，看白天慢慢变成黑夜！";
+    }
+    if (slug === "science_seasons") {
+      if (stepId === 1) return "用橙色「当开始运行（时间轴）」开头，放「让零零的背景明暗从 20 渐变到 200」，光线会随季节流转。";
+      if (stepId === 2) return "再接连放几个「当时间到达 0/2/4/6 秒 让零零说」对应四季的话。";
+      if (stepId === 3) return "点「运行」播放时间轴，看春夏秋冬轮转！";
+    }
+    if (slug === "science_orbit") {
+      if (stepId === 1) return "用橙色「当开始运行（时间轴）」开头，放「让零零绕中心转 1 圈」，它会绕着太阳画圈。";
+      if (stepId === 2) return "加「当时间到 1 秒 让零零说 地球绕太阳转一圈就是一年」，讲清公转的意义。";
+      if (stepId === 3) return "点「运行」播放时间轴，看地球公转吧！";
+    }
+    if (slug === "science_water_cycle") {
+      if (stepId === 1) return "用橙色「当开始运行（时间轴）」开头，先放「让零零的上下位置从 0 到 -80」代表蒸发上升。";
+      if (stepId === 2) return "接着放「让天空下起雨」，再加「当时间到 8 秒 让零零说 雨水落回地面……」。";
+      if (stepId === 3) return "点「运行」播放时间轴，看水怎么循环旅行！";
+    }
+    if (slug === "science_grow") {
+      if (stepId === 1) return "用橙色「当开始运行（时间轴）」开头，放「让种子大小从 0.1 渐变到 1」。";
+      if (stepId === 2) return "再加一条「让种子的上下位置从 -80 渐变到 0」，让它从土里钻出来（两条变化轨道）。";
+      if (stepId === 3) return "点「运行」播放时间轴，看种子发芽长大！";
+    }
+    if (slug === "science_sound") {
+      if (stepId === 1) return "用橙色「当开始运行（时间轴）」开头，放「让零零的大小从 0.2 渐变到 3」，声波会一圈圈变大。";
+      if (stepId === 2) return "加「当时间到 4 秒 让零零说 声音像一圈圈水波……」，讲清声音怎么传。";
+      if (stepId === 3) return "点「运行」播放时间轴，看声波向外扩散！";
+    }
+    if (slug === "science_light") {
+      if (stepId === 1) return "用橙色「当开始运行（时间轴）」开头，放「让零零的上下位置从 -100 到 0」代表空气中的直线光。";
+      if (stepId === 2) return "再放两条「左右位置 0→60」「上下位置 0→100（都在 4~8 秒）」让光斜着走，并在第 4 秒加一句解说。";
+      if (stepId === 3) return "点「运行」播放时间轴，看光路怎么拐弯（折射）！";
+    }
+  }
   if (PBL_SLUGS.includes(slug)) {
     if (slug === "singing_picture") {
       if (stepId === 1) return "先放绿色「落笔」，二零才会画出线来。";
@@ -1332,6 +1455,11 @@ export function coach(slug: string, stepId: number): string {
     if (stepId === 1) return "拖一个绿色「当开始运行」，再用「设置变量」记下要算的数。";
     if (stepId === 2) return "用「重复执行」或「画笔」把计算过程跑起来——循环能替你一遍遍算，画笔能把图形画出来。";
     if (stepId === 3) return "点「运行」，看程序是不是真的算出了结果并说出来 / 画出来了。空程序可不会出答案哦！";
+  }
+  if (LIST9_SLUGS.includes(slug)) {
+    if (stepId === 1) return "从「列表」分类拖一个紫色「新建列表」，给列表起个名字（比如 购物清单），这就是一个能装很多东西的容器。";
+    if (stepId === 2) return "用「把 X 加入列表」把一样样东西（文字或数字）放进去——可以连续放好几条，列表才有内容。";
+    if (stepId === 3) return "用「说 列表 XXX」或「列表的第几项 / 长度」把列表内容展示出来，点「运行」，看二零是不是把清单念出来了。只建表不放东西、或不展示，都不算完成哦！";
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
 }

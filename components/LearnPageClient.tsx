@@ -59,6 +59,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     keyHandlers: 0,
     clickHandlers: 0,
     sounded: false,
+    bgHue: 0,
   });
   const [logs, setLogs] = useState<string[]>([]);
   const [generatedCode, setGeneratedCode] = useState("");

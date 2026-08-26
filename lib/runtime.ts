@@ -180,6 +180,8 @@ export interface StageState {
   actors: ActorState[];
   /** 当前激活的场景（切换场景积木设置）。 */
   scene?: SceneDef;
+  /** 背景色相（昼夜/四季用），0-360。由时间轴 tween（PROP=bgHue）驱动，供渲染层着色背景。 */
+  bgHue: number;
   penPaths: PenPath[];
   currentPath: PenPath | null;
   penColor: number; // hue 0-360
@@ -197,7 +199,7 @@ export interface StageState {
   running: boolean;
   log: string[];
   /** 变量终值快照：供 isGoalAchieved 对「变量类」项目做真实结果校验（如 步数==10）。 */
-  vars: Record<string, number>;
+  vars: Record<string, number | unknown[]>;
   /** 累计移动距离：供「用变量控制移动」类项目（如 var_speed）校验「真的动了」。 */
   movedDistance: number;
   /** 已注册的按键处理器数量：供「键盘操控」类项目完成判定（必须真的配置了按键事件，空程序则为 0）。 */
@@ -625,7 +627,9 @@ export class TimelineEngine {
         break;
       }
       case "bgHue": {
-        (st as unknown as { bgHue?: number }).bgHue = val;
+        // 背景色相是 StageState 顶层字段；getState() 返回浅拷贝，直接写 st 会丢失，
+        // 必须落到真实 state（setBgHue 写 this.state.bgHue，再由 getState 的 ...this.state 带出）。
+        this.rt.setBgHue(val);
         break;
       }
     }
@@ -754,7 +758,7 @@ export class Runtime {
   private initialClouds: Cloud[];
   private apples: Apple[];
   private initialApples: Apple[];
-  private vars: Record<string, number> = {};
+  private vars: Record<string, number | unknown[]> = {};
   private cloudRaf: number | null = null;
   private appleRaf: number | null = null;
   /** 当前被「控制角色」积木选中的角色 id；默认二零，保证旧项目行为不变。 */
@@ -813,8 +817,8 @@ export class Runtime {
       particles: [],
       running: false,
       log: [],
-      // 变量终值快照：供 isGoalAchieved 对「变量类」项目做真实结果校验（如 步数==10）。
-      vars: {} as Record<string, number>,
+      // 变量终值快照：供 isGoalAchieved 对「变量类」项目做真实结果校验（如 步数==10）。同时承载「列表」类型变量（数组）。
+      vars: {} as Record<string, number | unknown[]>,
       // 累计移动距离：供「用变量控制移动」类项目（如 var_speed）校验「真的动了」。
       movedDistance: 0,
       // 已注册按键处理器数量：供「键盘操控」类项目完成判定（空程序为 0）。
@@ -823,6 +827,8 @@ export class Runtime {
       clickHandlers: this.scripts.whenStageClicked ? 1 : 0,
       // 程序运行过程中是否真的播放过声音：供「音乐创作」类完成判定（空程序为 false）。
       sounded: false,
+      // 背景色相（昼夜/四季）：供时间轴 tween（PROP=bgHue）驱动，渲染层据此着色背景。
+      bgHue: 0,
     };
     // 时间轴引擎：构造即初始化（与 action 队列完全隔离，旧项目不调用它的方法即无副作用）
     this.timeline = new TimelineEngine(this);
@@ -830,6 +836,11 @@ export class Runtime {
 
   getState() {
     return { ...this.state, vars: { ...this.vars }, keyHandlers: this.scripts.whenKeyPressed?.length ?? 0, clickHandlers: this.scripts.whenStageClicked ? 1 : 0, companionEngaged: this.companionEngaged, sounded: this.sounded };
+  }
+
+  /** 供时间轴引擎设置背景色相（昼夜/四季 tween）。直接写 this.state.bgHue，确保 getState 的浅拷贝带出该值。 */
+  setBgHue(v: number) {
+    this.state.bgHue = v;
   }
 
   /** 供时间轴引擎触发渲染（emit 为 private，这里暴露一个安全的通知入口）。 */
@@ -1038,12 +1049,59 @@ export class Runtime {
 
   /** 修改变量（按 delta 增减）。 */
   changeVar(name: string, delta: number) {
-    this.vars[name] = (this.vars[name] ?? 0) + delta;
+    this.vars[name] = ((this.vars[name] as number) ?? 0) + delta;
   }
 
   /** 读取变量当前值（默认 0）。 */
   getVar(name: string): number {
-    return this.vars[name] ?? 0;
+    return (this.vars[name] as number) ?? 0;
+  }
+
+  // ---- 列表（数据）原语：列表变量与数字变量共用 this.vars 命名空间，值类型为未知元素数组 ----
+  /** 新建（或重置）一个名为 name 的空列表。 */
+  setList(name: string, items: unknown[] = []) {
+    this.vars[name] = [...items];
+    this.log(`[系统] 新建列表 ${name}，共 ${items.length} 项`);
+  }
+
+  /** 读取列表（不存在时返回空数组，避免 undefined 导致运行时报错）。 */
+  getList(name: string): unknown[] {
+    const v = this.vars[name];
+    return Array.isArray(v) ? v : [];
+  }
+
+  /** 把一项追加到列表末尾（像购物车加商品）。 */
+  listAppend(name: string, item: unknown) {
+    const list = this.getList(name);
+    list.push(item);
+    this.log(`[系统] 列表 ${name} 加入「${String(item)}」，现在 ${list.length} 项`);
+  }
+
+  /** 读取列表第 index 项（1 基，符合孩子直觉：第 1 项、第 2 项……）。越界返回空串。 */
+  listItem(name: string, index: number): unknown {
+    const list = this.getList(name);
+    const i = Math.floor(index) - 1;
+    if (i < 0 || i >= list.length) return "";
+    return list[i];
+  }
+
+  /** 修改列表第 index 项为 item（1 基）；越界不操作。 */
+  listSetItem(name: string, index: number, item: unknown) {
+    const list = this.getList(name);
+    const i = Math.floor(index) - 1;
+    if (i >= 0 && i < list.length) list[i] = item;
+  }
+
+  /** 从列表移除第 index 项（1 基）；越界不操作。 */
+  listRemoveAt(name: string, index: number) {
+    const list = this.getList(name);
+    const i = Math.floor(index) - 1;
+    if (i >= 0 && i < list.length) list.splice(i, 1);
+  }
+
+  /** 列表长度（项数）。 */
+  listLength(name: string): number {
+    return this.getList(name).length;
   }
 
   /** 读取某个项目的最高分（本地保存，跨刷新保留）。没有记录时返回 0。 */

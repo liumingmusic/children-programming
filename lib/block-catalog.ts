@@ -17,6 +17,7 @@ export type BlockCategory =
   | "函数"
   | "声音"
   | "角色"
+  | "列表"
   | "特殊";
 
 export type BlockShape = "hat" | "statement" | "reporter" | "boolean" | "special";
@@ -56,6 +57,7 @@ export const CATEGORY_COLORS: Record<BlockCategory, string> = {
   函数: "#5B8DEF",
   声音: "#B45EC9",
   角色: "#3FA796",
+  列表: "#A569BD",
   特殊: "#C0566B",
 };
 
@@ -71,6 +73,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   "函数",
   "声音",
   "角色",
+  "列表",
   "特殊",
 ];
 
@@ -939,6 +942,92 @@ export const BLOCK_CATALOG: BlockDoc[] = [
     purpose: "运行一次你定义的积木，相当于把那一串积木再执行一遍。可以调用很多次，也能在定义里调用自己（递归）。",
     usage: "名字要和「定义积木」里写的一模一样（区分大小写）。例如定义了「画正方形」，这里就填「画正方形」。",
     example: "调用我的积木 画正方形",
+    stages: ["stage-9-12"],
+  },
+
+  // —— 9-12 阶段 · 列表与数据（分类 G）——
+  {
+    id: "maker_list_create",
+    label: "新建列表",
+    category: "列表",
+    color: 300,
+    shape: "statement",
+    parts: [T("新建列表"), { kind: "input", inputType: "text", placeholder: "清单" }],
+    purpose: "新建一个名为「清单」的空列表。列表是用来装一堆同类东西的容器（如购物清单、点名表、成绩表），后面用「加入」往里放内容。",
+    usage: "先「新建列表」定好名字，再用「把 X 加入列表」一项项往里加；也可配合「重复执行」批量加入。",
+    example: "新建列表 购物清单",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_list_add",
+    label: "加入列表",
+    category: "列表",
+    color: 300,
+    shape: "statement",
+    parts: [T("把"), { kind: "input", inputType: "text", placeholder: "苹果" }, T("加入列表"), { kind: "input", inputType: "text", placeholder: "清单" }],
+    purpose: "把一个东西（文字或数字）放到列表末尾，像往购物车里加一件商品。",
+    usage: "VALUE 可接文字块或数字块，也能接「列表的第几项」做嵌套操作。",
+    example: "把 苹果 加入列表 购物清单",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_list_var",
+    label: "整个列表",
+    category: "列表",
+    color: 300,
+    shape: "reporter",
+    parts: [T("列表"), { kind: "input", inputType: "text", placeholder: "清单" }],
+    purpose: "取出整个列表（一串东西），可放进「说」里一口气念出来，或放进「长度」「第几项」里使用。",
+    usage: "想一次性展示清单内容时用它，例如「说 列表 购物清单」会念出全部项目。",
+    example: "说 列表 购物清单",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_list_item",
+    label: "列表的第几项",
+    category: "列表",
+    color: 300,
+    shape: "reporter",
+    parts: [T("列表"), { kind: "input", inputType: "text", placeholder: "清单" }, T("的第"), N("1"), T("项")],
+    purpose: "读出列表里的某一项（从 1 开始数：第 1 项、第 2 项……），可放进「说」或算式里。",
+    usage: "INDEX 可接数字块或「随机整数」，做点名器、抽奖时常配合随机数取一项。",
+    example: "说 列表 点名表 的第 随机整数(1,30) 项",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_list_length",
+    label: "列表的长度",
+    category: "列表",
+    color: 300,
+    shape: "reporter",
+    parts: [T("列表"), { kind: "input", inputType: "text", placeholder: "清单" }, T("的长度")],
+    purpose: "列表里一共有多少项（像数一数购物清单上有几样东西）。",
+    usage: "常放进「说」展示统计结果，或作为「重复执行」的次数上限。",
+    example: "说 列表 购物清单 的长度",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_list_remove",
+    label: "从列表移除",
+    category: "列表",
+    color: 300,
+    shape: "statement",
+    parts: [T("从列表"), { kind: "input", inputType: "text", placeholder: "清单" }, T("移除第"), N("1"), T("项")],
+    purpose: "把列表里某一项删掉（比如买完的东西从清单划掉），从 1 开始数。",
+    usage: "INDEX 越界不会报错，只是不操作；可配合「列表的长度」做安全移除。",
+    example: "从列表 购物清单 移除第 1 项",
+    stages: ["stage-9-12"],
+  },
+  {
+    id: "maker_list_set",
+    label: "修改列表项",
+    category: "列表",
+    color: 300,
+    shape: "statement",
+    parts: [T("把列表"), { kind: "input", inputType: "text", placeholder: "清单" }, T("的第"), N("1"), T("项设为"), { kind: "input", inputType: "text", placeholder: "新内容" }],
+    purpose: "修改列表里某一项的内容（从 1 开始数）。",
+    usage: "例如把成绩表里某次分数改掉；VALUE 可接文字或数字块。",
+    example: "把列表 成绩表 的第 1 项设为 95",
     stages: ["stage-9-12"],
   },
 

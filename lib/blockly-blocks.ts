@@ -34,6 +34,14 @@ export const TOOLBOX = {
     { kind: "block" as const, type: "maker_change_var" },
     { kind: "block" as const, type: "maker_get_var" },
     { kind: "block" as const, type: "maker_mod", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 7 } } }, B: { shadow: { type: "math_number", fields: { NUM: 2 } } } } },
+    // ---- 9-12 阶段 · 列表与数据（分类 G）----
+    { kind: "block" as const, type: "maker_list_create", fields: { NAME: "清单" } },
+    { kind: "block" as const, type: "maker_list_add", fields: { NAME: "清单" }, inputs: { VALUE: { shadow: { type: "text", fields: { TEXT: "苹果" } } } } },
+    { kind: "block" as const, type: "maker_list_var", fields: { NAME: "清单" } },
+    { kind: "block" as const, type: "maker_list_item", fields: { NAME: "清单" }, inputs: { INDEX: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
+    { kind: "block" as const, type: "maker_list_length", fields: { NAME: "清单" } },
+    { kind: "block" as const, type: "maker_list_remove", fields: { NAME: "清单" }, inputs: { INDEX: { shadow: { type: "math_number", fields: { NUM: 1 } } } } },
+    { kind: "block" as const, type: "maker_list_set", fields: { NAME: "清单" }, inputs: { INDEX: { shadow: { type: "math_number", fields: { NUM: 1 } } }, VALUE: { shadow: { type: "text", fields: { TEXT: "新内容" } } } } },
     { kind: "block" as const, type: "maker_compare", inputs: { A: { shadow: { type: "math_number", fields: { NUM: 0 } } }, B: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
     { kind: "block" as const, type: "maker_get_size" },
     { kind: "block" as const, type: "maker_set_expression" },
@@ -460,6 +468,99 @@ export function registerCustomBlocks() {
         this.setOutput(true, "Number");
         this.setColour(330);
         this.setTooltip("读取某个变量当前的值，可放进「如果…那么」或算式里。");
+        this.setHelpUrl("");
+      },
+    },
+    // ---- 9-12 阶段 · 列表与数据（分类 G）----
+    maker_list_create: {
+      init() {
+        this.appendDummyInput()
+          .appendField("新建列表")
+          .appendField(new Blockly.FieldTextInput("清单"), "NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(300);
+        this.setTooltip("新建一个名为「清单」的空列表，后面可以用「加入」往里放东西。列表是用来装一堆同类的东西（如购物清单、点名表）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_list_add: {
+      init() {
+        this.appendValueInput("VALUE").setCheck(null).appendField("把");
+        this.appendDummyInput().appendField("加入列表").appendField(new Blockly.FieldTextInput("清单"), "NAME");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(300);
+        this.setTooltip("把一个东西（文字或数字）放到列表末尾，像往购物车里加一件商品。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_list_var: {
+      init() {
+        this.appendDummyInput()
+          .appendField("列表")
+          .appendField(new Blockly.FieldTextInput("清单"), "NAME");
+        this.setOutput(true, null);
+        this.setColour(300);
+        this.setTooltip("取出整个列表（一串东西），可以放进「说」里一口气念出来，或放进「长度」「第几项」里使用。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_list_item: {
+      init() {
+        this.appendDummyInput()
+          .appendField("列表")
+          .appendField(new Blockly.FieldTextInput("清单"), "NAME")
+          .appendField("的第");
+        this.appendValueInput("INDEX").setCheck("Number").appendField("项");
+        this.setInputsInline(true);
+        this.setOutput(true, null);
+        this.setColour(300);
+        this.setTooltip("读出列表里的某一项（从 1 开始数：第 1 项、第 2 项……），可放进「说」或算式里。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_list_length: {
+      init() {
+        this.appendDummyInput()
+          .appendField("列表")
+          .appendField(new Blockly.FieldTextInput("清单"), "NAME")
+          .appendField("的长度");
+        this.setOutput(true, "Number");
+        this.setColour(300);
+        this.setTooltip("列表里一共有多少项（像数一数购物清单上有几样东西）。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_list_remove: {
+      init() {
+        this.appendDummyInput()
+          .appendField("从列表")
+          .appendField(new Blockly.FieldTextInput("清单"), "NAME")
+          .appendField("移除第");
+        this.appendValueInput("INDEX").setCheck("Number").appendField("项");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(300);
+        this.setTooltip("把列表里某一项删掉（比如买完的东西从清单划掉），从 1 开始数。");
+        this.setHelpUrl("");
+      },
+    },
+    maker_list_set: {
+      init() {
+        this.appendDummyInput()
+          .appendField("把列表")
+          .appendField(new Blockly.FieldTextInput("清单"), "NAME")
+          .appendField("的第");
+        this.appendValueInput("INDEX").setCheck("Number").appendField("项设为");
+        this.appendValueInput("VALUE").setCheck(null);
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(300);
+        this.setTooltip("修改列表里某一项的内容（从 1 开始数）。");
         this.setHelpUrl("");
       },
     },
@@ -1285,6 +1386,47 @@ export function registerCustomBlocks() {
   javascriptGenerator.forBlock["maker_get_var"] = (block) => {
     const name = JSON.stringify(block.getFieldValue("NAME"));
     return [`__runtime.getVar(${name})`, Order.FUNCTION_CALL];
+  };
+
+  // ---- 9-12 阶段 · 列表与数据（分类 G）----
+  javascriptGenerator.forBlock["maker_list_create"] = (block) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    return `__runtime.setList(${name});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_list_add"] = (block, generator) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    const value = generator.valueToCode(block, "VALUE", Order.ATOMIC) || '""';
+    return `__runtime.listAppend(${name}, ${value});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_list_var"] = (block) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    return [`__runtime.getList(${name})`, Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_list_item"] = (block, generator) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    const index = generator.valueToCode(block, "INDEX", Order.ATOMIC) || "1";
+    return [`__runtime.listItem(${name}, ${index})`, Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_list_length"] = (block) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    return [`__runtime.listLength(${name})`, Order.FUNCTION_CALL];
+  };
+
+  javascriptGenerator.forBlock["maker_list_remove"] = (block, generator) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    const index = generator.valueToCode(block, "INDEX", Order.ATOMIC) || "1";
+    return `__runtime.listRemoveAt(${name}, ${index});\n`;
+  };
+
+  javascriptGenerator.forBlock["maker_list_set"] = (block, generator) => {
+    const name = JSON.stringify(block.getFieldValue("NAME"));
+    const index = generator.valueToCode(block, "INDEX", Order.ATOMIC) || "1";
+    const value = generator.valueToCode(block, "VALUE", Order.ATOMIC) || '""';
+    return `__runtime.listSetItem(${name}, ${index}, ${value});\n`;
   };
 
   javascriptGenerator.forBlock["maker_mod"] = (block, generator) => {
