@@ -1,0 +1,63 @@
+import type { CourseProject } from "@/courses";
+
+export const mathSudokuProject: CourseProject = {
+  slug: "math_sudoku",
+  category: "math",
+  title: "四宫数独填空",
+  ageGroup: "9-12 岁",
+  description:
+    "数独是「每行每列都不重复」的数字游戏。我们用「列表」当 4×4 的格子，把一组合法的答案（每行每列都是 1、2、3、4 各一次）放进去，再念出来检查有没有重复。",
+  missionBrief:
+    "当开始运行时，新建「数独」列表，把 4×4 的答案（1、2、3、4 各出现、且每行每列不重复）依次加入列表；用「说 列表 数独」把整盘展示出来，最后「说 数独完成」表示已填好。",
+  erLingHint:
+    "① 新建列表「数独」；② 用「加入」把 16 个数字（四宫格答案，例如第一行 1 2 3 4、第二行 3 4 1 2、第三行 2 1 4 3、第四行 4 3 2 1）依次放进去；③「说 列表 数独」展示整盘；④「说 数独完成」。点运行，看列表里装了什么。",
+  steps: [
+    { id: 1, title: "新建一个「数独」列表当 4×4 的格子" },
+    { id: 2, title: "把答案数字依次加入列表（每行每列不重复）" },
+    { id: 3, title: "运行把整盘数独展示出来并说出「数独完成」" },
+  ],
+  defaultXml: `<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_list_create"><field name="NAME">数独</field>
+          <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+            <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+              <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+                <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                  <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+                    <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                      <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                        <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                          <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                            <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                              <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                                <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+                                  <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                                    <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">3</field></shadow></value>
+                                      <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                                        <next><block type="maker_list_add"><field name="NAME">数独</field><value name="VALUE"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                                          <next><block type="maker_say"><value name="TEXT"><block type="maker_list_var"><field name="NAME">数独</field></block></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                                            <next><block type="maker_say"><value name="TEXT"><shadow type="text"><field name="TEXT">数独完成</field></shadow></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value></block></next>
+                                          </block></next>
+                                        </block></next>
+                                      </block></next>
+                                    </block></next>
+                                  </block></next>
+                                </block></next>
+                              </block></next>
+                            </block></next>
+                          </block></next>
+                        </block></next>
+                      </block></next>
+                    </block></next>
+                  </block></next>
+                </block></next>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>`,
+  goal: { saidIncludes: ["数独完成"] },
+};

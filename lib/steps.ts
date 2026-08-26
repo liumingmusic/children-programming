@@ -140,8 +140,8 @@ const MUSIC9_SLUGS = [
   "music_pitch_pos", "music_chord", "music_birthday", "music_compose",
 ];
 
-/** 分类 F · 数学与逻辑进阶（9-12 阶段，7/8 项；数独填空需「列表」原语，留待列表基石落地后补）。
- * 判定复用 VAR 的「goal 真实结果断言」分支（声明 saidIncludes / drew，空程序无输出必然不通过）。 */
+/** 分类 F · 数学与逻辑进阶（9-12 阶段，全 8 项；math_sudoku 数独填空复用列表判定模型，归在 LIST9_SLUGS）。
+ * 其余 7 项判定复用 VAR 的「goal 真实结果断言」分支（声明 saidIncludes / drew，空程序无输出必然不通过）。 */
 const MATH9_SLUGS = [
   "math_mul_table", "math_factor_prime", "math_area", "math_fib",
   "math_prime_sieve", "math_polygon", "math_coords",
@@ -167,6 +167,7 @@ const SCIENCE9_SLUGS = [
 const LIST9_SLUGS = [
   "list_shopping", "list_rollcall", "list_ranking", "list_lottery",
   "list_todo", "list_words", "list_scores", "list_queue",
+  "math_sudoku",
 ];
 
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
