@@ -106,6 +106,26 @@ const D_GAME: Record<string, { collide: string; score: boolean }> = {
   reaction_game: { collide: "__runtime.touchingApple(", score: true },
 };
 
+/** 分类 H · 综合小游戏（9-12 阶段，全 8 项）。
+ * 复用三套已验证的判定模型（与 D / G / multi 同思路，杜绝「随便搭积木也能通过」）：
+ *  - 键盘操控型（game_snake / game_shooter / game_dodge / game_race）：isGoalAchieved 只校验「真的配置了按键处理器」(keyHandlers>0)，
+ *    computeSteps 用真实 JS 标记把关（按键 + 移动 + 碰撞结算）。
+ *  - 逻辑 / 数据型（game_guess / game_memory / game_2048lite）：用「真实结果」把关——game_guess 靠「说 猜中啦」，
+ *    game_memory / game_2048lite 靠「非空列表 + 说 目标词」。
+ *  - 多角色型（game_puzzle）：靠 companionEngaged（真的控制了伙伴角色 三七）。
+ * 空程序 / 只搭一半 必然不通过。 */
+const GAME9_SLUGS = [
+  "game_snake", "game_shooter", "game_dodge", "game_race",
+  "game_guess", "game_memory", "game_2048lite", "game_puzzle",
+];
+/** 键盘操控型综合小游戏：碰撞检测标记 + 是否计分（与 D_GAME 同构）。 */
+const GAME9_KEY: Record<string, { collide: string; score: boolean }> = {
+  game_snake: { collide: "__runtime.touchingApple(", score: true },
+  game_shooter: { collide: "__runtime.touchingCloud(", score: true },
+  game_dodge: { collide: "__runtime.touchingCloud(", score: false },
+  game_race: { collide: "__runtime.touchingApple(", score: true },
+};
+
 /** 分类 I · 交互绘本与故事（9-12 阶段）。判定基于真实 JS 标记：必须真的配置了「舞台点击事件」（空程序则为 0）。
  * 交互绘本的本质是「点击触发」，完成判定以注册点击处理器数量为信号（与键盘类同思路，时序安全）。 */
 const STORY9_SLUGS = [
@@ -630,7 +650,30 @@ export function computeSteps(
       const finished = logs.includes("[系统] 程序执行完毕");
       if (id === 1) done = hasSetList;
       else if (id === 2) done = hasAppend;
-      else if (id === 3) done = hasSay && hasListReporter && finished;
+      else       if (id === 3) done = hasSay && hasListReporter && finished;
+    } else if (GAME9_SLUGS.includes(project.slug)) {
+      // 分类 H · 综合小游戏（9-12）：复用 D / G / multi 三套真实标记模型。
+      if (project.slug in GAME9_KEY) {
+        // 键盘操控型：按键驱动一格一判定（与 D_GAME 同构）
+        const cfg = GAME9_KEY[project.slug];
+        const keyFired = logs.some((l) => l.includes("按下按键"));
+        const hasMove = code.includes("__runtime.move");
+        const usedCollide = code.includes(cfg.collide);
+        const usedScore = !cfg.score || code.includes("__runtime.changeVar") || code.includes("__runtime.setVar");
+        const finished = logs.includes("[系统] 程序执行完毕");
+        if (id === 1) done = keyFired || hasMove;
+        else if (id === 2) done = usedCollide && usedScore && (keyFired || hasMove);
+        else if (id === 3) done = finished;
+      } else {
+        // 逻辑 / 数据 / 多角色型：搭建基础 → 核心玩法 → 展示结果（与 G 同构）
+        const hasFoundation = code.includes("__runtime.setList(") || code.includes("__runtime.setVar(") || code.includes("__runtime.controlActor(");
+        const hasCore = code.includes("__runtime.changeVar(") || code.includes("__runtime.listAppend(") || code.includes("__runtime.listItem(") || code.includes("__runtime.listLength(") || code.includes("__runtime.listSetItem(") || code.includes("__runtime.listRemoveAt(") || code.includes("__runtime.goto(") || code.includes("__runtime.controlActor(");
+        const hasSay = code.includes("__runtime.say(");
+        const finished = logs.includes("[系统] 程序执行完毕");
+        if (id === 1) done = hasFoundation;
+        else if (id === 2) done = hasCore;
+        else if (id === 3) done = hasSay && finished;
+      }
     } else if (STORY9_SLUGS.includes(project.slug)) {
       // 分类 I · 交互绘本与故事（9-12）：基于真实 JS 标记 / 运行日志判定「当开始运行 + 舞台点击 + 讲出/表现出故事内容」。
       // 交互绘本的本质是「点击触发」，故第 2 步以「舞台被点击」日志为信号。
@@ -1007,6 +1050,32 @@ export function isGoalAchieved(
         .filter((l) => l.startsWith("[二零]"))
         .join("\n");
       if (!goal.saidIncludes.some((s) => saidLog.includes(s))) return false;
+    }
+    return true;
+  }
+
+  // 分类 H · 综合小游戏：按子类型用真实结果把关（杜绝随便搭积木通过）。
+  if (GAME9_SLUGS.includes(project.slug)) {
+    if (project.slug in GAME9_KEY) {
+      // 键盘操控型：必须真的配置了按键处理器（时序安全，与分类 D 同思路）。
+      return (state.keyHandlers ?? 0) > 0;
+    }
+    if (project.slug === "game_puzzle" && state.companionEngaged !== true) {
+      // 拼图归位：必须真的控制了伙伴角色（三七），否则不算完成。
+      return false;
+    }
+    // 逻辑 / 数据 / 多角色型（game_guess / game_memory / game_2048lite / game_puzzle）：必须真的展示出结果。
+    if (!project.goal) return false;
+    const saidLog = (state.log ?? []).filter((l) => l.startsWith("[二零]")).join("\n");
+    if (project.goal.saidIncludes && project.goal.saidIncludes.length > 0) {
+      if (!project.goal.saidIncludes.some((s) => saidLog.includes(s))) return false;
+    }
+    // 列表型（记忆翻牌 / 数字合成）还必须有非空列表，证明真的用列表存了数据。
+    if (project.slug === "game_memory" || project.slug === "game_2048lite") {
+      const hasNonEmptyList = Object.values(state.vars ?? {}).some(
+        (v) => Array.isArray(v) && v.length > 0
+      );
+      if (!hasNonEmptyList) return false;
     }
     return true;
   }
@@ -1460,6 +1529,28 @@ export function coach(slug: string, stepId: number): string {
     if (stepId === 1) return "从「列表」分类拖一个紫色「新建列表」，给列表起个名字（比如 购物清单），这就是一个能装很多东西的容器。";
     if (stepId === 2) return "用「把 X 加入列表」把一样样东西（文字或数字）放进去——可以连续放好几条，列表才有内容。";
     if (stepId === 3) return "用「说 列表 XXX」或「列表的第几项 / 长度」把列表内容展示出来，点「运行」，看二零是不是把清单念出来了。只建表不放东西、或不展示，都不算完成哦！";
+  }
+  if (GAME9_SLUGS.includes(slug)) {
+    if (slug in GAME9_KEY) {
+      if (stepId === 1) return "从「事件」分类拖「当按下方向键」事件——这是操控游戏的核心，没有按键就动不起来。";
+      if (stepId === 2) return "在按键里放「移动 / 转向」，再接「如果 碰到 ×× 那么 变量 加分 / 说」，把碰撞和计分接上。";
+      if (stepId === 3) return "点「运行」，用方向键操控二零，看它是不是真的碰到了目标、加了分。没配按键可不算完成哦！";
+    }
+    if (slug === "game_guess") {
+      if (stepId === 1) return "用「设置变量」记下目标数字和当前猜测，程序才知道在找什么。";
+      if (stepId === 2) return "用「重复执行」+「如果…那么」一步步试：每次把「当前」加 1，相等时就「说 猜中啦」。";
+      if (stepId === 3) return "点「运行」，看程序数到目标并喊出「猜中啦」。只循环不判断可不算完成哦！";
+    }
+    if (slug === "game_memory" || slug === "game_2048lite") {
+      if (stepId === 1) return "从「列表」分类拖「新建列表」，给卡片 / 数字块一个容器。";
+      if (stepId === 2) return "用「加入 / 修改 / 删除」把列表填好或合成——列表有内容才算在用它。";
+      if (stepId === 3) return "用「说 列表」把内容展示出来，再「说」出完成词，点运行看结果。只建表不展示不算完成哦！";
+    }
+    if (slug === "game_puzzle") {
+      if (stepId === 1) return "用「控制角色 三七」让伙伴先就位——多角色游戏要先会指挥伙伴。";
+      if (stepId === 2) return "再「控制角色 二零」并「移到」指定坐标，把两片拼图各归其位。";
+      if (stepId === 3) return "点「运行」，看两个角色各就各位并「说 归位完成」。没真的控制伙伴不算完成哦！";
+    }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
 }
