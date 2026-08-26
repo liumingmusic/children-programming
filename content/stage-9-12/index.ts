@@ -18,6 +18,8 @@ import { var_bestProject } from "./b/var_best";
 import { stage9MultiProjects } from "./c";
 import { stage9KeyProjects } from "./d";
 import { stage9StoryProjects } from "./i";
+import { stage9MusicProjects } from "./e";
+import { stage9MathProjects } from "./f";
 
 export const stage9Projects: CourseProject[] = [
   fn_squareProject,
@@ -39,4 +41,6 @@ export const stage9Projects: CourseProject[] = [
   ...stage9MultiProjects,
   ...stage9KeyProjects,
   ...stage9StoryProjects,
+  ...stage9MusicProjects,
+  ...stage9MathProjects,
 ];

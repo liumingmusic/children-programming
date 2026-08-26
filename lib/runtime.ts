@@ -206,6 +206,8 @@ export interface StageState {
   clickHandlers: number;
   /** 程序是否真正 engage 了伙伴角色（控制/广播/触碰/测量）：供「多角色」类完成判定（空程序为 false）。 */
   companionEngaged?: boolean;
+  /** 程序运行过程中是否真的播放过声音：供「音乐创作」类完成判定（空程序为 false）。 */
+  sounded?: boolean;
 }
 
 // 画笔默认粗细（屏幕像素）。项目里未放「设置画笔粗细」积木时使用此值。
@@ -759,6 +761,8 @@ export class Runtime {
   private currentActorId: string = "erling";
   /** 程序是否真正「 engage 了伙伴角色」（控制它 / 广播给它 / 触碰或测量它）。供「多角色」类完成判定：空程序不会 engage，杜绝随便搭通过校验。 */
   private companionEngaged = false;
+  /** 程序运行过程中是否真的播放过声音：供「音乐创作」类完成判定（空程序为 false）。 */
+  private sounded = false;
   /** 当前处于「落笔」状态的角色 id（画笔路径归属于落笔的那位角色）。默认二零。 */
   private drawingActorId: string = "erling";
   /** 时间轴子系统（分类10·科学）。所有 timeline 能力都委托给它，与 action 队列完全隔离。 */
@@ -817,13 +821,15 @@ export class Runtime {
       keyHandlers: 0,
       // 已注册舞台点击处理器数量：供「交互绘本 / 点击类」项目完成判定（空程序为 0）。
       clickHandlers: this.scripts.whenStageClicked ? 1 : 0,
+      // 程序运行过程中是否真的播放过声音：供「音乐创作」类完成判定（空程序为 false）。
+      sounded: false,
     };
     // 时间轴引擎：构造即初始化（与 action 队列完全隔离，旧项目不调用它的方法即无副作用）
     this.timeline = new TimelineEngine(this);
   }
 
   getState() {
-    return { ...this.state, vars: { ...this.vars }, keyHandlers: this.scripts.whenKeyPressed?.length ?? 0, clickHandlers: this.scripts.whenStageClicked ? 1 : 0, companionEngaged: this.companionEngaged };
+    return { ...this.state, vars: { ...this.vars }, keyHandlers: this.scripts.whenKeyPressed?.length ?? 0, clickHandlers: this.scripts.whenStageClicked ? 1 : 0, companionEngaged: this.companionEngaged, sounded: this.sounded };
   }
 
   /** 供时间轴引擎触发渲染（emit 为 private，这里暴露一个安全的通知入口）。 */
@@ -1610,12 +1616,14 @@ export class Runtime {
           break;
         }
         case "playNote": {
+          this.sounded = true;
           const freq = NOTE_FREQ[action.note] ?? 440;
           const dur = action.beats * BEAT_MS;
           this.playAndWait(freq, dur).then(() => resolve());
           break;
         }
         case "playRandomNote": {
+          this.sounded = true;
           const scaleNotes = ["do", "re", "mi", "fa", "sol", "la", "ti"];
           const note = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
           const freq = NOTE_FREQ[note] ?? 440;
@@ -1623,22 +1631,26 @@ export class Runtime {
           break;
         }
         case "playDrum": {
+          this.sounded = true;
           playDrumAt(getAudioContext(), action.kind);
           this.emit();
           setTimeout(() => resolve(), 200);
           break;
         }
         case "playToneByMouseX": {
+          this.sounded = true;
           const freq = pitchFromX(this.mouse.x, this.width);
           this.playAndWait(freq, BEAT_MS).then(() => resolve());
           break;
         }
         case "playToneByActorX": {
+          this.sounded = true;
           const freq = pitchFromX(actor.x, this.width);
           this.playAndWait(freq, BEAT_MS).then(() => resolve());
           break;
         }
         case "playChord": {
+          this.sounded = true;
           const ctx = getAudioContext();
           const chosen = action.notes.filter((n) => NOTE_FREQ[n] != null);
           const dur = BEAT_MS * 2;

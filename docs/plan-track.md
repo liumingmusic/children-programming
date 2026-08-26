@@ -199,25 +199,25 @@
 - ✅ [需: 键盘] 太空射击入门 `space_shooter`
 - ✅ [需: 键盘+变量] 反应力小游戏 `reaction_game`
 
-### 分类 E · 音乐创作（音乐）　🔧
-- ⬜ [需: 音效] 弹 do-re-mi
-- ⬜ [需: 音效] 小星星
-- ⬜ [需: 音效] 循环旋律
-- ⬜ [需: 音效] 随机音符
-- ⬜ [需: 音效] 音高随位置变
-- ⬜ [需: 音效] 简单和弦
-- ⬜ [需: 音效] 生日快乐
-- ⬜ [需: 音效] 自己谱曲
+### 分类 E · 音乐创作（音乐）　✅（8/8 完成）
+- ✅ [需: 音效] 弹 do-re-mi `music_doremi`
+- ✅ [需: 音效] 小星星 `music_twinkle`
+- ✅ [需: 音效] 循环旋律 `music_loop`
+- ✅ [需: 音效] 随机音符 `music_random`
+- ✅ [需: 音效] 音高随位置变 `music_pitch_pos`
+- ✅ [需: 音效] 简单和弦 `music_chord`
+- ✅ [需: 音效] 生日快乐 `music_birthday`
+- ✅ [需: 音效] 自己谱曲 `music_compose`
 
-### 分类 F · 数学与逻辑进阶（数学）
-- ⬜ [需: 变量] 乘法表生成
-- ⬜ [需: 变量] 因数与质数初识
-- ⬜ [需: 变量] 图形面积计算
-- ⬜ [需: 变量] 斐波那契数列
-- ⬜ [需: 变量] 质数筛
-- ⬜ [需: 变量] 角度与正多边形
-- ⬜ [需: 变量] 坐标绘图
-- ⬜ [需: 列表] 数独填空
+### 分类 F · 数学与逻辑进阶（数学）　✅（7/8 完成，数独填空待「列表」基石）
+- ✅ [需: 变量] 乘法表生成 `math_mul_table`
+- ✅ [需: 变量] 因数与质数初识 `math_factor_prime`
+- ✅ [需: 变量] 图形面积计算 `math_area`
+- ✅ [需: 变量] 斐波那契数列 `math_fib`
+- ✅ [需: 变量] 质数筛查 `math_prime_sieve`
+- ✅ [需: 变量] 角度与正多边形 `math_polygon`
+- ✅ [需: 变量] 坐标绘图 `math_coords`
+- 🔧 [需: 列表] 数独填空 `math_sudoku`（列表原语待补，见 G 分类前的「列表基石」任务）
 
 ### 分类 G · 列表与数据（列表）
 - ⬜ [需: 列表] 购物清单
@@ -239,13 +239,13 @@
 - ⬜ [需: 变量] 猜数字
 - ⬜ [需: 键盘+多角色] 俄罗斯方块简化
 
-### 分类 I · 交互绘本与故事（故事）
-- ⬜ [需: 多角色+变量] 分支选择故事
-- ⬜ [需: 多角色] 可点击绘本
-- ⬜ [需: 多角色] 我的冒险书
-- ⬜ [需: 多角色] 角色成长记
-- ⬜ [需: 多角色] 科普互动绘本
-- ⬜ [需: 多角色] 节日互动卡
+### 分类 I · 交互绘本与故事（故事）　✅（6/6 完成）
+- ✅ [需: 多角色+变量] 分支选择故事 `story_branch`
+- ✅ [需: 多角色] 可点击绘本 `story_clickable`
+- ✅ [需: 多角色] 我的冒险书 `story_adventure`
+- ✅ [需: 多角色] 角色成长记 `story_growth`
+- ✅ [需: 多角色] 科普互动绘本 `story_science`
+- ✅ [需: 多角色] 节日互动卡 `story_card`
 
 ### 分类 J · 科学探究（科学）
 - ⬜ [需: 多角色] 昼夜模拟
@@ -256,7 +256,7 @@
 - ⬜ [需: 多角色] 声音传播
 - ⬜ [需: 粒子] 光的折射
 
-> **9-12 阶段小计**：10 分类，约 73 项目，已完成 **32**（分类 A·函数 8/8 + 分类 B·变量 8/8 + 分类 C·多角色 8/8 + 分类 D·键盘 8/8；自定义积木 / 变量 / 多角色碰撞·距离·消息广播 / 键盘(含 apples 下落物) / 音效 运行时已落地，列表 / 坐标 待补）。
+> **9-12 阶段小计**：10 分类，约 73 项目，已完成 **53**（分类 A·函数 8/8 + 分类 B·变量 8/8 + 分类 C·多角色 8/8 + 分类 D·键盘 8/8 + 分类 E·音乐 8/8 + 分类 F·数学 7/8 + 分类 I·故事 6/6；自定义积木 / 变量 / 多角色碰撞·距离·消息广播 / 键盘(含 apples 下落物) / 音效 / 舞台点击事件 / 真实结果(goal·sounded) 运行时已落地，列表 / 坐标 待补——坐标 goto 已可用但「列表」原语仍缺，阻塞 G 全类 + F·数独）。
 
 ---
 
@@ -411,3 +411,22 @@
 - **分类 D·键盘修复**：键盘游戏完成判定在「当开始运行」跑完时触发，而按键处理器在其后才执行（时序上项目永远无法靠「真的按过」完成），故校验**注册按键处理器数量 `keyHandlers > 0`**（`KEY_SLUGS` + `D_GAME` 共 8 项全部覆盖）。`StageState` 新增必填 `keyHandlers` 字段，`getState` 合并 `this.scripts.whenKeyPressed.length`。
 - **测试**：新增 `tests/multi-key-goal.test.ts`（34 例）——8 个 MULTI「看示范」断言 `companionEngaged` 为真且判定通过，8 个 KEY「看示范」断言 `keyHandlers>0` 且判定通过；两类各 8 个「空程序」断言判定不通过；另含 2 个 synthetic 守卫。配套更新 `LearnPageClient` / `StudioClient` 的 `StageState` 字面量（补 `keyHandlers`、`acted`）。
 - **验证**：`NODE_OPTIONS=""` 全量测试相关套件 74 项全绿（`multi-key-goal`/`var-goal`/`fn-goal`/`stage9-multiactor`/`stage9-fn-var`/`all-projects-smoke`）；类型检查零错误。
+
+### 2026-08-17 · 新增 9-12 分类 I·交互绘本（零新运行时）+ 收紧点击类完成判定（P0 收尾延续）
+- **交付内容**：分类 I·交互绘本 6 项目全部上线（`story_branch`/`story_clickable`/`story_adventure`/`story_growth`/`story_science`/`story_card`），复用已落地的多角色 + 变量运行时，全部以「舞台点击事件」驱动（交互绘本本质）。
+- **完成判定收紧（同类 P0 隐患）**：交互绘本的点击事件与键盘同理——完成判定在「当开始运行」跑完时触发，点击在其后才派发；且 `runScript` 每次运行会重置 `companionEngaged`，导致点击脚本会覆盖多角色 engage 信号。故新增 `StageState.clickHandlers`（注册舞台点击处理器数，与 `keyHandlers` 同源），`isGoalAchieved` 的 `STORY9_SLUGS` 分支返回 `state.clickHandlers > 0`——空程序 / 未配点击事件判定不通过，杜绝「随便搭积木也能通过」。
+- **设计取舍**：绘本统一做成「点击驱动」，完成信号取注册数而非「真的点过」（时序安全，与键盘类一致）；`computeSteps` 三步引导（当开始运行 → 舞台被点击 → 讲出/表现出故事内容），`coach` 补交互绘本辅导文案。
+- **测试**：新增 `tests/story-goal.test.ts`（13 例）——6 个「看示范」断言 `clickHandlers>0` 且判定通过，6 个「空程序」断言不通过，1 个 synthetic 守卫。`tsc` 零错误；`courses` 一致性 10 绿；`all-projects-smoke` 全量代码生成通过；`build` 173 页零错误。
+- **验证**：提交 `db4429d2` → gh-pages 经 worktree 推送 `308b7f6b`；线上 6 个 `/learn/story_*` 均返回 200。9-12 阶段累计完成 38 项（A/B/C/D/I）。
+
+### 2026-08-18 · 新增 9-12 分类 E·音乐（8/8）+ F·数学（7/8）+ 收紧两类完成判定（P0 收尾延续）
+- **交付内容**：
+  - 分类 E·音乐创作 8 项目全部上线（`music_doremi`/`music_twinkle`/`music_loop`/`music_random`/`music_pitch_pos`/`music_chord`/`music_birthday`/`music_compose`），复用已落地的音效运行时；以「代码初探」差异化 6-8 音乐（避免重复）。
+  - 分类 F·数学进阶 7 项目上线（`math_mul_table`/`math_factor_prime`/`math_area`/`math_fib`/`math_prime_sieve`/`math_polygon`/`math_coords`），复用已落地的变量 + 坐标(goto) + 画笔运行时；**数独填空 `[需:列表]` 留待「列表」基石落地后补**（本轮策略：零新运行时优先）。
+- **完成判定收紧（同类 P0 隐患闭环）**：
+  - 音乐类：runtime 在 `performAction` 的 6 个发声动作（playNote/playRandomNote/playDrum/playToneByMouseX/playToneByActorX/playChord）同步置位 `sounded`；`StageState` 新增 `sounded` 字段、`getState` 合并；`isGoalAchieved` 的 `MUSIC9_SLUGS` 分支返回 `sounded===true` → **空程序（不发声）必然不通过**。
+  - 数学类：复用 VAR 的 `goal` 真实结果断言分支（扩展守卫为 `VAR_SLUGS || MATH9_SLUGS`，**未波及 6-8 数学**：6-8 用独立的 `MATH_SLUGS` 常量、无 `goal` 不受影响）；每个项目声明 `goal.saidIncludes`（如 斐波那契 55 / 质数 29 / 乘法表 81 / 面积 24 / 六边形内角 120）或 `drew`（面积/多边形/坐标绘图）→ **空程序无输出必然不通过**。
+  - `computeSteps` 为两类补三步引导（音乐：当开始运行→用到音频积木→真的播放；数学：变量→循环/画笔→跑完），`coach` 补辅导文案。
+  - 命名约定：9-12 常量统一加 `9` 后缀（`MUSIC9_SLUGS`/`MATH9_SLUGS`/`STORY9_SLUGS`），避免与 6-8 同名 `MUSIC_SLUGS`/`MATH_SLUGS` 冲突（曾因此触发 TS 重复声明，已修复）。
+- **测试**：新增 `tests/music-math-goal.test.ts`（32 例）——音乐 8「看示范」断言 `sounded` 为真且判定通过 + 8「空程序」不通过 + 1 synthetic；数学 7「看示范」断言 `goal` 通过 + 7「空程序」不通过 + 1 synthetic。`tsc` 零错误；`courses` 一致性 10 绿；`all-projects-smoke` 全量代码生成通过；`build` 新增 15 个 `/learn` 路径零错误。
+- **验证**：（待提交后推送）9-12 阶段累计完成 53 项（A/B/C/D/E/I 全 8/8 + F 7/8）。

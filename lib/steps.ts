@@ -112,6 +112,21 @@ const STORY9_SLUGS = [
   "story_branch", "story_clickable", "story_adventure", "story_growth", "story_science", "story_card",
 ];
 
+/** 分类 E · 音乐创作（9-12 阶段，全 8 项）。判定基于真实运行时信号：程序运行过程中「真的播放过声音」（sounded）。
+ * 与多角色 companionEngaged / 键盘 keyHandlers 同源——发声动作在 performAction 时同步置位 sounded，
+ * 完成判定在「程序执行完毕」时据此把关，空程序（不发声）必然不通过，杜绝「随便搭积木也能通过」。 */
+const MUSIC9_SLUGS = [
+  "music_doremi", "music_twinkle", "music_loop", "music_random",
+  "music_pitch_pos", "music_chord", "music_birthday", "music_compose",
+];
+
+/** 分类 F · 数学与逻辑进阶（9-12 阶段，7/8 项；数独填空需「列表」原语，留待列表基石落地后补）。
+ * 判定复用 VAR 的「goal 真实结果断言」分支（声明 saidIncludes / drew，空程序无输出必然不通过）。 */
+const MATH9_SLUGS = [
+  "math_mul_table", "math_factor_prime", "math_area", "math_fib",
+  "math_prime_sieve", "math_polygon", "math_coords",
+];
+
 /** 统计生成代码里某个运行时调用出现的次数（基于真实 JS 标记，而非积木类型名）。 */
 function countMark(code: string, mark: string): number {
   return code.split(mark).length - 1;
@@ -569,6 +584,24 @@ export function computeSteps(
       if (id === 1) done = startFired;
       else if (id === 2) done = clickFired;
       else if (id === 3) done = contentMark && finished;
+    } else if (MUSIC9_SLUGS.includes(project.slug)) {
+      // 分类 E · 音乐创作（9-12）：基于真实 JS 标记 / 运行日志判定「当开始运行 + 用到了音频积木 + 真的播放出来」。
+      const finished = logs.includes("[系统] 程序执行完毕");
+      const startFired = logs.some((l) => l.includes("开始执行程序"));
+      const audio = hasAnyAudio(code);
+      if (id === 1) done = startFired;
+      else if (id === 2) done = audio;
+      else if (id === 3) done = finished && audio;
+    } else if (MATH9_SLUGS.includes(project.slug)) {
+      // 分类 F · 数学与逻辑进阶（9-12）：基于真实 JS 标记判定「用了变量 / 循环 / 画笔」引导三步；
+      // 真实结果由 isGoalAchieved 的 goal 断言把关（saidIncludes / drew），空程序无输出必然不通过。
+      const finished = logs.includes("[系统] 程序执行完毕");
+      const hasVar = code.includes("__runtime.setVar") || code.includes("__runtime.changeVar") || code.includes("__runtime.getVar");
+      const hasLoop = code.includes("for (");
+      const hasPen = code.includes("__runtime.penDown");
+      if (id === 1) done = hasVar || hasPen;
+      else if (id === 2) done = hasLoop || hasPen;
+      else if (id === 3) done = finished;
     } else if (PBL_SLUGS.includes(project.slug)) {
       // 分类 11 · 综合创意 / 毕业项目：每个项目组合多种本领，判定基于真实 JS 标记。
       const finished = logs.includes("[系统] 程序执行完毕");
@@ -766,6 +799,8 @@ export function isGoalAchieved(
     keyHandlers?: number;
     /** 已注册舞台点击处理器数量（交互绘本类完成判定用）。 */
     clickHandlers?: number;
+    /** 程序运行过程中是否真的播放过声音（音乐创作类完成判定用，空程序为 false）。 */
+    sounded?: boolean;
   },
   _logs?: string[]
 ): boolean {
@@ -837,9 +872,10 @@ export function isGoalAchieved(
     return totalSegments(paths) >= 4;
   }
 
-  // 变量类（var）：必须真正产出「目标结果」，不能「用了变量就算完成」。
-  // 这是与 FN 同一 P0 缺陷的收尾——逐项目用 goal 声明期望值，对运行时终态做断言。
-  if (VAR_SLUGS.includes(project.slug)) {
+  // 变量类（var）与 数学类（math）：必须真正产出「目标结果」，不能「用了变量就算完成」。
+  // 这是与 FN 同一 P0 缺陷的收尾——逐项目用 goal 声明期望值（saidIncludes / drew / vars），对运行时终态做断言。
+  // 数学类复用同一分支：每个项目都声明 goal，空程序（不产出任何输出）必然不通过。
+  if (VAR_SLUGS.includes(project.slug) || MATH9_SLUGS.includes(project.slug)) {
     if (!project.goal) return false; // 未声明目标 → 不允许通过（杜绝随便搭）
     const goal = project.goal;
     const finalVars = state.vars ?? {};
@@ -880,6 +916,13 @@ export function isGoalAchieved(
   // 故校验注册数而非「真的点过」（时序安全，杜绝空程序通过）。
   if (STORY9_SLUGS.includes(project.slug)) {
     return (state.clickHandlers ?? 0) > 0;
+  }
+
+  // 分类 E · 音乐创作：必须真的播放过声音（sounded 在 performAction 发声时同步置位）。
+  // 发声动作在「当开始运行」执行过程中触发，完成判定在「程序执行完毕」时据 sounded 把关，
+  // 空程序（不发声）必然 sounded===false → 不通过（杜绝「随便搭积木也能通过」）。
+  if (MUSIC9_SLUGS.includes(project.slug)) {
+    return state.sounded === true;
   }
 
   // 其余（绘图/事件/条件/无标记序列）：以步骤判定为准
@@ -1279,6 +1322,16 @@ export function coach(slug: string, stepId: number): string {
     if (stepId === 1) return "拖一个绿色「当开始运行」事件，作为绘本翻开的第一页。";
     if (stepId === 2) return "再拖一个蓝色「当舞台被点击」事件——这是绘本能「翻页 / 互动」的关键，点舞台才会触发下一页。";
     if (stepId === 3) return "在「当舞台被点击」里放「说」「切换场景」或「控制角色 三七」，点「运行」后再点舞台，看故事是不是真的讲出来了。";
+  }
+  if (MUSIC9_SLUGS.includes(slug)) {
+    if (stepId === 1) return "拖一个绿色「当开始运行」事件，让演奏开始。";
+    if (stepId === 2) return "从紫色「声音」分类里拖「弹奏音符 / 弹和弦 / 敲响鼓 / 随机弹一个音」等积木接上去——要用到声音积木才算在创作音乐哦。";
+    if (stepId === 3) return "点「运行」，听程序是不是真的奏出了声音。空程序可不会响，要先搭好音符再运行！";
+  }
+  if (MATH9_SLUGS.includes(slug)) {
+    if (stepId === 1) return "拖一个绿色「当开始运行」，再用「设置变量」记下要算的数。";
+    if (stepId === 2) return "用「重复执行」或「画笔」把计算过程跑起来——循环能替你一遍遍算，画笔能把图形画出来。";
+    if (stepId === 3) return "点「运行」，看程序是不是真的算出了结果并说出来 / 画出来了。空程序可不会出答案哦！";
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
 }

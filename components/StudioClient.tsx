@@ -53,6 +53,7 @@ const INITIAL_STATE: StageState = {
   movedDistance: 0,
   keyHandlers: 0,
   clickHandlers: 0,
+  sounded: false,
 };
 
 /** 灵感小贴士：开放式创作的触发点（不做步骤判定，仅给方向）。 */
