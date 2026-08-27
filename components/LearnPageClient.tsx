@@ -66,6 +66,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "loading">("idle");
   const [progress, setProgress] = useState({ completed: false, stars: 0 });
   const progressRef = useRef({ completed: false, stars: 0 });
+  // 最近一次运行的生成代码：完成闸门（时间轴项目需用它做 computeSteps 判定）读取
+  const codeRef = useRef("");
 
   const [showBrief, setShowBrief] = useState(false);
   const [toasts, setToasts] = useState<StepToast[]>([]);
@@ -145,9 +147,13 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       setStageState(state);
       setLogs(state.log);
       if (state.log.includes("[系统] 程序执行完毕") && !progressRef.current.completed) {
-        // 关键修复：不能「程序一跑完就判完成」——必须真正达成目标（走到旗子/集齐星星）才算数，
-        // 否则孩子瞎搭积木也能拿到「任务完成」，纯属误人子弟。
-        if (isGoalAchieved(project, state, state.log)) {
+        // 完成把关：时间轴项目（科学）走 computeSteps，验证是否真搭出预期轨道，
+        // 杜绝「只 reset 无 addTrack」的空程序误判通过；非时间轴项目走 isGoalAchieved，
+        // 验证是否真正达成目标（走到旗子/集齐星星），同样防瞎搭积木。
+        const achieved = project.timeline
+          ? computeSteps(project, codeRef.current ?? "", state.log).every((s) => s.done)
+          : isGoalAchieved(project, state, state.log);
+        if (achieved) {
           progressRef.current = { completed: true, stars: 3 };
           setProgress(progressRef.current);
           markProgress(project.slug, true, 3).catch(console.error);
@@ -220,6 +226,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
 
     const code = editor.getCode();
     setGeneratedCode(code);
+    codeRef.current = code;
 
     if (!code.trim()) {
       setHint(

@@ -39,6 +39,7 @@ export function genCode(xml: string): string {
   Blockly.Xml.domToWorkspace(dom, ws);
   const code = javascriptGenerator.workspaceToCode(ws).toString();
   ws.dispose();
+  div.remove(); // 防止批量运行时 body 累积大量 SVG 节点导致 jsdom 内存膨胀、极端变慢
   return code;
 }
 
@@ -115,6 +116,7 @@ export function genScripts(xml: string): {
   }
   javascriptGenerator.finish();
   ws.dispose();
+  div.remove(); // 防止批量运行时 body 累积大量 SVG 节点导致 jsdom 内存膨胀、极端变慢
   return { whenStart, whenStageClicked, whenKeyPressed, whenReceived };
 }
 

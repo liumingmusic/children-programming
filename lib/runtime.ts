@@ -447,6 +447,8 @@ export class TimelineEngine {
   playing = false;
   /** 累计每帧增量（用于粒子发射限速），仅记录已用时间。 */
   private firedAt = new Set<number>();
+  /** 播放到结尾时的回调（用于触发「程序执行完毕」，让完成闸门能被触发）。 */
+  onComplete?: () => void;
 
   constructor(rt: Runtime) {
     this.rt = rt;
@@ -546,6 +548,7 @@ export class TimelineEngine {
       this.playing = false;
       this.stopRaf();
       this.emit();
+      this.onComplete?.();
       return;
     }
     this.raf = requestAnimationFrame(this.loop);
@@ -1388,6 +1391,10 @@ export class Runtime {
       delete (window as unknown as Record<string, unknown>).__runtimeArg;
     }
     // 轨道已加好：确保处于 t=0 初始帧，然后开始播放
+    this.timeline.onComplete = () => {
+      this.log("[系统] 程序执行完毕");
+      this.emit();
+    };
     this.timeline.seek(0);
     this.timeline.play();
     this.state.running = false;
