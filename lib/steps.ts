@@ -19,6 +19,15 @@ const DRAW_LOOP_SLUGS = [
   "js_square",
 ];
 
+/** 13-16 分类 K · 文本代码过渡（js 分类，Phase 1 铺满的 7 项）。
+ * 与 js_square（纯绘图，已并入 DRAW_LOOP_SLUGS）不同：这 7 项分别瞄准一个 JS 语言概念
+ * （输出 / 变量 / 函数 / 数组 / 计算工具 / 画布换色 / 积木→代码综合），
+ * 判定同样基于**真实 JS 标记**（如 `function ` 定义、`const x = [` 数组字面量、`__runtime.say(`）
+ * 与运行日志（[二零] 说话输出 / [系统] 程序执行完毕），空程序必然不通过。 */
+const JS_CODE_SLUGS = [
+  "js_hello", "js_variable", "js_function", "js_array", "js_tool", "js_canvas", "js_compare",
+];
+
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
@@ -247,6 +256,83 @@ export function computeSteps(
           code.includes("__runtime.turn");
       // 第 3 步：程序跑完
       else if (id === 3) done = logs.includes("[系统] 程序执行完毕");
+    } else if (JS_CODE_SLUGS.includes(project.slug)) {
+      // 13-16 代码模式：判定基于「学生手写 JS 的真实标记」+ 运行日志（杜绝空程序 / 只写注释通过）。
+      const hasSay = code.includes("__runtime.say(");
+      const hasColor =
+        code.includes("__runtime.setPenColor") ||
+        code.includes("__runtime.changePenColor");
+      const hasVar = /\b(let|const|var)\b/.test(code);
+      const hasFunc = /function\s+\w+\s*\(/.test(code);
+      const hasArray = /\b(?:let|const|var)\s+\w+\s*=\s*\[/.test(code);
+      // 去掉 // 行注释再判运算，否则只写一句注释里的「/」也会被误判为「有计算」
+      const codeNoComment = code.replace(/\/\/.*$/gm, "");
+      const hasArith = /[\*/]/.test(codeNoComment) || /Math\./.test(codeNoComment);
+      // 变量是否真的「用」在了画图指令里（move/turn 的参数是变量名而非写死的数字）。
+      // 仅凭 /\blet\b/ 判断会被 for 循环的计数器 let i 蒙混过关，故额外校验这一条。
+      const usesVarInDraw =
+        /__runtime\.move\(\s*[A-Za-z_$]/.test(code) ||
+        /__runtime\.turn\(\s*[A-Za-z_$]/.test(code);
+      const saidOutput = logs.some((l) => l.startsWith("[二零]"));
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (project.slug === "js_hello") {
+        // 输出类：写了 say → 真的说出话（[二零] 日志）→ 跑完
+        if (id === 1) done = hasSay;
+        else if (id === 2) done = saidOutput;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "js_variable") {
+        if (id === 1) done = hasVar;
+        else if (id === 2)
+          done =
+            code.includes("__runtime.penDown()") &&
+            hasLoop &&
+            code.includes("__runtime.move") &&
+            code.includes("__runtime.turn") &&
+            usesVarInDraw;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "js_function") {
+        // 函数类：真的定义了函数（function 名(...)）并真的画出了图形
+        if (id === 1) done = hasFunc;
+        else if (id === 2)
+          done =
+            code.includes("__runtime.penDown()") &&
+            code.includes("__runtime.move") &&
+            code.includes("__runtime.turn");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "js_array") {
+        if (id === 1) done = hasArray;
+        else if (id === 2)
+          done =
+            code.includes("__runtime.penDown()") &&
+            hasLoop &&
+            code.includes("__runtime.move") &&
+            code.includes("__runtime.turn");
+        else if (id === 3) done = finished;
+      } else if (project.slug === "js_tool") {
+        // 计算工具类：真的算了（* / / / Math.）并把结果说出来
+        if (id === 1) done = hasArith;
+        else if (id === 2) done = hasSay;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "js_canvas") {
+        if (id === 1) done = code.includes("__runtime.penDown()");
+        else if (id === 2)
+          done =
+            hasLoop &&
+            code.includes("__runtime.move") &&
+            code.includes("__runtime.turn") &&
+            hasColor;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "js_compare") {
+        // 综合复习：落笔画 → 换色 → 说话 → 跑完
+        if (id === 1)
+          done =
+            code.includes("__runtime.penDown()") &&
+            code.includes("__runtime.move") &&
+            code.includes("__runtime.turn");
+        else if (id === 2) done = hasColor;
+        else if (id === 3) done = hasSay;
+        else if (id === 4) done = finished;
+      }
     } else if (project.slug === "stars") {
       if (id === 1) done = code.includes("__runtime.gotoMouse()");
       else if (id === 2) done = code.includes("__runtime.touchingStar()");
