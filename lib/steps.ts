@@ -28,6 +28,17 @@ const JS_CODE_SLUGS = [
   "js_hello", "js_variable", "js_function", "js_array", "js_tool", "js_canvas", "js_compare",
 ];
 
+/**
+ * 13-16 分类 M · 物理与模拟（phys 分类，Phase 2 试点）。
+ * 与 js 分类不同：这里不再依赖画笔轨迹，而是「变量累积 + 循环 + 每帧擦掉重画」的模拟循环。
+ * 判定同样基于**真实 JS 标记**：
+ *   - `y = y + ...` / `v = v - ...` 形态 → 变量被循环反复改写（模拟的核心）
+ *   - `__runtime.clearCanvas()` + `drawXxx(` + `__runtime.wait(` → 真的在逐帧擦掉重画
+ *   - `if (` + `v = -v` → 真的做了碰撞反弹
+ * 空程序 / 只写注释必然不通过（第 3 步还额外要求「程序执行完毕」日志）。
+ */
+const PHYS_CODE_SLUGS = ["phys_fall", "phys_bounce"];
+
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
@@ -332,6 +343,35 @@ export function computeSteps(
         else if (id === 2) done = hasColor;
         else if (id === 3) done = hasSay;
         else if (id === 4) done = finished;
+      }
+    } else if (PHYS_CODE_SLUGS.includes(project.slug)) {
+      // 13-16 物理模拟类：判定「变量被循环改写」+「逐帧擦掉重画」+「碰撞反弹」，
+      // 全部基于真实 JS 标记；去掉行注释，避免注释里的示例被误判。
+      const codeNoComment = code.replace(/\/\/.*$/gm, "");
+      const hasVar = /\b(let|const|var)\b/.test(codeNoComment);
+      const hasClear = code.includes("__runtime.clearCanvas()");
+      const hasWait = code.includes("__runtime.wait(");
+      const hasDraw =
+        code.includes("__runtime.drawCircle(") ||
+        code.includes("__runtime.drawRect(") ||
+        code.includes("__runtime.drawLine(") ||
+        code.includes("__runtime.drawText(");
+      // 变量被「自己加上/减去一个增量」地反复改写 —— 模拟循环的核心形态
+      const updatesPosition = /\by\s*=\s*y\s*[-+]/.test(codeNoComment);
+      const updatesVelocity = /\bv\s*=\s*v\s*[-+]/.test(codeNoComment);
+      const hasIf = /\bif\s*\(/.test(codeNoComment);
+      const reversesVelocity = /\bv\s*=\s*-\s*v\b/.test(codeNoComment);
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (project.slug === "phys_fall") {
+        // 变量记状态 → 循环里改写速度/位置并逐帧重画 → 跑完
+        if (id === 1) done = hasVar && (updatesPosition || updatesVelocity);
+        else if (id === 2)
+          done = hasLoop && updatesPosition && updatesVelocity && hasClear && hasDraw && hasWait;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "phys_bounce") {
+        if (id === 1) done = hasLoop && updatesPosition && updatesVelocity;
+        else if (id === 2) done = hasIf && reversesVelocity;
+        else if (id === 3) done = hasClear && hasDraw && finished;
       }
     } else if (project.slug === "stars") {
       if (id === 1) done = code.includes("__runtime.gotoMouse()");

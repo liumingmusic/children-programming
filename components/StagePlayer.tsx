@@ -411,6 +411,49 @@ export default function StagePlayer({ state, scene, onStageClick, onTimeline }: 
     state.penPaths.forEach((path) => drawPath(path));
     if (state.currentPath) drawPath(state.currentPath);
 
+    // ---- 画布图元（13-16 分类 M/N/O/P）：学生用代码画的矩形 / 圆 / 线段 / 文字 ----
+    // 与画笔轨迹共用世界坐标与相机变换；矩形因 y 轴向上，取两角后按 min/abs 归一。
+    if (state.shapes) {
+      for (const s of state.shapes) {
+        ctx.save();
+        if (s.kind === "rect") {
+          const a = toScreen(s.x, s.y);
+          const b = toScreen(s.x + (s.w ?? 0), s.y + (s.h ?? 0));
+          ctx.fillStyle = s.color ?? "#F59E0B";
+          ctx.fillRect(
+            Math.min(a.x, b.x),
+            Math.min(a.y, b.y),
+            Math.abs(b.x - a.x),
+            Math.abs(b.y - a.y)
+          );
+        } else if (s.kind === "circle") {
+          const p = toScreen(s.x, s.y);
+          ctx.fillStyle = s.color ?? "#F59E0B";
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, Math.max(1, (s.r ?? 6) * scale), 0, Math.PI * 2);
+          ctx.fill();
+        } else if (s.kind === "line") {
+          const a = toScreen(s.x, s.y);
+          const b = toScreen(s.x2 ?? s.x, s.y2 ?? s.y);
+          ctx.strokeStyle = s.color ?? "#F59E0B";
+          ctx.lineWidth = s.width ?? 3;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        } else if (s.kind === "text") {
+          const p = toScreen(s.x, s.y);
+          ctx.fillStyle = s.color ?? "#FFFFFF";
+          ctx.font = `${Math.max(8, (s.size ?? 16) * scale)}px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif`;
+          ctx.textAlign = "left";
+          ctx.textBaseline = "alphabetic";
+          ctx.fillText(s.text ?? "", p.x, p.y);
+        }
+        ctx.restore();
+      }
+    }
+
     // 场景装饰：目标点 emoji / 障碍 / 迷宫墙（纯展示，位于画笔轨迹之上、角色之下）
     if (scene?.walls) {
       scene.walls.forEach((w) => {

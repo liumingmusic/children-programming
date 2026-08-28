@@ -9,6 +9,31 @@ export interface PenPath {
   width: number;
 }
 
+/**
+ * 画布图元（13-16 分类 M/N/O/P · 画布与 DOM 渲染基建）。
+ * 与「画笔轨迹」不同：这是学生用代码直接声明的矩形 / 圆形 / 线段 / 文字，
+ * 坐标是**世界坐标**（y 轴向上，与角色、画笔同一套坐标系），由 StagePlayer 统一变换后绘制。
+ *
+ * 设计要点：绘制以「入队动作」的形式执行（与 move/turn/penDown 同源），执行时写入 state.shapes 再 emit。
+ * 不能直接把 2D context 交给学生代码——StagePlayer 的画布在每次 state 变化时整体重绘，
+ * 直接画上去的内容会被下一次重绘冲掉。
+ */
+export interface CanvasShape {
+  kind: "rect" | "circle" | "line" | "text";
+  /** 世界坐标（矩形取左上角、圆形取圆心、线段取起点、文字取基线左端）。 */
+  x: number;
+  y: number;
+  w?: number; // rect 宽
+  h?: number; // rect 高
+  r?: number; // circle 半径
+  x2?: number; // line 终点
+  y2?: number;
+  text?: string; // text 内容
+  size?: number; // text 字号（世界单位）
+  width?: number; // line 线宽（屏幕像素）
+  color?: string;
+}
+
 export interface Star {
   id: number;
   x: number;
@@ -184,6 +209,8 @@ export interface StageState {
   bgHue: number;
   penPaths: PenPath[];
   currentPath: PenPath | null;
+  /** 学生用代码绘制的画布图元（13-16 分类 M/N/O/P）。每次运行开始时清空。 */
+  shapes: CanvasShape[];
   penColor: number; // hue 0-360
   penSize: number; // 画笔粗细（屏幕像素）
   penDown: boolean;
@@ -340,6 +367,13 @@ type Action = { actorId?: string } & (
   | { type: "penSetColor"; hue: number }
   | { type: "penChangeColor"; delta: number }
   | { type: "penSetSize"; size: number }
+  // --- 画布绘制（13-16 分类 M/N/O/P）---
+  // 与画笔轨迹同源：入队 → 执行时写入 state.shapes → emit 触发 StagePlayer 重绘。
+  | { type: "drawRect"; x: number; y: number; w: number; h: number; color: string }
+  | { type: "drawCircle"; x: number; y: number; r: number; color: string }
+  | { type: "drawLine"; x1: number; y1: number; x2: number; y2: number; color: string; width: number }
+  | { type: "drawText"; x: number; y: number; text: string; color: string; size: number }
+  | { type: "clearCanvas" }
   | { type: "setSize"; size: number }
   | { type: "changeSize"; delta: number }
   | { type: "playNote"; note: string; beats: number }
@@ -811,6 +845,7 @@ export class Runtime {
       actors,
       penPaths: [],
       currentPath: null,
+      shapes: [],
       penColor: 0,
       penSize: DEFAULT_PEN_SIZE,
       penDown: false,
@@ -883,6 +918,7 @@ export class Runtime {
     this.vars = {};
     this.state.penPaths = [];
     this.state.currentPath = null;
+    this.state.shapes = [];
     this.state.penColor = 0;
     this.state.penSize = DEFAULT_PEN_SIZE;
     this.state.penDown = false;
@@ -998,6 +1034,35 @@ export class Runtime {
     const s = Math.max(1, Math.min(50, Math.round(size)));
     this.actions.push({ type: "penSetSize", size: s });
     this.log("[系统] 画笔粗细设置");
+  }
+
+  // --- 画布绘制（13-16 分类 M/N/O/P）---
+  // 坐标为**世界坐标**（y 轴向上，与角色/画笔同一套），由 StagePlayer 统一变换绘制。
+  // 刻意不打日志：物理动画每帧会画多个图元，逐条 log 会把日志面板刷爆（且无判定价值）。
+
+  /** 画矩形（x,y 为左上角，w/h 为宽高）。 */
+  drawRect(x: number, y: number, w: number, h: number, color = "#F59E0B") {
+    this.actions.push({ type: "drawRect", x, y, w, h, color });
+  }
+
+  /** 画圆（x,y 为圆心）。 */
+  drawCircle(x: number, y: number, r: number, color = "#F59E0B") {
+    this.actions.push({ type: "drawCircle", x, y, r, color });
+  }
+
+  /** 画线段（x1,y1 → x2,y2）。 */
+  drawLine(x1: number, y1: number, x2: number, y2: number, color = "#F59E0B", width = 3) {
+    this.actions.push({ type: "drawLine", x1, y1, x2, y2, color, width });
+  }
+
+  /** 画文字（x,y 为基线左端）。 */
+  drawText(x: number, y: number, text: string, color = "#FFFFFF", size = 16) {
+    this.actions.push({ type: "drawText", x, y, text: String(text), color, size });
+  }
+
+  /** 清空画布上所有图元（动画里配合「每帧重画」使用）。 */
+  clearCanvas() {
+    this.actions.push({ type: "clearCanvas" });
   }
 
   // --- Size (actor scale) ---
@@ -1415,6 +1480,7 @@ export class Runtime {
     this.actions = [];
     this.state.penPaths = [];
     this.state.currentPath = null;
+    this.state.shapes = [];
     this.state.penDown = false;
     for (const a of this.state.actors) a.size = 1;
     this.state.stars = this.initialStars.map((s) => ({ ...s }));
@@ -1446,6 +1512,7 @@ export class Runtime {
     this.state.log = [];
     this.state.penPaths = [];
     this.state.currentPath = null;
+    this.state.shapes = [];
     this.state.penDown = false;
     this.companionEngaged = false; // 每次运行重置 engage 标记
     this.state.running = true;
@@ -1777,6 +1844,46 @@ export class Runtime {
           this.commitCurrentPath();
           this.state.penSize = action.size;
           this.startCurrentPath();
+          this.emit();
+          resolve();
+          break;
+        }
+        // --- 画布绘制（13-16 分类 M/N/O/P）：写入 state.shapes，由 StagePlayer 统一渲染 ---
+        case "drawRect": {
+          this.state.shapes.push({
+            kind: "rect", x: action.x, y: action.y, w: action.w, h: action.h, color: action.color,
+          });
+          this.emit();
+          resolve();
+          break;
+        }
+        case "drawCircle": {
+          this.state.shapes.push({
+            kind: "circle", x: action.x, y: action.y, r: action.r, color: action.color,
+          });
+          this.emit();
+          resolve();
+          break;
+        }
+        case "drawLine": {
+          this.state.shapes.push({
+            kind: "line", x: action.x1, y: action.y1, x2: action.x2, y2: action.y2,
+            color: action.color, width: action.width,
+          });
+          this.emit();
+          resolve();
+          break;
+        }
+        case "drawText": {
+          this.state.shapes.push({
+            kind: "text", x: action.x, y: action.y, text: action.text, color: action.color, size: action.size,
+          });
+          this.emit();
+          resolve();
+          break;
+        }
+        case "clearCanvas": {
+          this.state.shapes = [];
           this.emit();
           resolve();
           break;

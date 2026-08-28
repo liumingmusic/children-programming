@@ -46,6 +46,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     actors: [{ id: "erling", species: "erling", name: "二零", x: 0, y: 0, angle: 270, message: null, messageUntil: 0, size: 1, expression: "normal", visible: true, acted: false }],
     penPaths: [],
     currentPath: null,
+    shapes: [],
     penColor: 0,
     penSize: 3,
     penDown: false,

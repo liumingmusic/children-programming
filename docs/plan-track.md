@@ -13,7 +13,7 @@
 
 ## 一、6-8 岁阶段（图形化启蒙 · Blockly 海龟/二零）
 
-> 现状：已建成 **190 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **8 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 启动（js 分类 **8/8 已铺满**：`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）。
+> 现状：已建成 **192 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **10 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类试点 2 项（`phys_fall` 自由落体 / `phys_bounce` 弹跳球）。
 > 概念梯度沿用 Code.org + ScratchJr + Blockly Games 的「序列→循环→事件→条件」主线。
 
 ### 分类 1 · 基础序列与方向（序列）　✅（11/11 完成）
@@ -302,9 +302,17 @@
 - ⬜ [需: JS模式] 贪心入门
 
 ### 分类 M · 物理与模拟（物理）
-- ⬜ [需: JS模式+画布] 自由落体
+> 实现分类 id = `phys`。**Phase 2 已落地画布渲染基建 + 试点 2/7**：
+> 舞台本就是 canvas，但由 React 在 state 变化时整体重绘，**不能把 2D context 直接交给学生代码**（会被下一次重绘冲掉）。
+> 故沿用现有「动作队列」架构：`Runtime` 新增 `drawRect / drawCircle / drawLine / drawText / clearCanvas` 五个原语，
+> 执行时写入 `StageState.shapes`，由 `StagePlayer` 用同一套 `toScreen`（世界坐标 / y 轴向上）变换统一渲染。
+> 好处：天然支持「每帧 clearCanvas + 重画」的动画、SSR/测试环境无需真实 canvas、完成判定可读图元统计。
+> 五个原语**刻意不打日志**——动画每帧画多个图元，逐条 log 会刷爆日志面板且无判定价值。
+> 判定走 `lib/steps.ts` 的 `PHYS_CODE_SLUGS` 分支（真实 JS 标记：`y = y + ...` / `v = v - ...` 变量自更新、
+> `__runtime.clearCanvas()` + `drawXxx(` + `__runtime.wait(` 逐帧重画、`if (` + `v = -v` 碰撞反弹）。
+- ✅ [JS模式+画布] 自由落体（`phys_fall` · 重力累积 `v = v - g*dt` → `y = y + v*dt`，每帧 clearCanvas + drawCircle 重画）
 - ⬜ [需: JS模式+画布] 抛物线
-- ⬜ [需: JS模式+画布] 弹球碰撞
+- ✅ [JS模式+画布] 弹球碰撞（`phys_bounce` · 撞地检测 + `v = -v * 0.7` 反弹衰减 + 静止阈值防「哆嗦」，drawRect 画地面 / drawText 记次数）
 - ⬜ [需: JS模式+画布] 重力模拟
 - ⬜ [需: JS模式+画布] 弹簧振子
 - ⬜ [需: JS模式+画布] 圆周运动
@@ -360,7 +368,7 @@
 |---|---|---|---|---|
 | 6-8 岁 | 11 | 105 | **105** + 造物工坊（含分类11·综合 4 个总结项目） | 分类7·故事 ✅ / 分类10·科学 ✅ / 分类11·综合 ✅ / 造物工坊 ✅ 全部交付 |
 | 9-12 岁 | 10 | 77 | **77** | 全部轻量运行时已落地（含列表 7 原语 / 时间轴引擎）；9-12 阶段 10 分类全部满编 |
-| 13-16 岁 | 8 | 53 | **8**（分类 K 满编 8/8） | 文本 JS 模式（地基已建，K 已铺满）/ 画布 / DOM / 算法与数据 |
+| 13-16 岁 | 8 | 53 | **10**（K·js 8/8 + M·phys 2/7 试点） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地** / DOM（待 Phase 2 后续）/ 算法与数据（待 Phase 3） |
 
 **如何完善（单会话工作流）**：
 1. 从本表挑一个 ⬜ 项目（或一整个分类）。
@@ -372,7 +380,11 @@
 7. 部署 gh-pages 后验证 `/learn/<slug>` 与 `/certificate/<slug>` 返回 200。
 8. **回写本表**：把对应行 ⬜ 改为 ✅ 并补 slug。
 
-> 约定：所有新增项目默认接入对应阶段的 `projectSlugs`（stage-6-8 已含 105 项；stage-9-12 已含 77 项；stage-13-16 待建）。每次完善后同步更新本表，保证「计划」与「实况」一致。
+> 约定：所有新增项目默认接入对应阶段的 `projectSlugs`（stage-6-8 已含 105 项；stage-9-12 已含 77 项；stage-13-16 已含 10 项）。每次完善后同步更新本表，保证「计划」与「实况」一致。
+>
+> **13-16 内容组织约定**：按分类拆文件夹，与 9-12 阶段同一套约定 ——
+> `content/stage-13-16/<cat>/<slug>.ts` + `content/stage-13-16/<cat>/index.ts` 聚合成 `stage13<Cat>Projects`，
+> 再由 `content/stage-13-16/index.ts` 汇总为 `stage13Projects`。已建 `js/`（8 项）、`phys/`（2 项）。
 
 ---
 

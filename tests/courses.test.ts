@@ -137,10 +137,11 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("stage-13-16 已开放，js 分类 8 个项目（Phase 0 试点 + Phase 1 铺满）可被检索", () => {
+  it("stage-13-16 已开放，js 8 项 + phys 2 项（Phase 0/1 铺满 + Phase 2 试点）可被检索", () => {
     expect(getStageProjects("stage-13-16").map((p) => p.slug)).toEqual([
       "js_square", "js_hello", "js_variable", "js_function",
       "js_array", "js_tool", "js_canvas", "js_compare",
+      "phys_fall", "phys_bounce",
     ]);
   });
 
@@ -253,13 +254,15 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("stage-13-16 已开放，getStageCategories 返回 js 分类及其 8 个项目", () => {
+  it("stage-13-16 已开放，getStageCategories 返回 js / phys 两个分类", () => {
     const cats = getStageCategories("stage-13-16");
-    expect(cats).toHaveLength(1);
+    expect(cats).toHaveLength(2);
     expect(cats[0].id).toBe("js");
     expect(cats[0].projects.map((p) => p.slug)).toEqual([
       "js_square", "js_hello", "js_variable", "js_function",
       "js_array", "js_tool", "js_canvas", "js_compare",
     ]);
+    expect(cats[1].id).toBe("phys");
+    expect(cats[1].projects.map((p) => p.slug)).toEqual(["phys_fall", "phys_bounce"]);
   });
 });
