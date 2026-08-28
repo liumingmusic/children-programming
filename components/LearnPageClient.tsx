@@ -152,7 +152,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
         // 验证是否真正达成目标（走到旗子/集齐星星），同样防瞎搭积木。
         const achieved = project.timeline
           ? computeSteps(project, codeRef.current ?? "", state.log).every((s) => s.done)
-          : isGoalAchieved(project, state, state.log);
+          : isGoalAchieved(project, state, state.log, codeRef.current ?? "");
         if (achieved) {
           progressRef.current = { completed: true, stars: 3 };
           setProgress(progressRef.current);

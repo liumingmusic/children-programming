@@ -910,7 +910,8 @@ export function isGoalAchieved(
     /** 程序运行过程中是否真的播放过声音（音乐创作类完成判定用，空程序为 false）。 */
     sounded?: boolean;
   },
-  _logs?: string[]
+  _logs?: string[],
+  code?: string
 ): boolean {
   const allMarks = project.scene?.marks ?? [];
   const goalMarks = allMarks.filter(
@@ -1081,8 +1082,11 @@ export function isGoalAchieved(
     return true;
   }
 
-  // 其余（绘图/事件/条件/无标记序列）：以步骤判定为准
-  return true;
+  // 其余（绘图/事件/条件/无标记序列/音乐/数学/故事等）：以步骤判定为准——
+  // 复用 computeSteps 的真实 JS 标记校验（用了哪些核心积木 / 触发了哪些事件 / 程序是否跑完），
+  // 杜绝「空程序 / 随便拖几块」也能通过；示范（按步骤设计）天然满足三步，不会误伤。
+  const logs = _logs ?? state.log ?? [];
+  return computeSteps(project, code ?? "", logs).every((s) => s.done);
 }
 
 /** 针对「第一个未完成步骤」给出孩子能看懂的辅导提示。 */
