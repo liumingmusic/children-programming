@@ -10,6 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@uiw/react-codemirror": "^4.25.11",
     "blockly": "^13.1.1",
     "dexie": "^4.4.4",
     "lucide-react": "^1.27.0",

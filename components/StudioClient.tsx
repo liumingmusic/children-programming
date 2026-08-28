@@ -399,7 +399,7 @@ export default function StudioClient() {
             积木支持点击添加或拖拽到工作区。 */}
         <ToolboxAccordion
           categories={toolboxCategories}
-          onPick={(item) => editorRef.current?.addBlock(item.doc.id, item.entry)}
+          onPick={(item) => editorRef.current?.addBlock?.(item.doc.id, item.entry)}
         />
 
         {/* 中间积木编辑区 */}

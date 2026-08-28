@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Play, RotateCcw, Save, CheckCircle, BookOpen, Info, X } from "lucide-react";
-import BlocklyEditor, { BlocklyEditorHandle } from "@/components/BlocklyEditor";
+import BlocklyEditor from "@/components/BlocklyEditor";
 import ToolboxAccordion from "@/components/ToolboxAccordion";
 import StagePlayer from "@/components/StagePlayer";
 import DemoOverlay from "@/components/DemoOverlay";
 import ErLingAvatar from "@/components/ErLingAvatar";
+import CodeEditor from "@/components/CodeEditor";
+import type { ProjectEditorHandle } from "@/components/editorHandle";
 import { Runtime, StageState, type Hazard, type Cloud, type Apple, type Species } from "@/lib/runtime";
 
 /** 伙伴角色元数据：cast id → 物种与名字。新增伙伴角色在此登记。 */
@@ -35,7 +37,7 @@ interface StepToast {
 }
 
 export default function LearnPageClient({ project }: LearnPageClientProps) {
-  const editorRef = useRef<BlocklyEditorHandle>(null);
+  const editorRef = useRef<ProjectEditorHandle>(null);
   const runtimeRef = useRef<Runtime | null>(null);
   const [stageState, setStageState] = useState<StageState>({
     width: STAGE_WIDTH,
@@ -230,9 +232,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
 
     if (!code.trim()) {
       setHint(
-        project.timeline
-          ? "二零还没收到指令呢～先拖一个「当开始运行（时间轴）」积木，把时间轴积木放进去，再点运行吧！"
-          : "二零还没收到指令呢～先拖一个「当开始运行」绿色事件，把积木放进去，再点运行吧！"
+        project.codeMode
+          ? "二零还没收到指令呢～先写几行 JavaScript（比如 __runtime.move(100)），再点运行吧！"
+          : project.timeline
+            ? "二零还没收到指令呢～先拖一个「当开始运行（时间轴）」积木，把时间轴积木放进去，再点运行吧！"
+            : "二零还没收到指令呢～先拖一个「当开始运行」绿色事件，把积木放进去，再点运行吧！"
       );
       setTimeout(() => setHint(null), 4000);
       return;
@@ -353,13 +357,17 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   // 「清空积木」：彻底清掉学生工作区（破坏性，需二次确认），满足「重来」诉求
   const handleClearBlocks = useCallback(() => {
     if (typeof window === "undefined") return;
-    const ok = window.confirm("确定要清空当前所有积木吗？此操作无法撤销。");
+    const ok = window.confirm(
+      project.codeMode
+        ? "确定要清空当前所有代码吗？此操作无法撤销。"
+        : "确定要清空当前所有积木吗？此操作无法撤销。"
+    );
     if (!ok) return;
     editorRef.current?.resetWorkspace();
     setSaveStatus("idle");
     setAutoSaved(false);
-    flashResetToast("积木已清空，从头开始吧");
-  }, [flashResetToast]);
+    flashResetToast(project.codeMode ? "代码已清空，从头开始吧" : "积木已清空，从头开始吧");
+  }, [flashResetToast, project.codeMode]);
 
   // 记忆翻牌等独立组件类项目：由组件自己判定完成，胜利时回调这里
   const handleMemoryWin = useCallback(() => {
@@ -566,22 +574,54 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           </section>
         ) : (
           <>
-            {/* 积木工具箱（手风琴）—— 常驻左侧侧栏、默认展开 事件/运动 两类；
-                积木支持点击添加或拖拽到工作区（HTML5 dragstart/onDrop）。 */}
-            <ToolboxAccordion
-              onPick={(item) => editorRef.current?.addBlock(item.doc.id, item.entry)}
-            />
+            {/* 左侧工具区：积木模式=手风琴工具箱；代码模式=指令速查 */}
+            {project.codeMode ? (
+              <div className="flex w-56 flex-col gap-3">
+                <div className="rounded-xl border border-[#22C55E]/30 bg-[#E1F5EE] p-4">
+                  <h2 className="mb-2 text-sm font-medium text-[#04342C]">指令速查</h2>
+                  <p className="mb-2 text-xs leading-relaxed text-[#444441]">
+                    用 <code className="rounded bg-white/70 px-1">__runtime</code> 指挥二零：
+                  </p>
+                  <ul className="space-y-1 text-xs text-[#5F5E5A]">
+                    <li><code className="rounded bg-white/70 px-1">penDown()</code> 落笔</li>
+                    <li><code className="rounded bg-white/70 px-1">penUp()</code> 抬笔</li>
+                    <li><code className="rounded bg-white/70 px-1">move(步数)</code> 前进</li>
+                    <li><code className="rounded bg-white/70 px-1">turn(角度)</code> 转向（右转为正）</li>
+                    <li><code className="rounded bg-white/70 px-1">setPenColor(色相)</code> 换色</li>
+                    <li><code className="rounded bg-white/70 px-1">say(文本,秒)</code> 说话</li>
+                    <li><code className="rounded bg-white/70 px-1">goto(x,y)</code> 移到坐标</li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <ToolboxAccordion
+                onPick={(item) => editorRef.current?.addBlock?.(item.doc.id, item.entry)}
+              />
+            )}
 
             <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
-              <h2 className="mb-2 text-sm font-medium text-[#04342C]">积木工作区</h2>
+              <h2 className="mb-2 text-sm font-medium text-[#04342C]">
+                {project.codeMode ? "代码编辑器" : "积木工作区"}
+              </h2>
               <div className="min-h-0 flex-1">
-                <BlocklyEditor
-                  ref={editorRef}
-                  onChange={handleEditorChange}
-                  onAutoSave={scheduleAutoSave}
-                  bootstrapXml={bootstrapXml}
-                  onFlush={flushXml}
-                />
+                {project.codeMode ? (
+                  <CodeEditor
+                    ref={editorRef}
+                    onChange={handleEditorChange}
+                    onAutoSave={scheduleAutoSave}
+                    bootstrapXml={bootstrapXml}
+                    onFlush={flushXml}
+                    initialCode={project.defaultCode}
+                  />
+                ) : (
+                  <BlocklyEditor
+                    ref={editorRef}
+                    onChange={handleEditorChange}
+                    onAutoSave={scheduleAutoSave}
+                    bootstrapXml={bootstrapXml}
+                    onFlush={flushXml}
+                  />
+                )}
               </div>
             </section>
 
@@ -637,11 +677,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           <button
             onClick={handleClearBlocks}
             disabled={stageState.running}
-            title="清空工作区里所有积木，从头开始（需确认）"
+            title={project.codeMode ? "清空编辑器里所有代码，从头开始（需确认）" : "清空工作区里所有积木，从头开始（需确认）"}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-4 text-sm font-medium text-[#5F5E5A] hover:bg-[#F1EFE8] disabled:opacity-50"
           >
             <RotateCcw className="h-4 w-4" />
-            清空积木
+            {project.codeMode ? "清空代码" : "清空积木"}
           </button>
           <button
             onClick={handleSave}

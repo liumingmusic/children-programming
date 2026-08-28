@@ -31,8 +31,12 @@ export default function DemoOverlay({
   const runtimeRef = useRef<Runtime | null>(null);
   const [state, setState] = useState<StageState | null>(null);
   const [running, setRunning] = useState(false);
+  // 代码模式：参考答案以纯文本展示，运行时单独持有一个 Runtime 跑 defaultCode
+  const [codeState, setCodeState] = useState<StageState | null>(null);
+  const codeRuntimeRef = useRef<Runtime | null>(null);
 
   useEffect(() => {
+    if (project.codeMode) return; // 代码模式不注入 Blockly，参考答案由纯文本展示
     if (!blocklyDiv.current) return;
     registerCustomBlocks();
     const ws = Blockly.inject(blocklyDiv.current, {
@@ -96,7 +100,25 @@ export default function DemoOverlay({
     };
   }, [project]);
 
+  // 代码模式 Runtime 退出时复位，避免内存/状态残留
+  useEffect(() => {
+    return () => {
+      codeRuntimeRef.current?.reset();
+      codeRuntimeRef.current = null;
+    };
+  }, []);
+
   const handleRun = async () => {
+    // 代码模式：用单独 Runtime 跑参考答案 defaultCode（只读，不触碰学生主画布）
+    if (project.codeMode) {
+      if (!project.defaultCode || running) return;
+      const rt = new Runtime(480, 360, (s) => setCodeState(s), undefined, {});
+      codeRuntimeRef.current = rt;
+      setRunning(true);
+      await rt.runUserCode(project.defaultCode);
+      setRunning(false);
+      return;
+    }
     const ws = wsRef.current;
     const rt = runtimeRef.current;
     if (!ws || !rt || running) return;
@@ -167,19 +189,32 @@ export default function DemoOverlay({
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-6 md:flex-row">
-          {/* 参考答案积木（只读） */}
-          <div className="flex min-h-0 flex-1 flex-col">
-            <p className="mb-2 shrink-0 text-xs font-medium text-[#444441]">参考答案积木</p>
-            <div className="h-[440px] w-full shrink-0 overflow-hidden rounded-xl border border-black/10 bg-[#F1EFE8]">
-              <div ref={blocklyDiv} className="h-full w-full" />
+          {/* 参考答案：积木模式=只读 Blockly；代码模式=只读代码文本 */}
+          {project.codeMode ? (
+            <div className="flex min-h-0 flex-1 flex-col">
+              <p className="mb-2 shrink-0 text-xs font-medium text-[#444441]">参考答案代码（只读）</p>
+              <div className="h-[440px] w-full shrink-0 overflow-auto rounded-xl border border-black/10 bg-[#0F172A] p-3">
+                <pre className="whitespace-pre font-mono text-[13px] leading-relaxed text-[#E2E8F0]">
+                  {project.defaultCode}
+                </pre>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col">
+              <p className="mb-2 shrink-0 text-xs font-medium text-[#444441]">参考答案积木</p>
+              <div className="h-[440px] w-full shrink-0 overflow-hidden rounded-xl border border-black/10 bg-[#F1EFE8]">
+                <div ref={blocklyDiv} className="h-full w-full" />
+              </div>
+            </div>
+          )}
 
           {/* 演示舞台 */}
           <div className="flex min-h-0 flex-1 flex-col">
             <p className="mb-2 text-xs font-medium text-[#444441]">运行效果</p>
             <div className="flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-black/10 bg-[#E6F1FB] p-2">
-              {state && <StagePlayer state={state} scene={project.scene} />}
+              {(project.codeMode ? codeState : state) && (
+                <StagePlayer state={project.codeMode ? codeState! : state!} scene={project.scene} />
+              )}
             </div>
             <button
               onClick={handleRun}
@@ -192,9 +227,13 @@ export default function DemoOverlay({
           </div>
         </div>
 
-        {!project.defaultXml && (
-          <p className="px-6 pb-4 text-sm text-[#8A8880]">该关卡暂无可参考的示范。</p>
-        )}
+        {project.codeMode
+          ? !project.defaultCode && (
+              <p className="px-6 pb-4 text-sm text-[#8A8880]">该关卡暂无可参考的示范。</p>
+            )
+          : !project.defaultXml && (
+              <p className="px-6 pb-4 text-sm text-[#8A8880]">该关卡暂无可参考的示范。</p>
+            )}
       </div>
     </div>
   );

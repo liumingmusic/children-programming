@@ -8,21 +8,10 @@ import { buildFlyoutToolbox } from "@/lib/toolbox-category";
 import { collectScripts } from "@/lib/scripts";
 import type { ToolboxEntry } from "@/lib/toolbox-category";
 import type { Runtime } from "@/lib/runtime";
+import type { ProjectEditorHandle } from "@/components/editorHandle";
 
-export interface BlocklyEditorHandle {
-  getXml: () => string;
-  loadXml: (xml: string) => void;
-  getCode: () => string;
-  run: (runtime: Runtime) => Promise<void>;
-  resetWorkspace: () => void;
-  /** 标记当前内容已落盘，避免退出时重复 flush。 */
-  markSaved: () => void;
-  /**
-   * 由外部手风琴工具箱调用：把某个积木（含默认 fields / shadow inputs）添加到画布。
-   * 直接用 Blockly 序列化 API 复刻 flyout 拖出的效果，并放到当前可视区域左上角附近。
-   */
-  addBlock: (type: string, entry?: ToolboxEntry) => void;
-}
+/** 积木编辑器句柄。与代码模式共用 ProjectEditorHandle，便于 LearnPageClient 一套逻辑兼容两种模式。 */
+export type BlocklyEditorHandle = ProjectEditorHandle;
 
 interface BlocklyEditorProps {
   onChange?: (code: string) => void;
@@ -51,7 +40,7 @@ interface BlocklyEditorProps {
   toolboxCategories?: string[];
 }
 
-const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
+const BlocklyEditor = forwardRef<ProjectEditorHandle, BlocklyEditorProps>(
   function BlocklyEditor(
     { onChange, onAutoSave, bootstrapXml, onFlush, disableNativeFlyout = true, toolboxCategories },
     ref
@@ -272,7 +261,8 @@ const BlocklyEditor = forwardRef<BlocklyEditorHandle, BlocklyEditorProps>(
           workspace.clear();
           dirtyRef.current = true; // 清空也是改动，退出时会被 flush（若用户未另存）
         },
-        addBlock: (type: string, entry?: ToolboxEntry) => addBlockInternal(type, entry),
+        addBlock: (type: string, entry?: unknown) =>
+          addBlockInternal(type, entry as ToolboxEntry | undefined),
         run: async (runtime: Runtime) => {
           const workspace = workspaceRef.current;
           if (!workspace) return;

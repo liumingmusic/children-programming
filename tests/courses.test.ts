@@ -137,8 +137,8 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("soon 阶段（stage-13-16 无项目）getStageProjects 返回空数组", () => {
-    expect(getStageProjects("stage-13-16")).toEqual([]);
+  it("stage-13-16 已开放，首批 js 分类试点项目可被检索", () => {
+    expect(getStageProjects("stage-13-16").map((p) => p.slug)).toEqual(["js_square"]);
   });
 
   it("getProject 对全部项目返回正确标题", () => {
@@ -250,7 +250,10 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("soon 阶段（stage-13-16 无项目）getStageCategories 返回空数组", () => {
-    expect(getStageCategories("stage-13-16")).toEqual([]);
+  it("stage-13-16 已开放，getStageCategories 返回 js 分类及其试点项目", () => {
+    const cats = getStageCategories("stage-13-16");
+    expect(cats).toHaveLength(1);
+    expect(cats[0].id).toBe("js");
+    expect(cats[0].projects.map((p) => p.slug)).toEqual(["js_square"]);
   });
 });

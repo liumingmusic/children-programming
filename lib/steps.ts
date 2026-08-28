@@ -15,6 +15,8 @@ const DRAW_LOOP_SLUGS = [
   "square", "triangle", "star5", "flower",
   "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit",
   "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard",
+  // 13-16 代码过渡类（js 分类）：学生直接写 JS 调 __runtime API，同样的「落笔 + 循环移动转向」判定复用。
+  "js_square",
 ];
 
 /** 分类 4 · 事件与互动 */

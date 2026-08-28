@@ -28,6 +28,7 @@ describe("全部项目 defaultXml 代码生成冒烟（防积木改名/缺定义
     const failures: string[] = [];
     for (const p of projects) {
       if (p.component === "memory") continue; // 翻牌独立组件，不走 Blockly
+      if (p.codeMode) continue; // 代码模式项目用 defaultCode（纯 JS），不生成 Blockly XML
       if (!p.defaultXml) {
         failures.push(`${p.slug}: 缺 defaultXml`);
         continue;

@@ -16,6 +16,10 @@ export interface CourseProject {
   erLingHint: string;
   steps: CourseStep[];
   defaultXml?: string;
+  /** 代码模式：true 时学生直接编写 JavaScript 文本（而非拖积木）。运行时复用同一套 __runtime 命令式 API。 */
+  codeMode?: boolean;
+  /** 代码模式的初始 / 示范代码（相当于积木模式的 defaultXml）。学生打开即载入，看示范也用它。 */
+  defaultCode?: string;
   /** 舞台场景装饰（纯展示）：目标点 emoji、障碍、迷宫墙等。不参与运行逻辑与步骤判定。 */
   scene?: ProjectScene;
   /** 舞台上需要收集的「星星/物品」坐标。传给 Runtime 作为可收集目标（碰触即收集），用于条件与游戏类收集项目。 */

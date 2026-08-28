@@ -1401,6 +1401,16 @@ export class Runtime {
     this.emit();
   }
 
+  /**
+   * 代码模式运行：学生直接写的整段 JavaScript（已用 __runtime 命令式 API 指挥二零）。
+   * 复用 runScript 的 eval 体（含动作队列执行、日志、程序执行完毕收尾），无需积木分层。
+   * 学生在代码里直接调用 __runtime.move / __runtime.turn / __runtime.penDown 等（与积木生成的代码同源）。
+   */
+  async runUserCode(code: string) {
+    if (this.state.running) return;
+    return this.runScript(code, "start");
+  }
+
   start() {
     this.actions = [];
     this.state.penPaths = [];

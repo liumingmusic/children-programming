@@ -23,8 +23,8 @@ export const stages: Stage[] = [
     id: "stage-13-16",
     ageRange: "13-16 岁",
     name: "进阶工坊",
-    tagline: "用 Python 与网页技术，完成属于自己的独立项目。",
-    status: "soon",
-    projectSlugs: [],
+    tagline: "从积木过渡到 JavaScript，做工具、模拟与创意作品。",
+    status: "open",
+    projectSlugs: ["js_square"],
   },
 ];
