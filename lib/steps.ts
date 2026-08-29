@@ -108,6 +108,11 @@ const WEB_CODE_SLUGS = [
   "web_calculator", "web_todo", "web_memory", "web_typing", "web_platformer", "web_chatbot",
 ];
 
+/** 13-16 分类 L · 算法与数据结构（Phase 3a，8 项）。 */
+const ALGO_CODE_SLUGS = [
+  "algo_bubble", "algo_binary", "algo_stack", "algo_maze", "algo_fib", "algo_prime", "algo_string", "algo_greedy",
+];
+
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
@@ -679,6 +684,55 @@ export function computeSteps(
         if (id === 1) done = hasInput;
         else if (id === 2) done = hasPush && hasIf;
         else if (id === 3)  done = hasButton && hasShow && finished;
+      }
+    } else if (ALGO_CODE_SLUGS.includes(project.slug)) {
+      // 13-16 算法可视化：抓「学生真的写了数组/循环/递归/查找/图，并用画布画出来」的真实标记。
+      const codeNoComment = code.replace(/\/\/.*$/gm, "");
+      const hasArray = /(const|let|var)\s+\w+\s*=\s*\[/.test(codeNoComment);
+      const hasLoop = /\b(for|while)\b/.test(codeNoComment);
+      const hasFunction = /function\s+\w+\s*\(/.test(codeNoComment);
+      const hasDraw = /__runtime\.(drawRect|drawCircle|drawText|drawLine)\(/.test(codeNoComment);
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (project.slug === "algo_bubble") {
+        // 声明数组 → 循环里比较相邻并交换 → 画出来
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = hasLoop && /a\[j\]\s*>\s*a\[j\s*\+\s*1\]/.test(codeNoComment) && /a\[j\]\s*=\s*a\[j\s*\+\s*1\]/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "algo_binary") {
+        // 声明有序数组 → while 折半（取中间、比较、缩边界）→ 画出来
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = /while\s*\(/.test(codeNoComment) && /Math\.floor\(/.test(codeNoComment) && /a\[mid\]/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "algo_stack") {
+        // 空数组 → push 入栈 + pop 出栈 → 画出来
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = /\.\s*push\s*\(/.test(codeNoComment) && /\.\s*pop\s*\(|\.\s*shift\s*\(/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "algo_maze") {
+        // 二维数组地图 → 队列 BFS（push + shift + visited）→ 画出来
+        if (id === 1) done = /const\s+\w+\s*=\s*\[\[/.test(codeNoComment);
+        else if (id === 2) done = /\.\s*push\s*\(/.test(codeNoComment) && /\.\s*shift\s*\(/.test(codeNoComment) && /visited/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "algo_fib") {
+        // 写递归函数 → 必须有自调用（fib(参数-1) 这种递归形态）→ 画出来
+        if (id === 1) done = hasFunction;
+        else if (id === 2) done = /fib\s*\(\s*\w+\s*-\s*1\s*\)/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "algo_prime") {
+        // 循环试除 → 取余判断整除且只试到根号（i*i<=n）→ 画出来
+        if (id === 1) done = hasLoop;
+        else if (id === 2) done = /%/.test(codeNoComment) && /i\s*\*\s*i\s*<=/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "algo_string") {
+        // 声明字符串 → 遍历字符并计数（counts[...]）→ 画出来
+        if (id === 1) done = /let\s+\w+\s*=\s*"[^"]*"/.test(codeNoComment);
+        else if (id === 2) done = hasLoop && /counts\[/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "algo_greedy") {
+        // 声明面额数组与金额 → 循环 + while 贪心不断减（amount - coins[i]）→ 画出来
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = hasLoop && /while\s*\(/.test(codeNoComment) && /=.*-\s*coins\[/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
       }
     } else if (project.slug === "stars") {
       if (id === 1) done = code.includes("__runtime.gotoMouse()");
@@ -2022,6 +2076,48 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 1) return "用「网页·输入框」收集用户说的话。";
       if (stepId === 2) return "用「如果包含关键词」判断用户意图，列表（push）记下对话，生成回复。";
       if (stepId === 3) return "点「运行」，跟小鹦鹉聊几句，看它是不是真的按规则回话！";
+    }
+  }
+  if (ALGO_CODE_SLUGS.includes(slug)) {
+    if (slug === "algo_bubble") {
+      if (stepId === 1) return "先准备一个数组（比如 let a = [5,3,8,1,9,2,7,4]），这就是要排序的一排数字。";
+      if (stepId === 2) return "用两层循环，内层比较相邻两个数 a[j] 和 a[j+1]，左边大就交换它们（let t=a[j]; a[j]=a[j+1]; a[j+1]=t;）。";
+      if (stepId === 3) return "每次比较后 clearCanvas 重画柱子并 wait(0.2)，点「运行」看大数怎么一步步浮到右边！";
+    }
+    if (slug === "algo_binary") {
+      if (stepId === 1) return "准备一个从小到大排好序的数组和一个 target，二分查找只认有序数组。";
+      if (stepId === 2) return "用 while 循环，每轮取中间 mid = Math.floor((lo+hi)/2)，比较 a[mid] 与 target 来移动左/右边界。";
+      if (stepId === 3) return "每轮把查找区间画出来并 wait(0.4)，点「运行」看区间怎么快速缩小到目标！";
+    }
+    if (slug === "algo_stack") {
+      if (stepId === 1) return "准备一个空数组当栈：let stack = [];。";
+      if (stepId === 2) return "用 stack.push(x) 入栈、stack.pop() 出栈，体会「后进先出」——最后进来的最先出去。";
+      if (stepId === 3) return "每入栈 / 出栈一次就重画一遍堆叠的方块，点「运行」看栈的变化！";
+    }
+    if (slug === "algo_maze") {
+      if (stepId === 1) return "用二维数组 const maze = [[0,1,...],...] 表示迷宫：0 是路、1 是墙。";
+      if (stepId === 2) return "用队列做 BFS：queue.push(邻居) 入队、queue.shift() 出队，配合 visited 二维数组记录已探索格子。";
+      if (stepId === 3) return "每轮把已探索的格子染黄并 wait(0.25)，点「运行」看波纹如何扩散找到出口！";
+    }
+    if (slug === "algo_fib") {
+      if (stepId === 1) return "写一个函数 function fib(n)，这就是你要计算斐波那契的工具。";
+      if (stepId === 2) return "在函数里自己调用自己：return fib(n-1) + fib(n-2)，并写好退出条件 if (n < 2) return n;。";
+      if (stepId === 3) return "把前几项画成柱子，点「运行」看数列怎么快速增长——这就是递归之美！";
+    }
+    if (slug === "algo_prime") {
+      if (stepId === 1) return "用循环去试除：for (let i=2; ...) 拿 n 除以 i。";
+      if (stepId === 2) return "用 n % i === 0 判断整除，并把循环条件写成 i * i <= n，只试到根号就能砍掉一半工作量。";
+      if (stepId === 3) return "把 2~30 每个数是不是素数画成柱子（绿高灰矮），点「运行」圈出所有素数！";
+    }
+    if (slug === "algo_string") {
+      if (stepId === 1) return "准备一段字符串，比如 let s = \"helloworld\";。";
+      if (stepId === 2) return "用 for 遍历每个字符 s[i]，用一个计数表（对象 counts）记录每个字母出现了几次。";
+      if (stepId === 3) return "把每个字母的出现次数画成柱子，点「运行」看词频分布！";
+    }
+    if (slug === "algo_greedy") {
+      if (stepId === 1) return "准备面额数组 const coins = [25,10,5,1] 和要凑的金额 amount。";
+      if (stepId === 2) return "贪心：从最大面额开始，while (amount >= coins[i]) 就不断 amount = amount - coins[i] 并记下用掉的硬币。";
+      if (stepId === 3) return "把用掉的硬币画出来，点「运行」看是不是用最少的硬币凑出了金额！";
     }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
