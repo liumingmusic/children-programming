@@ -13,7 +13,8 @@
 
 ## 一、6-8 岁阶段（图形化启蒙 · Blockly 海龟/二零）
 
-> 现状：已建成 **197 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **15 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）。
+> 现状：已建成 **204 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **22 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
+Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`）。
 > 概念梯度沿用 Code.org + ScratchJr + Blockly Games 的「序列→循环→事件→条件」主线。
 
 ### 分类 1 · 基础序列与方向（序列）　✅（11/11 完成）
@@ -284,8 +285,8 @@
 | **1** | js 分类铺满：输出 / 变量 / 函数 / 数组 / 计算工具 / 画布换色 / 积木→代码综合 | K·`js` | 7 | ✅ 完成（`a7bca5a8`） |
 | **2a** | **画布渲染基建**（Runtime 五原语 + `state.shapes` + StagePlayer 统一渲染）+ M 物理试点 2 项 | M·`phys` | 2 | ✅ 完成（`affc3776`） |
 | **2b** | M 物理补齐（抛物线 / 重力模拟 / 弹簧振子 / 圆周运动 / 粒子系统） | M·`phys` | 5 | ✅ 完成（本分类 7/7 满编） |
-| **2c** | **N 数据可视化**（柱状图 / 折线图 / 饼图 / 图表生成器…）——纯画布，基建已就绪 | N·`dataviz` | 7 | ⬜ 下一步 |
-| **2d** | O 创意编程（分形树 / 曼陀罗 / 粒子烟花 / 生成艺术…）——纯画布 | O·`creative` | 6 | ⬜ 待做 |
+| **2c** | **N 数据可视化**（柱状图 / 折线图 / 饼图 / 天气图 / 成绩分布 / 词云 / 实时仪表盘） | N·`dataviz` | 7 | ✅ 完成（本分类 7/7 满编） |
+| **2d** | O 创意编程（分形树 / 曼陀罗 / 粒子烟花 / 生成艺术…）——纯画布 | O·`creative` | 6 | ⬜ 下一步 |
 | **2e** | **DOM 渲染基建**（在舞台旁挂一块可控 HTML 面板）+ P 网页小游戏（计算器 / 待办 / 记忆 / 打字…） | P·`web` | 6 | ⬜ 待做（须先建 DOM 能力） |
 | **3a** | L 算法与数据结构（冒泡排序可视化 / 二分查找 / 栈与队列 / BFS 迷宫 / 递归 / 素数 / 贪心） | L·`algo` | 8 | ⬜ 待做 |
 | **3b** | Q 人工智能启蒙（决策树 / 分类器 / 规则聊天机器人 / 推荐直觉 / 神经网络可视化） | Q·`ai` | 6 | ⬜ 待做 |
@@ -349,13 +350,25 @@
 - ✅ [JS模式+粒子] 粒子系统（`phys_particle` · 四个平行数组装 12 个粒子，各自受重力 + 撞地衰减 + 撞左右边界反向）
 
 ### 分类 N · 数据可视化（数据可视化）
-- ⬜ [需: JS模式+画布] 柱状图生成器
-- ⬜ [需: JS模式+画布] 折线图
-- ⬜ [需: JS模式+画布] 饼图
-- ⬜ [需: JS模式+列表] 天气预报图表
-- ⬜ [需: JS模式+列表] 成绩分布
-- ⬜ [需: JS模式] 词云
-- ⬜ [需: JS模式+实时] 实时数据仪表盘
+> 实现分类 id = `dataviz`。**Phase 2c 一次铺满 7/7**。
+> 与物理模拟不同：这些图大多是**静态**的——画一次就完事，不需要 `clearCanvas + wait` 的动画循环
+> （只有最后的实时仪表盘需要逐帧重画）。因此完成判定不能照搬 PHYS 那套「逐帧重画」标记，
+> 而是抓每关真正要教的**「数据 → 视觉属性」映射**：
+> `data[i] * scale`（数值→高度）、记住上一个点（→连线）、`Math.cos/sin` + 角度累加（→扇区）、
+> `counts[k] = counts[k] + 1`（→分组计数）、drawText 最后一个参数非写死数字（→字号随权重）、
+> `.push(` + `.shift(`（→滑动窗口）。判定走 `lib/steps.ts` 的 `DATAVIZ_CODE_SLUGS` 分支。
+>
+> **实现说明（对原蓝图的适配）**：画布原语只有 rect/circle/line/text，**没有扇形**，
+> 故饼图用「每 2 度一条半径线、线宽 6」密集填充来画出扇形（相邻线重叠即无缝）。
+> 蓝图里「天气预报 / 成绩分布」标注依赖列表，实际用**数组 + 循环**实现（13-16 阶段列表原语属于 9-12 图形化体系，
+> 代码模式下直接用 JS 数组更自然），教学目标不变。
+- ✅ [JS模式+画布] 柱状图生成器（`dataviz_bar` · 数值 × 缩放系数 = 柱高，数组 + 循环逐根画）
+- ✅ [JS模式+画布] 折线图（`dataviz_line` · 记住上一个点 `lastX/lastY`，把相邻点连起来；含目标参考线）
+- ✅ [JS模式+画布] 饼图（`dataviz_pie` · 份额→角度→三角函数坐标，半径线密集填充扇形 + 右侧图例）
+- ✅ [JS模式+画布] 天气预报图表（`dataviz_weather` · 求总和/极值画平均参考线，颜色随温度三档变化）
+- ✅ [JS模式+画布] 成绩分布（`dataviz_scores` · 先按分数段分组计数再画直方图，按最高桶自动缩放）
+- ✅ [JS模式+画布] 词云（`dataviz_wordcloud` · 数值→字号，绕圈排版，含中文居中估算）
+- ✅ [JS模式+画布] 实时数据仪表盘（`dataviz_dashboard` · 数组当滑动窗口 push/shift，每帧重算统计并擦掉重画）
 
 ### 分类 O · 创意编程（创意）
 - ⬜ [需: JS模式+画布] 分形树
@@ -388,11 +401,12 @@
 - ⬜ [需: 综合] 开源贡献
 - ⬜ [需: 综合] 作品集网站
 
-> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **15**
+> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **22**
 > （K·`js` **8/8 铺满**：Phase 0 试点 `js_square` + Phase 1 七个 `js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`；
 > M·`phys` **7/7 满编**：`phys_fall` 自由落体 / `phys_bounce` 弹跳球 / `phys_parabola` 抛物线 / `phys_gravity` 重力对比 /
-> `phys_spring` 弹簧振子 / `phys_orbit` 圆周运动 / `phys_particle` 粒子系统）。
-> JS 模式地基与画布渲染基建均已落地；分类 L / N / O / P / Q / R 按上方「推进路线图」的 Phase 节奏铺开，
+> `phys_spring` 弹簧振子 / `phys_orbit` 圆周运动 / `phys_particle` 粒子系统；
+> N·`dataviz` **7/7 满编**：`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`）。
+> JS 模式地基与画布渲染基建均已落地；分类 L / O / P / Q / R 按上方「推进路线图」的 Phase 节奏铺开，
 > 其中 P·`web` 还需先补 DOM 渲染能力。
 
 ---
@@ -403,10 +417,10 @@
 |---|---|---|---|---|
 | 6-8 岁 | 11 | 105 | **105** + 造物工坊（含分类11·综合 4 个总结项目） | 分类7·故事 ✅ / 分类10·科学 ✅ / 分类11·综合 ✅ / 造物工坊 ✅ 全部交付 |
 | 9-12 岁 | 10 | 77 | **77** | 全部轻量运行时已落地（含列表 7 原语 / 时间轴引擎）；9-12 阶段 10 分类全部满编 |
-| 13-16 岁 | 8 | 53 | **15**（K·js 8/8 + M·phys **7/7 满编**） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地，M 已铺满** / DOM（待 Phase 2e）/ 算法与数据（待 Phase 3） |
+| 13-16 岁 | 8 | 53 | **22**（K·js 8/8 + M·phys 7/7 + N·dataviz 7/7） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地，M、N 均已铺满** / DOM（待 Phase 2e）/ 算法与数据（待 Phase 3） |
 
 **当前下一步**：6-8（105/105）与 9-12（77/77）已全部满编，只剩 13-16 阶段。
-按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，当前处于 **Phase 2b 已完成 → 下一步 Phase 2c**（N·数据可视化 7 项，纯画布、基建已就绪，无需新运行时能力）。
+按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，当前处于 **Phase 2c 已完成 → 下一步 Phase 2d**（O·创意编程 6 项，纯画布、基建已就绪，无需新运行时能力）。
 
 **如何完善（单会话工作流）**：
 1. 从本表挑一个 ⬜ 项目（或一整个分类）。

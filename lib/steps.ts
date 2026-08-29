@@ -49,6 +49,30 @@ const PHYS_CODE_SLUGS = [
   "phys_particle",
 ];
 
+/**
+ * 13-16 分类 N · 数据可视化（dataviz 分类，Phase 2c 一次铺满 7/7）。
+ * 与物理模拟不同：这里的图大多是**静态**的（画一次即可，不需要 clearCanvas + wait 的动画循环），
+ * 只有最后的「实时仪表盘」需要逐帧重画。因此判定不能照搬 PHYS 那套「逐帧重画」标记，
+ * 而是抓每关真正要教的**数据 → 视觉属性映射**：
+ *   - 数组字面量 `[...]`                     → 数据真的存在数组里
+ *   - `data[i] * scale`                      → 数值被换算成了像素（缩放映射）
+ *   - `lastX = x;` / `prev`                  → 折线图真的记住了上一个点
+ *   - `Math.cos/sin` + `angle = angle + ...` → 饼图真的把份额换算成了角度
+ *   - `counts[k] = counts[k] + 1`            → 直方图真的做了分组计数
+ *   - `drawText(..., words[i], ..., size)`   → 词云的字号真的随权重变化
+ *   - `.push(` + `.shift(`                   → 仪表盘真的用了滑动窗口
+ * 空程序 / 只写注释必然不通过（最后一步仍要求「程序执行完毕」日志）。
+ */
+const DATAVIZ_CODE_SLUGS = [
+  "dataviz_bar",
+  "dataviz_line",
+  "dataviz_pie",
+  "dataviz_weather",
+  "dataviz_scores",
+  "dataviz_wordcloud",
+  "dataviz_dashboard",
+];
+
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
@@ -418,6 +442,84 @@ export function computeSteps(
         if (id === 1) done = hasArrayLiteral && updatesIndexed;
         else if (id === 2) done = updatesVelocity && hasIf && reversesVelocity;
         else if (id === 3) done = hasClear && hasDraw && finished;
+      }
+    } else if (DATAVIZ_CODE_SLUGS.includes(project.slug)) {
+      // 13-16 数据可视化类：抓「数据 → 视觉属性」的那一步，而非「有没有在动」。
+      // 前 6 项是静态图（画一次即可），只有仪表盘需要逐帧重画，故判定按项目分开写。
+      const codeNoComment = code.replace(/\/\/.*$/gm, "");
+      const hasArrayLiteral = /\b(?:let|const|var)\s+\w+\s*=\s*\[/.test(codeNoComment);
+      const hasText = code.includes("__runtime.drawText(");
+      const hasRect = code.includes("__runtime.drawRect(");
+      const hasLine = code.includes("__runtime.drawLine(");
+      const hasCircle = code.includes("__runtime.drawCircle(");
+      const hasClear = code.includes("__runtime.clearCanvas()");
+      const hasWait = code.includes("__runtime.wait(");
+      const usesTrig = /Math\.(cos|sin)\s*\(/.test(codeNoComment);
+      // 数值 → 像素：`data[i] * scale`（数组元素参与了乘法）
+      const scalesArrayValue =
+        /\w+\s*\[\s*\w+\s*\]\s*\*/.test(codeNoComment) ||
+        /\*\s*\w+\s*\[\s*\w+\s*\]/.test(codeNoComment);
+      // 折线图：记住了上一个点（lastX / prevX 之类的变量被赋值）
+      const remembersLast = /\b(last|prev)\w*\s*=/.test(codeNoComment);
+      // 饼图：角度被累加（angle = angle + ...）
+      const accumulatesAngle = /\bangle\s*=\s*angle\s*[-+]/.test(codeNoComment);
+      // 直方图：分组计数（counts[k] = counts[k] + 1）
+      const countsIntoBucket =
+        /\w+\s*\[\s*\w+\s*\]\s*=\s*\w+\s*\[\s*\w+\s*\]\s*\+/.test(codeNoComment);
+      // 分桶前先按区间判断（if (s >= 90) else if (s >= 80) ... 至少两段分支）
+      const bucketBranch = (codeNoComment.match(/else\s+if\s*\(/g) ?? []).length >= 2;
+      // 词云的字号是否随权重变化：检查 drawText 的**最后一个参数**（字号）是不是写死的数字。
+      // 只查「drawText 里出现了数组下标」是不够的——那可能只是词的数组 words[i]，
+      // 字号照样写死，图也就没有表达任何数据。
+      const lastArgs = (codeNoComment.match(/__runtime\.drawText\([^()]*\)/g) ?? []).map((c) => {
+        const inner = c.slice(c.indexOf("(") + 1, -1);
+        const parts = inner.split(",");
+        return parts[parts.length - 1].trim();
+      });
+      const sizeIsDynamic = lastArgs.some(
+        (a) =>
+          !/^-?\d+(\.\d+)?$/.test(a) &&
+          (/\[\s*\w+\s*\]/.test(a) || /^[A-Za-z_$][\w$]*$/.test(a))
+      );
+      // 滑动窗口：新数据 push、老数据 shift
+      const usesPush = /\.\s*push\s*\(/.test(codeNoComment);
+      const usesShift = /\.\s*shift\s*\(/.test(codeNoComment);
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (project.slug === "dataviz_bar") {
+        // 数组存数据 → 循环按数值画柱子（高度 = 数值 × 缩放）→ 跑完
+        if (id === 1) done = hasArrayLiteral;
+        else if (id === 2) done = hasLoop && hasRect && scalesArrayValue;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "dataviz_line") {
+        // 数组存数据 → 记住上一个点、把相邻点连起来 → 跑完
+        if (id === 1) done = hasArrayLiteral;
+        else if (id === 2) done = hasLoop && hasCircle && hasLine && remembersLast;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "dataviz_pie") {
+        // 份额 → 角度 → 三角函数换算坐标
+        if (id === 1) done = hasArrayLiteral;
+        else if (id === 2) done = usesTrig && accumulatesAngle && hasLine;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "dataviz_weather") {
+        // 求总和/极值 + 让颜色随数据变化 + 用文字标注数值
+        if (id === 1) done = hasArrayLiteral && /\bsum\s*=\s*sum\s*\+/.test(codeNoComment);
+        else if (id === 2) done = hasLoop && hasRect && hasText && /\bif\s*\(/.test(codeNoComment);
+        else if (id === 3) done = finished;
+      } else if (project.slug === "dataviz_scores") {
+        // 先分组计数（分桶），再按最高桶自动缩放画直方图
+        if (id === 1) done = hasArrayLiteral && countsIntoBucket && bucketBranch;
+        else if (id === 2) done = hasLoop && hasRect && scalesArrayValue;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "dataviz_wordcloud") {
+        // 字号随权重变化（drawText 的字号/内容取自数组元素）
+        if (id === 1) done = hasArrayLiteral && /\[\s*"/.test(codeNoComment);
+        else if (id === 2) done = hasLoop && hasText && sizeIsDynamic;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "dataviz_dashboard") {
+        // 滑动窗口：push 新数据、shift 老数据，并逐帧擦掉重画
+        if (id === 1) done = hasArrayLiteral && usesPush;
+        else if (id === 2) done = hasLoop && usesShift && hasClear && hasWait;
+        else if (id === 3) done = finished;
       }
     } else if (project.slug === "stars") {
       if (id === 1) done = code.includes("__runtime.gotoMouse()");

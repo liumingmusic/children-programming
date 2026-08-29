@@ -311,3 +311,142 @@ describe("画布绘制原语 · drawRect / drawCircle / drawLine / drawText / cl
     expect(drawLogs).toEqual([]);
   });
 });
+
+/**
+ * 13-16 · Phase 2c：N 数据可视化分类 7 项（一次铺满）。
+ *
+ * 与物理模拟不同，这些图大多是**静态**的：画一次就完事，不需要 clearCanvas + wait 的动画循环
+ * （只有最后的实时仪表盘需要）。所以判定抓的是「数据 → 视觉属性」的那一步映射，而不是「有没有在动」。
+ * 统一验证：① 数据字段齐备；② 示范代码跑通且完成门禁全绿；③ 空代码不能过；
+ * ④ 图元真的进了 state.shapes（图表真的被画出来，而不是只跑了段算术）。
+ */
+const DATAVIZ_PHASE2C_SLUGS = [
+  "dataviz_bar", "dataviz_line", "dataviz_pie", "dataviz_weather",
+  "dataviz_scores", "dataviz_wordcloud", "dataviz_dashboard",
+];
+
+describe("13-16 数据可视化 · Phase 2c 铺满（dataviz 7/7）", () => {
+  for (const slug of DATAVIZ_PHASE2C_SLUGS) {
+    const project = getProject(slug) as CourseProject | undefined;
+    expect(project, `缺少项目 ${slug}`).toBeTruthy();
+    if (!project) continue;
+
+    it(`${slug}：数据字段齐备（dataviz 分类 + codeMode + defaultCode）`, () => {
+      expect(project.category).toBe("dataviz");
+      expect(project.codeMode).toBe(true);
+      expect(typeof project.defaultCode).toBe("string");
+      expect(project.defaultCode!.length).toBeGreaterThan(0);
+    });
+
+    it(`${slug}：示范代码跑通，完成门禁全绿`, async () => {
+      const code = project.defaultCode!;
+      const state = await runCode(code);
+      expect(state.log).toContain("[系统] 程序执行完毕");
+
+      const steps = computeSteps(project, code, state.log);
+      const undone = steps.filter((s) => !s.done).map((s) => s.title);
+      expect(undone, `${slug} 未完成的步骤：${undone.join("、")}`).toEqual([]);
+      expect(isGoalAchieved(project, state, state.log, code)).toBe(true);
+    }, 15000);
+
+    it(`${slug}：空代码不能通过完成门禁`, async () => {
+      const state = await runCode("");
+      expect(isGoalAchieved(project, state, state.log, "")).toBe(false);
+    });
+
+    it(`${slug}：图表图元真的进了 state.shapes`, async () => {
+      const code = project.defaultCode!;
+      const state = await runCode(code);
+      expect(state.shapes.length).toBeGreaterThan(0);
+      // 静态图一次画完：饼图用 180 条半径线填充扇形，故上限放到 300
+      expect(state.shapes.length).toBeLessThan(300);
+    }, 15000);
+  }
+
+  // 定向拦截：证明门禁校验的是「数据 → 视觉属性」的那一步映射，而不是画了就算过
+  it("dataviz_bar：柱子高度写死、不随数据缩放不能通过", async () => {
+    const code =
+      "const data = [12, 30, 18];\n" +
+      "for (let i = 0; i < data.length; i++) {\n" +
+      '  __runtime.drawRect(-210 + i * 54, -120, 40, 100, "#F59E0B");\n' +
+      "}\n";
+    const state = await runCode(code);
+    // 高度是写死的 100，没有 data[i] * scale → 第 2 步不应通过
+    expect(isGoalAchieved(getProject("dataviz_bar")!, state, state.log, code)).toBe(false);
+  });
+
+  it("dataviz_line：只画数据点、不记住上一个点连线不能通过", async () => {
+    const code =
+      "const data = [8, 15, 12, 22];\n" +
+      "for (let i = 0; i < data.length; i++) {\n" +
+      '  __runtime.drawCircle(-200 + i * 52, -120 + data[i] * 3.2, 5, "#F59E0B");\n' +
+      "}\n";
+    const state = await runCode(code);
+    // 没有 lastX / lastY 之类「记住上一个点」的变量 → 第 2 步不应通过
+    expect(isGoalAchieved(getProject("dataviz_line")!, state, state.log, code)).toBe(false);
+  });
+
+  it("dataviz_pie：不用 cos / sin 换算角度不能通过", async () => {
+    const code =
+      "const data = [30, 45, 25];\n" +
+      "let angle = 90;\n" +
+      "for (let i = 0; i < data.length; i++) {\n" +
+      '  __runtime.drawCircle(-70, 0, 110, "#F59E0B");\n' +
+      "  angle = angle + data[i] / 100 * 360;\n" +
+      "}\n";
+    const state = await runCode(code);
+    // 角度在累加，但没有三角函数把角度换成坐标 → 第 2 步不应通过
+    expect(isGoalAchieved(getProject("dataviz_pie")!, state, state.log, code)).toBe(false);
+  });
+
+  it("dataviz_weather：不算总和、只画柱子不能通过", async () => {
+    const code =
+      "const temps = [22, 24, 19];\n" +
+      "for (let i = 0; i < temps.length; i++) {\n" +
+      '  __runtime.drawRect(-180 + i * 52, -110, 36, temps[i] * 4.5, "#38bdf8");\n' +
+      '  __runtime.drawText(-180 + i * 52, 10, String(temps[i]), "#E2E8F0", 13);\n' +
+      "}\n";
+    const state = await runCode(code);
+    // 没有「sum = sum + ...」的求平均过程 → 第 1 步不应通过
+    expect(isGoalAchieved(getProject("dataviz_weather")!, state, state.log, code)).toBe(false);
+  });
+
+  it("dataviz_scores：不做分组计数、直接把每个分数画成柱子不能通过", async () => {
+    const code =
+      "const scores = [72, 85, 91, 66, 78];\n" +
+      "for (let i = 0; i < scores.length; i++) {\n" +
+      '  __runtime.drawRect(-190 + i * 80, -120, 60, scores[i] * 1.5, "#38bdf8");\n' +
+      "}\n";
+    const state = await runCode(code);
+    // 没有 counts[k] = counts[k] + 1 的分组计数 → 第 1 步不应通过
+    expect(isGoalAchieved(getProject("dataviz_scores")!, state, state.log, code)).toBe(false);
+  });
+
+  it("dataviz_wordcloud：字号写死、不随权重变化不能通过", async () => {
+    const code =
+      'const words = ["代码", "循环", "函数"];\n' +
+      "const weights = [32, 27, 24];\n" +
+      "for (let i = 0; i < words.length; i++) {\n" +
+      '  __runtime.drawText(-100 + i * 80, 0, words[i], "#F59E0B", 20);\n' +
+      "}\n";
+    const state = await runCode(code);
+    // drawText 的字号没取自数组（写死 20）→ 第 2 步不应通过
+    expect(isGoalAchieved(getProject("dataviz_wordcloud")!, state, state.log, code)).toBe(false);
+  });
+
+  it("dataviz_dashboard：只 push 不 shift、也不逐帧重画不能通过", async () => {
+    const code =
+      "const data = [];\n" +
+      "let t = 0;\n" +
+      "for (let f = 0; f < 40; f++) {\n" +
+      "  t = t + 0.05;\n" +
+      "  data.push(50 + 30 * Math.sin(t * 2));\n" +
+      "}\n" +
+      "for (let i = 0; i < data.length; i++) {\n" +
+      '  __runtime.drawCircle(-200 + i * 20, 0, 4, "#38bdf8");\n' +
+      "}\n";
+    const state = await runCode(code);
+    // 没有 shift（不做滑动窗口）、也没有 clearCanvas + wait（不逐帧重画）→ 第 2 步不应通过
+    expect(isGoalAchieved(getProject("dataviz_dashboard")!, state, state.log, code)).toBe(false);
+  });
+});

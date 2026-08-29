@@ -137,12 +137,14 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("stage-13-16 已开放，js 8 项 + phys 7 项（Phase 0/1 铺满 + Phase 2 满编）可被检索", () => {
+  it("stage-13-16 已开放，js 8 + phys 7 + dataviz 7（Phase 0/1 铺满 + Phase 2 三个分类）可被检索", () => {
     expect(getStageProjects("stage-13-16").map((p) => p.slug)).toEqual([
       "js_square", "js_hello", "js_variable", "js_function",
       "js_array", "js_tool", "js_canvas", "js_compare",
       "phys_fall", "phys_bounce", "phys_parabola", "phys_gravity",
       "phys_spring", "phys_orbit", "phys_particle",
+      "dataviz_bar", "dataviz_line", "dataviz_pie", "dataviz_weather",
+      "dataviz_scores", "dataviz_wordcloud", "dataviz_dashboard",
     ]);
   });
 
@@ -255,9 +257,9 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("stage-13-16 已开放，getStageCategories 返回 js / phys 两个分类", () => {
+  it("stage-13-16 已开放，getStageCategories 返回 js / phys / dataviz 三个分类", () => {
     const cats = getStageCategories("stage-13-16");
-    expect(cats).toHaveLength(2);
+    expect(cats).toHaveLength(3);
     expect(cats[0].id).toBe("js");
     expect(cats[0].projects.map((p) => p.slug)).toEqual([
       "js_square", "js_hello", "js_variable", "js_function",
@@ -267,6 +269,11 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     expect(cats[1].projects.map((p) => p.slug)).toEqual([
       "phys_fall", "phys_bounce", "phys_parabola", "phys_gravity",
       "phys_spring", "phys_orbit", "phys_particle",
+    ]);
+    expect(cats[2].id).toBe("dataviz");
+    expect(cats[2].projects.map((p) => p.slug)).toEqual([
+      "dataviz_bar", "dataviz_line", "dataviz_pie", "dataviz_weather",
+      "dataviz_scores", "dataviz_wordcloud", "dataviz_dashboard",
     ]);
   });
 });
