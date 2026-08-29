@@ -113,6 +113,11 @@ const ALGO_CODE_SLUGS = [
   "algo_bubble", "algo_binary", "algo_stack", "algo_maze", "algo_fib", "algo_prime", "algo_string", "algo_greedy",
 ];
 
+/** 13-16 分类 Q · AI 启蒙（Phase 3b，6 项）。 */
+const AI_CODE_SLUGS = [
+  "ai_tree", "ai_knn", "ai_bayes", "ai_perceptron", "ai_recommend", "ai_network",
+];
+
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
@@ -731,7 +736,39 @@ export function computeSteps(
       } else if (project.slug === "algo_greedy") {
         // 声明面额数组与金额 → 循环 + while 贪心不断减（amount - coins[i]）→ 画出来
         if (id === 1) done = hasArray;
-        else if (id === 2) done = hasLoop && /while\s*\(/.test(codeNoComment) && /=.*-\s*coins\[/.test(codeNoComment);
+        else if (id === 2)  done = hasLoop && /while\s*\(/.test(codeNoComment) && /=.*-\s*coins\[/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      }
+    } else if (AI_CODE_SLUGS.includes(project.slug)) {
+      // 13-16 AI 启蒙：抓「学生真的用了 AI 概念（决策树归类 / 相似度 / 证据计数 / 训练更新 / 前向传播）并用画布画出」的真实标记。
+      const codeNoComment = code.replace(/\/\/.*$/gm, "");
+      const hasArray = /(const|let|var)\s+\w+\s*=\s*\[/.test(codeNoComment);
+      const hasLoop = /\b(for|while)\b/.test(codeNoComment);
+      const hasDraw = /__runtime\.(drawRect|drawCircle|drawText|drawLine)\(/.test(codeNoComment);
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (project.slug === "ai_tree") {
+        if (id === 1) done = /function\s+\w+\s*\(/.test(codeNoComment);
+        else if (id === 2) done = /if\s*\(/.test(codeNoComment) && /else/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "ai_knn") {
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = hasLoop && /Math\.hypot/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "ai_bayes") {
+        if (id === 1) done = /(const|let)\s+\w*[Ww]ords/.test(codeNoComment);
+        else if (id === 2) done = hasLoop && /msg\.includes/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "ai_perceptron") {
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = hasLoop && /err/.test(codeNoComment) && /w0|w1|b/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "ai_recommend") {
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = /Math\.(sqrt|cos)/.test(codeNoComment) || /\.\s*dot/.test(codeNoComment);
+        else if (id === 3) done = hasDraw && finished;
+      } else if (project.slug === "ai_network") {
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = hasLoop && /w1|w2/.test(codeNoComment);
         else if (id === 3) done = hasDraw && finished;
       }
     } else if (project.slug === "stars") {
@@ -2118,6 +2155,37 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 1) return "准备面额数组 const coins = [25,10,5,1] 和要凑的金额 amount。";
       if (stepId === 2) return "贪心：从最大面额开始，while (amount >= coins[i]) 就不断 amount = amount - coins[i] 并记下用掉的硬币。";
       if (stepId === 3) return "把用掉的硬币画出来，点「运行」看是不是用最少的硬币凑出了金额！";
+    }
+  } else if (AI_CODE_SLUGS.includes(slug)) {
+    if (slug === "ai_tree") {
+      if (stepId === 1) return "准备一份「特征→类别」的样本数据，比如几个 (天气, 是否出门) 的例子。";
+      if (stepId === 2) return "用 if / else 列出判断规则：先看某个特征，满足走左、不满足走右，把样本分到两类里。";
+      if (stepId === 3) return "把分类结果画出来，点「运行」看规则如何把新样本归到对应类别！";
+    }
+    if (slug === "ai_knn") {
+      if (stepId === 1) return "准备已知类别的点（红队 / 蓝队）和一个待判定点。";
+      if (stepId === 2) return "用 Math.hypot 算待判定点到每个点的距离，取最近的 K 个，看多数属于哪一类。";
+      if (stepId === 3) return "把点和判定结果画出来，点「运行」看「少数服从多数」如何分类！";
+    }
+    if (slug === "ai_bayes") {
+      if (stepId === 1) return "准备两组词表：广告词和正常词，再准备一封待判断的邮件。";
+      if (stepId === 2) return "用 for 循环配合 msg.includes(词) 统计命中两组词的数量。";
+      if (stepId === 3) return "把两组计数画成柱子，点「运行」看哪一边的「证据」更多，从而判定！";
+    }
+    if (slug === "ai_perceptron") {
+      if (stepId === 1) return "准备带标签的点（0 类 / 1 类）和初始权重 w0、w1、偏置 b。";
+      if (stepId === 2) return "循环里预测 pred，算误差 err = 真实 - 预测，错了就 w = w + err * 输入，一步步「学」出分界线。";
+      if (stepId === 3) return "把点和分界线画出来，点「运行」看感知机如何把两类点分开！";
+    }
+    if (slug === "ai_recommend") {
+      if (stepId === 1) return "用喜好向量描述你和几个「其他用户」对几部作品的评分。";
+      if (stepId === 2) return "用点积 / 余弦相似度算出最像你的那个人，再推荐他喜欢而你还没看过的。";
+      if (stepId === 3) return "把推荐结果画出来，点「运行」看「朋友的喜好」如何变成你的推荐！";
+    }
+    if (slug === "ai_network") {
+      if (stepId === 1) return "准备好输入节点、权重和偏置，把三层网络画出来（输入→隐藏→输出）。";
+      if (stepId === 2) return "逐层乘权重、加偏置，把输入从输入层传到隐藏层再到输出层（前向传播）。";
+      if (stepId === 3) return "标注每个节点数值和最终输出，点「运行」看一次「推理」是怎么算出来的！";
     }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
