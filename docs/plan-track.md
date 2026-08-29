@@ -13,7 +13,7 @@
 
 ## 一、6-8 岁阶段（图形化启蒙 · Blockly 海龟/二零）
 
-> 现状：已建成 **235 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **53 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；P·网页/小游戏 6/6（Phase 2e 铺满：计算器/待办/记忆/打字/平台跳跃/聊天机器人，安全 DOM 面板基建已建成）；L·算法 8/8（Phase 3a 铺满：冒泡/二分/栈队列/BFS/递归/素数/串频次/贪心，算法可视化地基已建）；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
+> 现状：已建成 **237 个**项目（6-8 阶段 **107 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **53 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；P·网页/小游戏 6/6（Phase 2e 铺满：计算器/待办/记忆/打字/平台跳跃/聊天机器人，安全 DOM 面板基建已建成）；L·算法 8/8（Phase 3a 铺满：冒泡/二分/栈队列/BFS/递归/素数/串频次/贪心，算法可视化地基已建）；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
 Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`）；
 Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random`/`creative_generative`/`creative_tree`/`creative_terrain`/`creative_firework`）。
 至此 **Phase 2（画布渲染基建 + M/N/O/P 四个分类）全部完成**，Phase 3a（L·算法）/ 3b（Q·AI）/ 3c（R·毕业项目）也已相继完成，13-16 阶段 8 分类均已满编。
@@ -150,7 +150,7 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
   - ✅ 互动绘本游戏（`interactive_book` · 舞台点击事件 + 如果碰到星星条件 + 飞向星星收集，事件/条件/收集综合，已上线）
 - 后续可在工坊内沉淀更多"主题挑战"（如电子贺卡 / 互动绘本）作为可选灵感，而非强制任务。
 
-> **6-8 阶段小计**：11 分类，已完成 **105 个引导项目**（含分类11·综合 4 个总结性项目）+ 造物工坊。引导项目明细：分类1·序列 11/11、分类2·循环 10/10、分类3·画笔 10/10、分类4·事件 10/10、分类5·条件 10/10、分类6·游戏 10/10、分类7·故事 10/10、分类8·音乐 10/10、分类9·数学 10/10、分类10·科学 10/10、分类11·综合 4/4。
+> **6-8 阶段小计**：11 分类，已完成 **107 个引导项目**（含分类11·综合 6 个总结性项目）+ 造物工坊。引导项目明细：分类1·序列 11/11、分类2·循环 10/10、分类3·画笔 10/10、分类4·事件 10/10、分类5·条件 10/10、分类6·游戏 10/10、分类7·故事 10/10、分类8·音乐 10/10、分类9·数学 10/10、分类10·科学 10/10、分类11·综合 6/6。
 
 ---
 
@@ -445,11 +445,11 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 
 | 阶段 | 分类数 | 项目数 | 已完成 | 待解锁关键能力 |
 |---|---|---|---|---|
-| 6-8 岁 | 11 | 105 | **105** + 造物工坊（含分类11·综合 4 个总结项目） | 分类7·故事 ✅ / 分类10·科学 ✅ / 分类11·综合 ✅ / 造物工坊 ✅ 全部交付 |
+| 6-8 岁 | 11 | 107 | **107** + 造物工坊（含分类11·综合 6 个总结项目） | 分类7·故事 ✅ / 分类10·科学 ✅ / 分类11·综合 ✅ / 造物工坊 ✅ 全部交付 |
 | 9-12 岁 | 10 | 77 | **77** | 全部轻量运行时已落地（含列表 7 原语 / 时间轴引擎）；9-12 阶段 10 分类全部满编 |
 | 13-16 岁 | 8 | 53 | **53**（K·js 8/8 + L·algo 8/8 + M·phys 7/7 + N·dataviz 7/7 + O·creative 6/6 + P·web 6/6 + Q·ai 6/6 + R·capstone 5/5） | 文本 JS 模式 / 画布渲染基建 / 算法可视化（L）/ AI 启蒙（Q）/ 毕业项目（R）八分类全部满编，13-16 阶段整体交付完成 |
 
-**当前下一步**：6-8（105/105）、9-12（77/77）、13-16（53/53）三阶段已全部满编，全站累计 **235 个**引导项目（含造物工坊）均已上线。
+**当前下一步**：6-8（107/107）、9-12（77/77）、13-16（53/53）三阶段已全部满编，全站累计 **237 个**引导项目（含造物工坊）均已上线。
 按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序，**Phase 0/1**（K·js 8 项）、**Phase 2a-2e**（M/N/O/P 四个画布分类 26 项 + DOM 基建）、**Phase 3a**（L·算法 8 项）、**Phase 3b**（Q·AI 启蒙 6 项）、**Phase 3c**（R·毕业项目 5 项）全部完成——53 个 codeMode 项目全部上线并已通过 53 关链式浏览器冒烟。至此「造物星球」全课程交付完毕。
 后续可考虑：① 「真交互」（鼠标跟随 / 点击事件回调）作为可选增强；② 内容/教学打磨与线上数据复盘。
 
@@ -463,7 +463,7 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 7. 部署 gh-pages 后验证 `/learn/<slug>` 与 `/certificate/<slug>` 返回 200。
 8. **回写本表**：把对应行 ⬜ 改为 ✅ 并补 slug。
 
-> 约定：所有新增项目默认接入对应阶段的 `projectSlugs`（stage-6-8 已含 105 项；stage-9-12 已含 77 项；stage-13-16 已含 10 项）。每次完善后同步更新本表，保证「计划」与「实况」一致。
+> 约定：所有新增项目默认接入对应阶段的 `projectSlugs`（stage-6-8 已含 107 项；stage-9-12 已含 77 项；stage-13-16 已含 10 项）。每次完善后同步更新本表，保证「计划」与「实况」一致。
 >
 > **13-16 内容组织约定**：按分类拆文件夹，与 9-12 阶段同一套约定 ——
 > `content/stage-13-16/<cat>/<slug>.ts` + `content/stage-13-16/<cat>/index.ts` 聚合成 `stage13<Cat>Projects`，

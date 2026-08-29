@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { BASE_PATH } from "@/lib/basePath";
+import AnalyticsBootstrap from "@/components/AnalyticsBootstrap";
+import RouteTracker from "@/components/RouteTracker";
 
 export const metadata: Metadata = {
   title: "造物星球 - 和二零一起，把想法种成作品",
@@ -17,7 +19,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" className="h-full antialiased">
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <AnalyticsBootstrap />
+        <RouteTracker />
+        {children}
+      </body>
     </html>
   );
 }

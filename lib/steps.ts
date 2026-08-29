@@ -180,6 +180,7 @@ const SCIENCE_SLUGS = [
  * 判定同样基于真实 JS 标记，不依赖积木类型名。完成判定以「步骤」为准（各项目无目标标记判定需求）。 */
 const PBL_SLUGS = [
   "singing_picture", "two_actor_show", "my_solar_system", "interactive_book",
+  "my_garden", "my_band",
 ];
 
 /** 分类 A · 函数与自定义积木（9-12 阶段，全 8 项）。判定基于真实 JS 标记：定义了函数、调用了函数。 */
@@ -1312,6 +1313,16 @@ export function computeSteps(
         if (id === 1) done = clickFired;
         else if (id === 2) done = code.includes("__runtime.touchingStar()") && code.includes("__runtime.gotoStar");
         else if (id === 3) done = logs.some((log) => log.includes("所有星星都收集完了")) || finished;
+      } else if (project.slug === "my_garden") {
+        // 我的小花园：落笔 + 循环画边框 + 说出花园名字（综合 draw + story）
+        if (id === 1) done = code.includes("__runtime.penDown()");
+        else if (id === 2) done = code.includes("__runtime.move") && code.includes("__runtime.turn");
+        else if (id === 3) done = sayCount >= 1 && finished;
+      } else if (project.slug === "my_band") {
+        // 我的小乐队：弹奏音符 + 循环重复旋律（综合 music + loop）
+        if (id === 1) done = startFired;
+        else if (id === 2) done = audioCount >= 1;
+        else if (id === 3) done = audioCount >= 3 && finished;
       }
     }
     else if (FN_SLUGS.includes(project.slug)) {
@@ -2060,6 +2071,16 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 2) return "在事件里放「如果 碰到星星 那么 说 找到星星啦」，再接三个「飞向星星 1/2/3 号」收集起来。";
       if (stepId === 3) return "点「运行」后点一下舞台，二零会收集完所有星星并说「绘本讲完啦」，这本互动绘本就完成咯！";
     }
+    if (slug === "my_garden") {
+      if (stepId === 1) return "先放绿色「落笔」，二零才会画出花园的边框。";
+      if (stepId === 2) return "把「移动」和「右转」放进「重复执行 4 次」里，二零就能转着圈画出方方的花圃。";
+      if (stepId === 3) return "最后接一个紫色「说」，让二零介绍「这是我的小花园！」，点运行看它又画又说～";
+    }
+    if (slug === "my_band") {
+      if (stepId === 1) return "先拖一个绿色「当开始运行」，里面放几个紫色「弹奏音符」（do、re、mi、fa）。";
+      if (stepId === 2) return "把这几个音符整体放进「重复执行 2 次」，旋律就会循环演奏。";
+      if (stepId === 3) return "点「运行」，听二零的小乐队是不是把旋律奏出来了！";
+    }
     if (slug === "two_actor_chat") {
       if (stepId === 1) return "拖一个绿色「当开始运行」事件，程序才会启动。";
       if (stepId === 2) return "用「控制角色 二零」让二零说话，再用「控制角色 三七」让三七接话——两个角色都要开口才算对话哦。";
@@ -2255,4 +2276,69 @@ export function coach(slug: string, stepId: number): string {
     }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
+}
+
+/**
+ * P1 教学有效性：把运行时抛出的错误（Runtime 内部会 log 为「[系统] 程序出错：…」）
+ * 翻译成孩子能懂的中文友好提示，按错误类型给出针对性辅导。
+ * 这样孩子写错代码时不再是「运行了但没反应」，而是得到具体、可执行的下一步。
+ */
+export function diagnoseRuntimeError(errorLine: string): string {
+  const msg = errorLine.replace(/^\[系统\]\s*程序出错[:：]\s*/, "").trim();
+  const m = msg.toLowerCase();
+
+  // 语法错误：括号 / 引号 / 分号 / 关键字 配对问题
+  if (
+    /syntaxerror/.test(m) ||
+    /unexpected (token|end of|end|char|identifier|;|\}|\))/.test(m) ||
+    /missing (operator|\)|\}|\]|;|argument)/.test(m) ||
+    /unterminated/.test(m) ||
+    /expected .* but/.test(m)
+  ) {
+    return "二零读不懂这段代码的写法啦～ 最常见的原因是：括号 ()、花括号 {}、方括号 [] 或引号 '' \"\" 没有成对出现，或者多写 / 少写了分号 ;。先检查报错位置附近，把没配对的符号补好，再点运行吧！（注意：中文括号「」和英文括号 () 是不一样的哦）";
+  }
+
+  // 引用错误：名字未声明 / 拼写错
+  if (/is not defined/.test(m) || /referenceerror/.test(m)) {
+    return "代码里出现了一个二零不认识的名字（通常是 ReferenceError）。多半是：① 变量或函数名拼写错了；② 还没用 let / const 声明就用；③ 把中文标点（，。；）当成了英文符号。核对一下名字是不是写对了？";
+  }
+
+  // 类型错误：函数名拼错 / 对 undefined 操作
+  if (
+    /typeerror/.test(m) ||
+    /is not a function/.test(m) ||
+    /cannot read propert/.test(m) ||
+    /undefined is not/.test(m)
+  ) {
+    return "某个东西的用法不太对（TypeError）。多半是：① 函数名拼错了（比如把 drawCircle 写成 drawCirle）；② 对一个空的东西（undefined）做了操作。检查一下你调用的函数名和参数对不对？";
+  }
+
+  // 范围错误：循环过大 / 无限循环
+  if (/rangeerror/.test(m)) {
+    return "有个数值超出了合理范围（RangeError），常见原因是循环次数写得太夸张，或者陷入了无限循环卡住了。检查一下循环的次数有没有写得过大？";
+  }
+
+  return `二零在运行代码时遇到了一个问题：${msg.slice(0, 80)}。换个写法再试试，或者点一下「看示范」参考一下～`;
+}
+
+/**
+ * 运行前语法预检（仅 codeMode）。用 new Function 编译一次，能在不真正执行的情况下
+ * 抓出语法错误并拿到精确行号，给孩子更精准的定位提示（比等运行时 log 更友好）。
+ * 返回友好提示字符串；无语法问题则返回 null。
+ */
+export function precheckSyntax(code: string): string | null {
+  try {
+    // eslint-disable-next-line no-new, @typescript-eslint/no-implied-eval
+    new Function("__runtime", code);
+    return null;
+  } catch (e) {
+    const err = e as Error;
+    const m = err.message.toLowerCase();
+    const lineMatch = /<anonymous>:(\d+):(\d+)/.exec(err.stack || "");
+    const pos = lineMatch ? `（大约在第 ${lineMatch[1]} 行）` : "";
+    if (/syntaxerror/.test(m) || /unexpected|unterminated|missing/.test(m)) {
+      return `你的代码有语法小问题${pos}，二零读不懂啦～ 最常见的是括号 ()、花括号 {}、引号 '' 没有成对出现，或多 / 少了分号 ;。先把这些符号配对好再运行吧！`;
+    }
+    return `你的代码有个写法问题${pos}：${err.message.slice(0, 80)}。检查一下再运行？`;
+  }
 }

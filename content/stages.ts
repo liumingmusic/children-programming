@@ -25,7 +25,7 @@ export const stages: Stage[] = [
       "word_chain", "birthday_party", "good_night", "two_talk", "a_day", "magic_show",
       "day_night", "rain", "snow", "volcano", "color_wheel", "rainbow_bridge", "seed_grow",
       "earth_sun", "food_chain", "moon_phase", "singing_picture", "two_actor_show",
-      "my_solar_system", "interactive_book"
+      "my_solar_system", "interactive_book", "my_garden", "my_band"
     ],
   },
   {

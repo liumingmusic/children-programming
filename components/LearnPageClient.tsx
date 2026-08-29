@@ -20,8 +20,9 @@ import type { CourseProject } from "@/courses";
 import MemoryGame from "@/components/MemoryGame";
 import { getNextProject, getStageOfProject, getProject } from "@/courses";
 import { loadProject, saveProject, markProgress, getProgress, getAllProgress, recordSessionTime } from "@/lib/db";
-import { computeSteps, coach, isGoalAchieved } from "@/lib/steps";
+import { computeSteps, coach, isGoalAchieved, diagnoseRuntimeError, precheckSyntax } from "@/lib/steps";
 import { isUnlocked, getPreviousSlug } from "@/lib/path";
+import { trackEvent, trackFirstCompletion } from "@/lib/analytics";
 
 const STAGE_WIDTH = 480;
 const STAGE_HEIGHT = 360;
@@ -177,6 +178,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           progressRef.current = { completed: true, stars: 3 };
           setProgress(progressRef.current);
           markProgress(project.slug, true, 3).catch(console.error);
+          // 埋点：项目达成完成（PM 核心转化指标：完成率 / 卡点）
+          trackEvent("project_complete", {
+            slug: project.slug,
+            stage: getStageOfProject(project.slug)?.id ?? "",
+          });
         }
       }
     }, project.stars
@@ -200,6 +206,12 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
         .filter((c): c is { id: string; species: Species; name: string } => Boolean(c)),
     });
     runtimeRef.current = runtime;
+
+    // 埋点：进入项目（仅在解锁、渲染完成后上报一次入口事件）
+    trackEvent("project_open", {
+      slug: project.slug,
+      stage: getStageOfProject(project.slug)?.id ?? "",
+    });
 
     getProgress(project.slug).then((p) => {
       if (p) {
@@ -260,6 +272,9 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       return;
     }
 
+    // 埋点：点击运行（运行次数 → 完成次数，即为「尝试转化率」）
+    trackEvent("run_click", { slug: project.slug });
+
     // ===== 分类10·科学：时间轴模式（走 Runtime 独立时间轴子系统，与动作队列隔离）=====
     if (project.timeline) {
       runtime.reset();
@@ -267,6 +282,12 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       runtime.runTimelineCode(code);
       // 时间轴项目：运行即「播放科学现象」，步骤判定只看是否搭出了预期轨道（见 steps.ts SCIENCE_SLUGS）
       const finalLogs = runtimeRef.current?.getState().log ?? [];
+      // P1 教学有效性：先诊断运行期报错，给出友好提示而非「没反应」
+      const timelineErr = finalLogs.find((l) => l.includes("[系统] 程序出错"));
+      if (timelineErr) {
+        setHint(diagnoseRuntimeError(timelineErr));
+        return;
+      }
       const st = computeSteps(project, code, finalLogs);
       if (!st.every((s) => s.done)) {
         const firstUndone = st.find((s) => !s.done);
@@ -279,12 +300,39 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       return;
     }
 
+    // P1 教学有效性：codeMode 运行前语法预检，给出精确行号的友好提示
+    if (project.codeMode) {
+      const syntaxHint = precheckSyntax(code);
+      if (syntaxHint) {
+        trackEvent("run_error", { slug: project.slug, message: "syntax_precheck" });
+        setHint(syntaxHint);
+        setTimeout(() => setHint(null), 6000);
+        return;
+      }
+    }
+
     runtime.reset();
     setSaveStatus("idle");
-    await editor.run(runtime);
+    try {
+      await editor.run(runtime);
+    } catch (err) {
+      // 埋点：学生代码运行报错（区分「卡在哪一步」的核心信号）
+      trackEvent("run_error", {
+        slug: project.slug,
+        message: String((err as Error)?.message ?? err),
+      });
+      // 极少数情况下 runtime 之外的异常（如音频上下文），也给友好提示
+      setHint("运行出错了，二零遇到了一点问题，换个写法再试试～");
+      return;
+    }
 
-    // 运行后给出针对性辅导：聚焦第一个未完成的步骤
+    // 运行后给出针对性辅导：优先诊断运行期报错，再聚焦第一个未完成的步骤
     const finalLogs = runtimeRef.current?.getState().log ?? [];
+    const runErr = finalLogs.find((l) => l.includes("[系统] 程序出错"));
+    if (runErr) {
+      setHint(diagnoseRuntimeError(runErr));
+      return;
+    }
     const st = computeSteps(project, code, finalLogs);
     if (!st.every((s) => s.done)) {
       const firstUndone = st.find((s) => !s.done);
@@ -306,7 +354,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const toggleExample = useCallback(() => {
     setShowBrief(false);
     setShowExample((s) => !s);
-  }, []);
+    trackEvent("example_view", { slug: project.slug });
+  }, [project.slug]);
 
   // 进入编辑器时拉取「已保存作品」用于还原画布（由 BlocklyEditor 在注入完成后调用，
   // 彻底消除「加载早于注入 / editorRef 未就绪」导致的空白画布）。
@@ -421,6 +470,14 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   const backHref = stage ? `/missions/${stage.id}` : "/missions";
   const nextProject = getNextProject(project.slug);
 
+  // 埋点：进入项目页（漏斗「曝光」）——衡量哪类项目被打开、流失发生在哪
+  useEffect(() => {
+    trackEvent("project_view", {
+      slug: project.slug,
+      stage: getStageOfProject(project.slug)?.id ?? "",
+    });
+  }, [project.slug]);
+
   // Trigger toasts when steps newly complete
   useEffect(() => {
     const newToasts: StepToast[] = [];
@@ -449,6 +506,9 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     }
     if (progress.completed && !prevCompletedRef.current) {
       setDoneBanner(true);
+      trackEvent("project_completed", { slug: project.slug });
+      // 首次完成：核心是「新用户是否完成首个作品」的转化指标
+      trackFirstCompletion(project.slug, getStageOfProject(project.slug)?.id ?? "");
     }
     prevCompletedRef.current = progress.completed;
   }, [progress.completed]);
