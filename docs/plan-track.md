@@ -13,10 +13,10 @@
 
 ## 一、6-8 岁阶段（图形化启蒙 · Blockly 海龟/二零）
 
-> 现状：已建成 **210 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **28 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
+> 现状：已建成 **216 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **34 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；P·网页/小游戏 6/6（Phase 2e 铺满：计算器/待办/记忆/打字/平台跳跃/聊天机器人，安全 DOM 面板基建已建成）；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
 Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`）；
 Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random`/`creative_generative`/`creative_tree`/`creative_terrain`/`creative_firework`）。
-至此 **Phase 2（画布渲染基建 + M/N/O 三个分类）全部完成**，13-16 剩下 L / P / Q / R 四个分类。
+至此 **Phase 2（画布渲染基建 + M/N/O/P 四个分类）全部完成**，13-16 剩下 L / Q / R 三个分类。
 > 概念梯度沿用 Code.org + ScratchJr + Blockly Games 的「序列→循环→事件→条件」主线。
 
 ### 分类 1 · 基础序列与方向（序列）　✅（11/11 完成）
@@ -289,7 +289,7 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 | **2b** | M 物理补齐（抛物线 / 重力模拟 / 弹簧振子 / 圆周运动 / 粒子系统） | M·`phys` | 5 | ✅ 完成（本分类 7/7 满编） |
 | **2c** | **N 数据可视化**（柱状图 / 折线图 / 饼图 / 天气图 / 成绩分布 / 词云 / 实时仪表盘） | N·`dataviz` | 7 | ✅ 完成（本分类 7/7 满编） |
 | **2d** | O 创意编程（曼陀罗 / 随机艺术 / 生成艺术 / 分形树 / 噪声地形 / 粒子烟花） | O·`creative` | 6 | ✅ 完成（本分类 6/6 满编） |
-| **2e** | **P 网页 / 小游戏**：先建 **DOM 渲染基建**（安全 DOM 面板），再做计算器 / 待办 / 记忆 / 打字… | P·`web` | 6 | ⬜ 下一步（须先建 DOM 能力） |
+| **2e** | **P 网页 / 小游戏**：先建 **DOM 渲染基建**（安全 DOM 面板），再做计算器 / 待办 / 记忆 / 打字 / 平台跳跃 / 聊天机器人 | P·`web` | 6 | ✅ 完成（见下方分类 P） |
 | **3a** | L 算法与数据结构（冒泡排序可视化 / 二分查找 / 栈与队列 / BFS 迷宫 / 递归 / 素数 / 贪心） | L·`algo` | 8 | ⬜ 待做 |
 | **3b** | Q 人工智能启蒙（决策树 / 分类器 / 规则聊天机器人 / 推荐直觉 / 神经网络可视化） | Q·`ai` | 6 | ⬜ 待做 |
 | **3c** | R 毕业项目（完整小游戏 / 数据作品 / 创意工具 / 作品集…） | R·`capstone` | 5 | ⬜ 待做 |
@@ -398,12 +398,12 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 - ✅ [JS模式+粒子] 粒子烟花（`creative_firework` · 均匀炸开 + 重力 + **空气阻尼** 0.97，否则会飞出画面）
 
 ### 分类 P · 网页 / 小游戏开发（Web / Game）
-- ⬜ [需: JS模式+DOM] 计算器网页
-- ⬜ [需: JS模式+DOM] 待办网页
-- ⬜ [需: JS模式+DOM] 记忆游戏
-- ⬜ [需: JS模式+画布] 平台跳跃
-- ⬜ [需: JS模式+DOM] 打字游戏
-- ⬜ [需: JS模式+后端] 简易聊天室
+- ✅ [JS模式+DOM] 迷你计算器（`web_calculator` · 输入框收集算式 → 按钮触发 → 安全求值 Function 写回面板）
+- ✅ [JS模式+DOM] 会生长的待办清单（`web_todo` · 列表 + 清空重渲染，状态驱动界面雏形）
+- ✅ [JS模式+DOM] 记忆力大挑战（`web_memory` · 展示→等待隐藏→凭记忆输入→比对）
+- ✅ [JS模式+画布/循环] 平台跳跃（`web_platformer` · 游戏循环 + 键盘 + 重力，实时操控）
+- ✅ [JS模式+DOM] 打字练习小游戏（`web_typing` · 随机出题→输入→比对→计分）
+- ✅ [JS模式+DOM] 小鹦鹉聊天室（`web_chatbot` · 关键词规则回复 + 列表展示对话，蓝图「后端聊天室」改为本地规则机器人，零依赖）
 
 ### 分类 Q · 人工智能启蒙（AI）
 - ⬜ [需: 列表+逻辑] 猜动物（决策树）
@@ -420,14 +420,15 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 - ⬜ [需: 综合] 开源贡献
 - ⬜ [需: 综合] 作品集网站
 
-> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **28**
+> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **34**
 > （K·`js` **8/8 铺满**：Phase 0 试点 `js_square` + Phase 1 七个 `js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`；
 > M·`phys` **7/7 满编**：`phys_fall` 自由落体 / `phys_bounce` 弹跳球 / `phys_parabola` 抛物线 / `phys_gravity` 重力对比 /
 > `phys_spring` 弹簧振子 / `phys_orbit` 圆周运动 / `phys_particle` 粒子系统；
 > N·`dataviz` **7/7 满编**：`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`；
-> O·`creative` **6/6 满编**：`creative_mandala`/`creative_random`/`creative_generative`/`creative_tree`/`creative_terrain`/`creative_firework`）。
-> JS 模式地基与画布渲染基建均已落地，**Phase 2 的四个画布分类（M/N/O 全部 + 地基）已全部铺满**；
-> 分类 L / P / Q / R 按上方「推进路线图」的 Phase 节奏铺开，其中 P·`web` 还需先补 DOM 渲染能力。
+> O·`creative` **6/6 满编**：`creative_mandala`/`creative_random`/`creative_generative`/`creative_tree`/`creative_terrain`/`creative_firework`；
+> P·`web` **6/6 满编**：`web_calculator`/`web_todo`/`web_memory`/`web_typing`/`web_platformer`/`web_chatbot`，安全 DOM 面板基建已落地）。
+> JS 模式地基与画布渲染基建均已落地，**Phase 2 的四个画布分类（M/N/O/P 全部 + 地基）已全部铺满**；
+> 分类 L / Q / R 按上方「推进路线图」的 Phase 节奏铺开。
 
 ---
 
@@ -437,13 +438,11 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 |---|---|---|---|---|
 | 6-8 岁 | 11 | 105 | **105** + 造物工坊（含分类11·综合 4 个总结项目） | 分类7·故事 ✅ / 分类10·科学 ✅ / 分类11·综合 ✅ / 造物工坊 ✅ 全部交付 |
 | 9-12 岁 | 10 | 77 | **77** | 全部轻量运行时已落地（含列表 7 原语 / 时间轴引擎）；9-12 阶段 10 分类全部满编 |
-| 13-16 岁 | 8 | 53 | **28**（K·js 8/8 + M·phys 7/7 + N·dataviz 7/7 + O·creative 6/6） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地，M、N、O 三个分类全部铺满** / DOM（待 Phase 2e）/ 算法与数据（待 Phase 3） |
+| 13-16 岁 | 8 | 53 | **34**（K·js 8/8 + M·phys 7/7 + N·dataviz 7/7 + O·creative 6/6 + P·web 6/6） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地，M、N、O、P 四个分类全部铺满** / 算法与数据（待 Phase 3）/ AI 启蒙（待 Phase 3b）/ 毕业项目（待 Phase 3c） |
 
 **当前下一步**：6-8（105/105）与 9-12（77/77）已全部满编，只剩 13-16 阶段。
-按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，当前处于 **Phase 2d 已完成 → 下一步 Phase 2e**（P·网页 / 小游戏 6 项）。
-⚠️ **Phase 2e 是本阶段最后一个需要新建运行时能力的 Phase**：画布只能画像素，做不了按钮 / 输入框 / 列表。
-需先设计「安全 DOM 面板」（受控容器 + 有限 API，如 `__ui.button()` / `__ui.text()` / `__ui.input()`），
-**不能直接把 `document` 交给学生代码**——理由和画布一样，会破坏舞台的 React 渲染。
+按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，**Phase 2e（P·网页 / 小游戏 6 项）已完成**——安全 DOM 面板（`__runtime.ui.*` 受控 API）已落地，6 个 web 项目全部上线。
+下一步进入 **Phase 3**：L 算法与数据结构 → Q 人工智能启蒙 → R 毕业项目。
 另外，「真交互」（鼠标跟随 / 点击事件回调）也依赖这套基建，届时可与分类 O 的「交互视觉」一并补上。
 
 **如何完善（单会话工作流）**：

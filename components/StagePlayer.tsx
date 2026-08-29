@@ -14,6 +14,9 @@ interface StagePlayerProps {
     onSeek: (t: number) => void;
     onSpeed: (s: number) => void;
   };
+  /** 安全 DOM 面板（13-16 分类 P·网页 / 小游戏）：转发按钮点击与输入框变更。 */
+  onUiClick?: (id: string) => void;
+  onUiChange?: (id: string, value: string) => void;
 }
 
 // 二零在画布中的固定屏幕尺寸（不再跟随相机自适应缩放 scale，避免小图形时被放大到 300px+ 盖住笔迹）。
@@ -223,7 +226,7 @@ interface View {
   cy: number;
 }
 
-export default function StagePlayer({ state, scene, onStageClick, onTimeline }: StagePlayerProps) {
+export default function StagePlayer({ state, scene, onStageClick, onTimeline, onUiClick, onUiChange }: StagePlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const starsRef = useRef<{ x: number; y: number; r: number; alpha: number; twinkle: number }[]>([]);
@@ -604,6 +607,66 @@ export default function StagePlayer({ state, scene, onStageClick, onTimeline }: 
       aria-label="舞台预览区"
     >
       <canvas ref={canvasRef} className="h-full w-full rounded-lg" aria-label="舞台预览区" />
+
+      {/* 安全 DOM 面板（13-16 分类 P·网页 / 小游戏）：渲染学生代码声明的 UI 元素 */}
+      {state.ui && state.ui.length > 0 && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="absolute left-2 top-2 flex max-h-[80%] w-[58%] flex-col gap-2 overflow-auto rounded-xl bg-white/92 p-3 shadow-lg backdrop-blur-sm"
+        >
+          {state.ui.map((el) => {
+            if (el.kind === "hr") {
+              return <hr key={el.id} className="border-[#04342C]/15" />;
+            }
+            if (el.kind === "button") {
+              return (
+                <button
+                  key={el.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUiClick?.(el.id);
+                  }}
+                  className="self-start rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                  style={{ backgroundColor: el.color ?? "#F59E0B" }}
+                >
+                  {el.text}
+                </button>
+              );
+            }
+            if (el.kind === "input") {
+              return (
+                <input
+                  key={el.id}
+                  value={el.value ?? ""}
+                  placeholder={el.placeholder}
+                  onChange={(e) => onUiChange?.(el.id, e.target.value)}
+                  className="w-full rounded-lg border border-[#04342C]/20 bg-white px-3 py-2 text-sm text-[#04342C] outline-none focus:border-[#F59E0B]"
+                />
+              );
+            }
+            if (el.kind === "heading") {
+              return (
+                <div
+                  key={el.id}
+                  className="font-bold leading-snug"
+                  style={{ color: el.color ?? "#04342C", fontSize: el.size ?? 18 }}
+                >
+                  {el.text}
+                </div>
+              );
+            }
+            return (
+              <div
+                key={el.id}
+                className="leading-relaxed"
+                style={{ color: el.color ?? "#04342C", fontSize: el.size ?? 14 }}
+              >
+                {el.text}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* 缩放控件 */}
       <div className="absolute bottom-2 right-2 flex items-center gap-1">

@@ -25,13 +25,32 @@ export interface CanvasShape {
   y: number;
   w?: number; // rect 宽
   h?: number; // rect 高
-  r?: number; // circle 半径
+  r?:  number; // circle 半径
   x2?: number; // line 终点
   y2?: number;
   text?: string; // text 内容
   size?: number; // text 字号（世界单位）
   width?: number; // line 线宽（屏幕像素）
   color?: string;
+}
+
+/**
+ * 安全 DOM 面板元素（13-16 分类 P·网页 / 小游戏）。
+ * 画布只能画像素，做不了按钮 / 输入框 / 标题，故新增「受控 DOM 面板」：
+ * 学生用代码声明 UI 元素（__runtime.ui.*），运行时把这些描述写入 state.ui，
+ * 由 StagePlayer 渲染成真实 HTML（按钮 / 输入框 / 文本）。
+ * 这与「不直接把 ctx 交给学生」同一原则——UI 也走「声明 → state → React 渲染」，
+ * 不直接暴露 document，避免学生代码破坏 React 的渲染边界。
+ * 点击事件通过 id 回传运行时（onUiClick），由运行时派发预先登记的回调。
+ */
+export interface UIElement {
+  id: string;
+  kind: "text" | "heading" | "hr" | "button" | "input";
+  text?: string; // text / heading / button 的展示文案
+  value?: string; // input 当前值
+  placeholder?: string; // input 占位提示
+  color?: string;
+  size?: number; // heading 字号（屏幕像素）
 }
 
 export interface Star {
@@ -211,6 +230,8 @@ export interface StageState {
   currentPath: PenPath | null;
   /** 学生用代码绘制的画布图元（13-16 分类 M/N/O/P）。每次运行开始时清空。 */
   shapes: CanvasShape[];
+  /** 安全 DOM 面板元素（13-16 分类 P·网页 / 小游戏）。由运行时 __runtime.ui.* 声明，StagePlayer 渲染成真实 HTML。 */
+  ui: UIElement[];
   penColor: number; // hue 0-360
   penSize: number; // 画笔粗细（屏幕像素）
   penDown: boolean;
@@ -809,6 +830,32 @@ export class Runtime {
   /** 时间轴子系统（分类10·科学）。所有 timeline 能力都委托给它，与 action 队列完全隔离。 */
   public timeline: TimelineEngine;
 
+  // ---- 安全 DOM 面板（13-16 分类 P·网页 / 小游戏）：受控 UI 元素 + 点击回调 ----
+  // UI 元素与点击回调分别存放：元素进 state.ui 供 React 渲染，回调按 id 存这里供派发。
+  private uiStore: UIElement[] = [];
+  private uiHandlers: Record<string, () => void> = {};
+  private uiSeq = 0;
+  /** 当前按键状态（游戏循环读取，如 __runtime.key("right")）。 */
+  private keyState: Record<string, boolean> = {};
+  /** 游戏循环函数（startLoop 注册，stopLoop 清空）。 */
+  private loopFn: ((dt: number) => void) | null = null;
+  private loopRaf: number | null = null;
+  private lastLoopTs = 0;
+  /** 是否启动过游戏循环：供「网页 / 小游戏」类完成判定（空程序为 false）。 */
+  loopStarted = false;
+
+  /** 受控 DOM 面板 API：学生用代码声明 UI（按钮 / 输入框 / 文本 / 标题 / 分隔线）。 */
+  ui: {
+    clear: () => void;
+    text: (text: string, opts?: { color?: string; size?: number }) => void;
+    heading: (text: string, opts?: { color?: string; size?: number }) => void;
+    hr: () => void;
+    button: (label: string, opts?: { onClick?: () => void; color?: string }) => void;
+    input: (opts?: { placeholder?: string; value?: string }) => string;
+    set: (id: string, value: string) => void;
+    value: (id: string) => string;
+  };
+
   constructor(
     width: number,
     height: number,
@@ -846,6 +893,7 @@ export class Runtime {
       penPaths: [],
       currentPath: null,
       shapes: [],
+      ui: [],
       penColor: 0,
       penSize: DEFAULT_PEN_SIZE,
       penDown: false,
@@ -868,8 +916,133 @@ export class Runtime {
       // 背景色相（昼夜/四季）：供时间轴 tween（PROP=bgHue）驱动，渲染层据此着色背景。
       bgHue: 0,
     };
-    // 时间轴引擎：构造即初始化（与 action 队列完全隔离，旧项目不调用它的方法即无副作用）
+    // 时间轴引擎：构造即初始化（与 action 队列完全隔离， 旧项目不调用它的方法即无副作用）
     this.timeline = new TimelineEngine(this);
+
+    // 受控 DOM 面板：把 __runtime.ui.* 方法绑定到运行时内部实现（回调按 id 存 uiHandlers）。
+    this.ui = {
+      clear: () => this.uiClear(),
+      text: (t, opts) => this.uiText(t, opts),
+      heading: (t, opts) => this.uiHeading(t, opts),
+      hr: () => this.uiHr(),
+      button: (label, opts) => this.uiButton(label, opts),
+      input: (opts) => this.uiInput(opts),
+      set: (id, value) => this.uiSet(id, value),
+      value: (id) => this.uiValue(id),
+    };
+  }
+
+  // ---- 安全 DOM 面板：API 实现 ----
+  private uiClear() {
+    this.uiStore = [];
+    this.uiHandlers = {};
+    this.state.ui = [];
+    this.emit();
+  }
+  private uiText(text: string, opts?: { color?: string; size?: number }) {
+    const id = `ui_${this.uiSeq++}`;
+    this.uiStore.push({ id, kind: "text", text: String(text), color: opts?.color, size: opts?.size });
+    this.state.ui = [...this.uiStore];
+    this.emit();
+  }
+  private uiHeading(text: string, opts?: { color?: string; size?: number }) {
+    const id = `ui_${this.uiSeq++}`;
+    this.uiStore.push({ id, kind: "heading", text: String(text), color: opts?.color, size: opts?.size });
+    this.state.ui = [...this.uiStore];
+    this.emit();
+  }
+  private uiHr() {
+    const id = `ui_${this.uiSeq++}`;
+    this.uiStore.push({ id, kind: "hr" });
+    this.state.ui = [...this.uiStore];
+    this.emit();
+  }
+  private uiButton(label: string, opts?: { onClick?: () => void; color?: string }) {
+    const id = `ui_${this.uiSeq++}`;
+    if (opts?.onClick) this.uiHandlers[id] = opts.onClick;
+    this.uiStore.push({ id, kind: "button", text: String(label), color: opts?.color });
+    this.state.ui = [...this.uiStore];
+    this.emit();
+  }
+  private uiInput(opts?: { placeholder?: string; value?: string }): string {
+    const id = `ui_${this.uiSeq++}`;
+    this.uiStore.push({ id, kind: "input", placeholder: opts?.placeholder ?? "", value: opts?.value ?? "" });
+    this.state.ui = [...this.uiStore];
+    this.emit();
+    return id;
+  }
+  private uiSet(id: string, value: string) {
+    const el = this.uiStore.find((e) => e.id === id);
+    if (el) {
+      el.value = String(value);
+      this.state.ui = [...this.uiStore];
+      this.emit();
+    }
+  }
+  private uiValue(id: string): string {
+    const el = this.uiStore.find((e) => e.id === id);
+    return el?.value ?? "";
+  }
+
+  /** 转发 UI 按钮点击：派发该元素预先登记的回调。 */
+  handleUiClick(id: string) {
+    const handler = this.uiHandlers[id];
+    if (handler) handler();
+    this.emit();
+  }
+
+  /** 转发 UI 输入框变更：写回运行时 store，供 __runtime.ui.value(id) 读取。 */
+  uiChange(id: string, value: string) {
+    this.uiSet(id, value);
+  }
+
+  // ---- 键盘状态 / 游戏循环（13-16 分类 P·平台跳跃等实时游戏）----
+  /** 记录按键按下 / 抬起（由前端 keydown / keyup 转发）。 */
+  setKey(name: string, pressed: boolean) {
+    this.keyState[name] = pressed;
+    this.emit();
+  }
+  /** 读某键是否正被按住（游戏循环里每帧查询）。 */
+  key(name: string): boolean {
+    return !!this.keyState[name];
+  }
+  /** 启动一个每帧执行的游戏循环（fn 收到 dt 秒）。直接改角色位置实现实时控制。 */
+  startLoop(fn: (dt: number) => void) {
+    this.stopLoop();
+    this.loopFn = fn;
+    this.loopStarted = true;
+    this.lastLoopTs = typeof performance !== "undefined" ? performance.now() : Date.now();
+    const step = (now: number) => {
+      if (!this.loopFn) return;
+      const dt = Math.max(0, Math.min(0.05, ((now - this.lastLoopTs) / 1000) || 0));
+      this.lastLoopTs = now;
+      this.loopFn(dt);
+      this.loopRaf = requestAnimationFrame(step);
+    };
+    this.loopRaf = requestAnimationFrame(step);
+  }
+  /** 停止游戏循环。 */
+  stopLoop() {
+    if (this.loopRaf !== null) {
+      cancelAnimationFrame(this.loopRaf);
+      this.loopRaf = null;
+    }
+    this.loopFn = null;
+  }
+  /** 直接设置当前控制角色的世界坐标（实时游戏用，不经过动画队列）。 */
+  setPos(x: number, y: number) {
+    const a = this.currentActor();
+    const dx = x - a.x;
+    const dy = y - a.y;
+    this.state.movedDistance += Math.sqrt(dx * dx + dy * dy);
+    a.x = x;
+    a.y = y;
+    this.emit();
+  }
+  /** 读取当前控制角色的世界坐标。 */
+  getPos(): { x: number; y: number } {
+    const a = this.currentActor();
+    return { x: a.x, y: a.y };
   }
 
   getState() {
@@ -919,6 +1092,10 @@ export class Runtime {
     this.state.penPaths = [];
     this.state.currentPath = null;
     this.state.shapes = [];
+    this.uiStore = [];
+    this.uiHandlers = {};
+    this.state.ui = [];
+    this.stopLoop();
     this.state.penColor = 0;
     this.state.penSize = DEFAULT_PEN_SIZE;
     this.state.penDown = false;
@@ -1515,6 +1692,8 @@ export class Runtime {
     this.state.shapes = [];
     this.state.penDown = false;
     this.companionEngaged = false; // 每次运行重置 engage 标记
+    this.stopLoop(); // 停掉上一轮遗留的游戏循环
+    this.uiClear(); // 清空上一轮遗留的 DOM 面板
     this.state.running = true;
     this.runningType = type;
     this.startClouds();

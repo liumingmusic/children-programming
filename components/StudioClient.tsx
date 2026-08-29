@@ -44,6 +44,7 @@ const INITIAL_STATE: StageState = {
   penPaths: [],
   currentPath: null,
   shapes: [],
+  ui: [],
   penColor: 0,
   penSize: 3,
   penDown: false,
@@ -125,17 +126,27 @@ export default function StudioClient() {
     };
   }, []);
 
-  // 键盘事件：把方向键转发给运行时（「按下按键」类自由创作可用）。
+  // 键盘事件：把方向键转发给运行时（「按下按键」类自由创作可用，并维护按键状态供游戏循环读取）。
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const map: Record<string, string> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
       const key = map[e.key];
       if (!key) return;
       e.preventDefault();
+      runtimeRef.current?.setKey(key, true);
       runtimeRef.current?.handleKeyPressed(key);
     };
+    const onKeyUp = (e: KeyboardEvent) => {
+      const map: Record<string, string> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
+      const key = map[e.key];
+      if (key) runtimeRef.current?.setKey(key, false);
+    };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
   }, []);
 
   const refreshWorks = useCallback(() => {
@@ -422,7 +433,12 @@ export default function StudioClient() {
           <div className="flex flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
             <h2 className="mb-2 text-sm font-medium text-[#04342C]">舞台预览</h2>
             <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#E6F1FB]">
-              <StagePlayer state={stageState} scene={undefined} />
+              <StagePlayer
+                state={stageState}
+                scene={undefined}
+                onUiClick={(id: string) => runtimeRef.current?.handleUiClick(id)}
+                onUiChange={(id: string, value: string) => runtimeRef.current?.uiChange(id, value)}
+              />
             </div>
           </div>
 

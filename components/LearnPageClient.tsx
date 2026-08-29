@@ -47,6 +47,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     penPaths: [],
     currentPath: null,
     shapes: [],
+    ui: [],
     penColor: 0,
     penSize: 3,
     penDown: false,
@@ -117,10 +118,26 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
         else return;
       }
       e.preventDefault();
+      // 同时记录按键状态（供平台跳跃等实时游戏循环读取）并触发「当按下按键」积木脚本
+      runtimeRef.current?.setKey(key, true);
       runtimeRef.current?.handleKeyPressed(key);
     };
+    const onKeyUp = (e: KeyboardEvent) => {
+      const map: Record<string, string> = {
+        ArrowUp: "up",
+        ArrowDown: "down",
+        ArrowLeft: "left",
+        ArrowRight: "right",
+      };
+      const key = map[e.key] ?? (e.key.length === 1 ? e.key.toLowerCase() : null);
+      if (key) runtimeRef.current?.setKey(key, false);
+    };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
   }, []);
 
   useEffect(() => {
@@ -631,20 +648,22 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
               <div className="flex flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
                 <h2 className="mb-2 text-sm font-medium text-[#04342C]">舞台预览</h2>
                 <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#E6F1FB]">
-                  <StagePlayer
-                    state={stageState}
-                    scene={project.scene}
-                    onStageClick={handleStageClick}
-                    onTimeline={
-                      project.timeline
-                        ? {
-                            onPlayPause: () => runtimeRef.current?.timeline.togglePlay(),
-                            onSeek: (t: number) => runtimeRef.current?.timeline.seek(t),
-                            onSpeed: (s: number) => runtimeRef.current?.timeline.setSpeed(s),
-                          }
-                        : undefined
-                    }
-                  />
+              <StagePlayer
+                state={stageState}
+                scene={project.scene}
+                onStageClick={handleStageClick}
+                onUiClick={(id: string) => runtimeRef.current?.handleUiClick(id)}
+                onUiChange={(id: string, value: string) => runtimeRef.current?.uiChange(id, value)}
+                onTimeline={
+                  project.timeline
+                    ? {
+                        onPlayPause: () => runtimeRef.current?.timeline.togglePlay(),
+                        onSeek: (t: number) => runtimeRef.current?.timeline.seek(t),
+                        onSpeed: (s: number) => runtimeRef.current?.timeline.setSpeed(s),
+                      }
+                    : undefined
+                }
+              />
                 </div>
               </div>
 

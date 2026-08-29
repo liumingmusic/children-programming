@@ -93,6 +93,21 @@ const CREATIVE_CODE_SLUGS = [
   "creative_firework",
 ];
 
+/**
+ * 13-16 分类 P · 网页 / 小游戏（web 分类，Phase 2e 铺满 6/6）。
+ * 这一分类首次引入「安全 DOM 面板」——学生用 __runtime.ui.* 声明按钮 / 输入框 / 文本 / 标题，
+ * 运行时把这些描述交给 StagePlayer 渲染成真实 HTML（而非画布像素）。判定仍基于**真实 JS 标记**：
+ *   - `__runtime.ui.input(`                   → 真的用输入框收集用户输入
+ *   - `__runtime.ui.button(` + `ui.value(` + `ui.set(` → 真的用按钮触发并回写结果（计算器）
+ *   - `.push(` + `ui.clear(`                  → 真的用列表存数据并刷新面板（待办 / 聊天）
+ *   - `ui.clear(` + `ui.input(` + `===`       → 真的先展示、再隐藏回忆、再比对（记忆）
+ *   - `__runtime.startLoop(` + `ui.key(` + `setPos(` + `v = v -` → 真的做了实时键盘操控游戏（跳跃）
+ * 空程序 / 只写注释必然不通过（最后一步还要求「程序执行完毕」日志）。
+ */
+const WEB_CODE_SLUGS = [
+  "web_calculator", "web_todo", "web_memory", "web_typing", "web_platformer", "web_chatbot",
+];
+
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
@@ -613,6 +628,57 @@ export function computeSteps(
         if (id === 1) done = hasArrayLiteral && usesTrig;
         else if (id === 2) done = hasDrag && hasClear && hasWait && hasLoop;
         else if (id === 3) done = finished;
+      }
+    } else if (WEB_CODE_SLUGS.includes(project.slug)) {
+      // 13-16 网页 / 小游戏：抓「学生真的用 DOM 面板交互 / 用游戏循环操控角色」的真实标记。
+      const codeNoComment = code.replace(/\/\/.*$/gm, "");
+      const hasInput = code.includes("__runtime.ui.input(");
+      const hasButton = code.includes("__runtime.ui.button(");
+      const hasValue = code.includes("__runtime.ui.value(");
+      const hasSet = code.includes("__runtime.ui.set(");
+      const hasShow = code.includes("__runtime.ui.text(") || code.includes("__runtime.ui.heading(");
+      const hasClear = code.includes("__runtime.ui.clear(");
+      const hasPush = /\.\s*push\s*\(/.test(codeNoComment);
+      const hasIf = /\bif\s*\(/.test(codeNoComment);
+      const hasCompare = /===|!==/.test(codeNoComment);
+      const hasStartLoop = code.includes("__runtime.startLoop(");
+      const hasKey = code.includes("__runtime.key(");
+      const hasSetPos = code.includes("__runtime.setPos(");
+      // 重力 / 速度的「自更新」（v = v - g*dt 形态），平台跳跃的核心。
+      const updatesVelocity = /\bv[\w\[\]]*\s*=\s*v[\w\[\]]*\s*[-+]/.test(codeNoComment);
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (project.slug === "web_calculator") {
+        // 输入框收集算式 → 按钮触发并把结果写回面板 → 跑完
+        if (id === 1) done = hasInput;
+        else if (id === 2) done = hasButton && hasValue && hasSet;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "web_todo") {
+        // 输入框收集任务 → 加到列表并重新渲染面板 → 跑完
+        if (id === 1) done = hasInput;
+        else if (id === 2) done = hasPush && hasClear;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "web_memory") {
+        // 先展示要记的内容 → 隐藏让用户凭记忆输入 → 比对并反馈
+        if (id === 1) done = hasShow;
+        else if (id === 2) done = hasClear && hasInput;
+        else if (id === 3) done = hasButton && hasCompare && finished;
+      } else if (   project.slug === "web_typing") {
+        // 展示目标词 → 输入框收集用户输入 → 比对并统计
+        if (id === 1) done = hasShow;
+        else if (id === 2) done = hasInput;
+        else if (id === 3) done = hasButton && hasCompare && finished;
+      } else if (project.slug === "web_platformer") {
+        // 启动游戏循环 → 用键盘控制移动并用重力落地 → 跑完
+        if (id === 1) done = hasStartLoop;
+        else if (id === 2) done = hasKey && hasSetPos && updatesVelocity;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "web_chatbot") {
+        // 输入框收集消息 → 按关键词规则（if + includes）生成回复并记录对话 → 展示对话
+        // 注意：聊天机器人用的是「包含关键词」判断（msg.includes(...)），不是 === 比较，
+        // 故 id2 只要求 push + if，不放 hasCompare（避免把示范代码判失败）。
+        if (id === 1) done = hasInput;
+        else if (id === 2) done = hasPush && hasIf;
+        else if (id === 3)  done = hasButton && hasShow && finished;
       }
     } else if (project.slug === "stars") {
       if (id === 1) done = code.includes("__runtime.gotoMouse()");
@@ -1924,6 +1990,38 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 1) return "用「控制角色 三七」让伙伴先就位——多角色游戏要先会指挥伙伴。";
       if (stepId === 2) return "再「控制角色 二零」并「移到」指定坐标，把两片拼图各归其位。";
       if (stepId === 3) return "点「运行」，看两个角色各就各位并「说 归位完成」。没真的控制伙伴不算完成哦！";
+    }
+  }
+  if (WEB_CODE_SLUGS.includes(slug)) {
+    if (slug === "web_calculator") {
+      if (stepId === 1) return "用「网页·输入框」先放一个输入框，收集用户写的算式。";
+      if (stepId === 2) return "再用「网页·按钮」做一个「计算」按钮，点击时读取输入框内容算出结果，并用「网页·设置」把答案写回面板。";
+      if (stepId === 3) return "点「运行」，在输入框里写 3 + 5 再点按钮，看答案是不是 8！";
+    }
+    if (slug === "web_todo") {
+      if (stepId === 1) return "用「网页·输入框」收集要记的任务。";
+      if (stepId === 2) return "点「添加」按钮时，把输入内容放进一个列表（push），并用「网页·清空 + 重新渲染」把清单刷新出来。";
+      if (stepId === 3) return "点「运行」，连加几项任务，看清单是不是一条条列出来。";
+    }
+    if (slug === "web_memory") {
+      if (stepId === 1) return "先用「网页·文本」展示一个要记住的数字（比如随机三位数）。";
+      if (stepId === 2) return "用「等待」几秒后「网页·清空」，再放一个输入框让用户凭记忆输入。";
+      if (stepId === 3) return "点「运行」，记住数字→等它消失→输入答案→比对反馈，看你能不能过记忆关！";
+    }
+    if (slug === "web_typing") {
+      if (stepId === 1) return "先用「网页·文本」展示一个目标词（从词库随机抽）。";
+      if (stepId === 2) return "放一个输入框，让用户照着目标词打字。";
+      if (stepId === 3) return "点「运行」，正确输入目标词就能加分，点「提交」看反馈！";
+    }
+    if (slug === "web_platformer") {
+      if (stepId === 1) return "用「游戏循环」让角色每一帧都更新位置，这是实时游戏的基础。";
+      if (stepId === 2) return "在循环里读「按键」（← → 移动、↑/空格 跳），用「设位置」移动角色，并给个重力让它落回地面。";
+      if (stepId === 3) return "点「运行」，用键盘方向键操控二零蹦跳，看它怎么落回地面！";
+    }
+    if (slug === "web_chatbot") {
+      if (stepId === 1) return "用「网页·输入框」收集用户说的话。";
+      if (stepId === 2) return "用「如果包含关键词」判断用户意图，列表（push）记下对话，生成回复。";
+      if (stepId === 3) return "点「运行」，跟小鹦鹉聊几句，看它是不是真的按规则回话！";
     }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";
