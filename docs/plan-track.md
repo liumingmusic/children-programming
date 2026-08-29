@@ -13,7 +13,7 @@
 
 ## 一、6-8 岁阶段（图形化启蒙 · Blockly 海龟/二零）
 
-> 现状：已建成 **192 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **10 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类试点 2 项（`phys_fall` 自由落体 / `phys_bounce` 弹跳球）。
+> 现状：已建成 **197 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **15 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）。
 > 概念梯度沿用 Code.org + ScratchJr + Blockly Games 的「序列→循环→事件→条件」主线。
 
 ### 分类 1 · 基础序列与方向（序列）　✅（11/11 完成）
@@ -283,8 +283,8 @@
 | **0** | 代码模式地基（`codeMode` + `defaultCode` / CodeMirror 编辑器 / `runUserCode`）+ 1 个试点 | K·`js` | 1 | ✅ 完成（`192e3a28`） |
 | **1** | js 分类铺满：输出 / 变量 / 函数 / 数组 / 计算工具 / 画布换色 / 积木→代码综合 | K·`js` | 7 | ✅ 完成（`a7bca5a8`） |
 | **2a** | **画布渲染基建**（Runtime 五原语 + `state.shapes` + StagePlayer 统一渲染）+ M 物理试点 2 项 | M·`phys` | 2 | ✅ 完成（`affc3776`） |
-| **2b** | M 物理补齐（抛物线 / 重力模拟 / 弹簧振子 / 圆周运动 / 粒子系统） | M·`phys` | 5 | ⬜ 待做 |
-| **2c** | N 数据可视化（柱状图 / 折线图 / 饼图 / 图表生成器…）——纯画布，基建已就绪 | N·`dataviz` | 7 | ⬜ 待做 |
+| **2b** | M 物理补齐（抛物线 / 重力模拟 / 弹簧振子 / 圆周运动 / 粒子系统） | M·`phys` | 5 | ✅ 完成（本分类 7/7 满编） |
+| **2c** | **N 数据可视化**（柱状图 / 折线图 / 饼图 / 图表生成器…）——纯画布，基建已就绪 | N·`dataviz` | 7 | ⬜ 下一步 |
 | **2d** | O 创意编程（分形树 / 曼陀罗 / 粒子烟花 / 生成艺术…）——纯画布 | O·`creative` | 6 | ⬜ 待做 |
 | **2e** | **DOM 渲染基建**（在舞台旁挂一块可控 HTML 面板）+ P 网页小游戏（计算器 / 待办 / 记忆 / 打字…） | P·`web` | 6 | ⬜ 待做（须先建 DOM 能力） |
 | **3a** | L 算法与数据结构（冒泡排序可视化 / 二分查找 / 栈与队列 / BFS 迷宫 / 递归 / 素数 / 贪心） | L·`algo` | 8 | ⬜ 待做 |
@@ -332,7 +332,7 @@
 - ⬜ [需: JS模式] 贪心入门
 
 ### 分类 M · 物理与模拟（物理）
-> 实现分类 id = `phys`。**Phase 2a 已完成：画布渲染基建落地 + 试点 2/7**（剩余 5 项见上方路线图 Phase 2b）：
+> 实现分类 id = `phys`。**Phase 2b 已完成，本分类 7/7 满编**（2a 试点 2 项 + 2b 补齐 5 项）：
 > 舞台本就是 canvas，但由 React 在 state 变化时整体重绘，**不能把 2D context 直接交给学生代码**（会被下一次重绘冲掉）。
 > 故沿用现有「动作队列」架构：`Runtime` 新增 `drawRect / drawCircle / drawLine / drawText / clearCanvas` 五个原语，
 > 执行时写入 `StageState.shapes`，由 `StagePlayer` 用同一套 `toScreen`（世界坐标 / y 轴向上）变换统一渲染。
@@ -341,12 +341,12 @@
 > 判定走 `lib/steps.ts` 的 `PHYS_CODE_SLUGS` 分支（真实 JS 标记：`y = y + ...` / `v = v - ...` 变量自更新、
 > `__runtime.clearCanvas()` + `drawXxx(` + `__runtime.wait(` 逐帧重画、`if (` + `v = -v` 碰撞反弹）。
 - ✅ [JS模式+画布] 自由落体（`phys_fall` · 重力累积 `v = v - g*dt` → `y = y + v*dt`，每帧 clearCanvas + drawCircle 重画）
-- ⬜ [需: JS模式+画布] 抛物线
+- ✅ [JS模式+画布] 抛物线（`phys_parabola` · 水平匀速 + 竖直加速两方向独立；用 trailX/trailY 两个数组存轨迹点，每帧重画让弧线显形）
 - ✅ [JS模式+画布] 弹球碰撞（`phys_bounce` · 撞地检测 + `v = -v * 0.7` 反弹衰减 + 静止阈值防「哆嗦」，drawRect 画地面 / drawText 记次数）
-- ⬜ [需: JS模式+画布] 重力模拟
-- ⬜ [需: JS模式+画布] 弹簧振子
-- ⬜ [需: JS模式+画布] 圆周运动
-- ⬜ [需: JS模式+粒子] 流体 / 粒子系统
+- ✅ [JS模式+画布] 重力模拟（`phys_gravity` · 平行数组 gs/ys/vs 同时驱动三颗球，地球 g=300 / 月球 50 / 木星 750，看谁先落地）
+- ✅ [JS模式+画布] 弹簧振子（`phys_spring` · `a = -k * x` 力与位移成正比且反向；水平放置弹簧，位移 x 就是真实横坐标）
+- ✅ [JS模式+画布] 圆周运动（`phys_orbit` · 角度匀速自增 + `Math.cos/sin` 换算坐标；画轨道点、半径线（向心力方向）与实时角度）
+- ✅ [JS模式+粒子] 粒子系统（`phys_particle` · 四个平行数组装 12 个粒子，各自受重力 + 撞地衰减 + 撞左右边界反向）
 
 ### 分类 N · 数据可视化（数据可视化）
 - ⬜ [需: JS模式+画布] 柱状图生成器
@@ -388,9 +388,10 @@
 - ⬜ [需: 综合] 开源贡献
 - ⬜ [需: 综合] 作品集网站
 
-> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **10**
+> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **15**
 > （K·`js` **8/8 铺满**：Phase 0 试点 `js_square` + Phase 1 七个 `js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`；
-> M·`phys` **2/7 试点**：`phys_fall` 自由落体 / `phys_bounce` 弹跳球）。
+> M·`phys` **7/7 满编**：`phys_fall` 自由落体 / `phys_bounce` 弹跳球 / `phys_parabola` 抛物线 / `phys_gravity` 重力对比 /
+> `phys_spring` 弹簧振子 / `phys_orbit` 圆周运动 / `phys_particle` 粒子系统）。
 > JS 模式地基与画布渲染基建均已落地；分类 L / N / O / P / Q / R 按上方「推进路线图」的 Phase 节奏铺开，
 > 其中 P·`web` 还需先补 DOM 渲染能力。
 
@@ -402,10 +403,10 @@
 |---|---|---|---|---|
 | 6-8 岁 | 11 | 105 | **105** + 造物工坊（含分类11·综合 4 个总结项目） | 分类7·故事 ✅ / 分类10·科学 ✅ / 分类11·综合 ✅ / 造物工坊 ✅ 全部交付 |
 | 9-12 岁 | 10 | 77 | **77** | 全部轻量运行时已落地（含列表 7 原语 / 时间轴引擎）；9-12 阶段 10 分类全部满编 |
-| 13-16 岁 | 8 | 53 | **10**（K·js 8/8 + M·phys 2/7 试点） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地** / DOM（待 Phase 2 后续）/ 算法与数据（待 Phase 3） |
+| 13-16 岁 | 8 | 53 | **15**（K·js 8/8 + M·phys **7/7 满编**） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地，M 已铺满** / DOM（待 Phase 2e）/ 算法与数据（待 Phase 3） |
 
 **当前下一步**：6-8（105/105）与 9-12（77/77）已全部满编，只剩 13-16 阶段。
-按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，当前处于 **Phase 2a 已完成 → 下一步 Phase 2b**（M·物理补齐 5 项）。
+按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，当前处于 **Phase 2b 已完成 → 下一步 Phase 2c**（N·数据可视化 7 项，纯画布、基建已就绪，无需新运行时能力）。
 
 **如何完善（单会话工作流）**：
 1. 从本表挑一个 ⬜ 项目（或一整个分类）。

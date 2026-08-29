@@ -128,16 +128,19 @@ describe("13-16 代码模式 · Phase 1 七项（js 分类铺满）", () => {
 });
 
 /**
- * 13-16 · Phase 2：画布渲染基建 + M 物理分类试点（phys_fall / phys_bounce）。
+ * 13-16 · Phase 2：画布渲染基建 + M 物理分类 7 项（Phase 2a 试点 2 + Phase 2b 补齐 5）。
  *
- * 这两个项目不再用画笔轨迹，而是「变量累积 + 循环 + 每帧 clearCanvas 重画」的模拟循环，
+ * 这些项目不再用画笔轨迹，而是「变量累积 + 循环 + 每帧 clearCanvas 重画」的模拟循环，
  * 靠新增的 __runtime.drawCircle / drawRect / drawLine / drawText / clearCanvas 画到舞台画布上。
  * 统一验证：① 数据字段齐备；② 示范代码跑通且完成门禁全绿；③ 空代码不能过；
  * ④ 画布图元真的进了 state.shapes（基建生效，而非只跑了个空循环）。
  */
-const PHYS_PHASE2_SLUGS = ["phys_fall", "phys_bounce"];
+const PHYS_PHASE2_SLUGS = [
+  "phys_fall", "phys_bounce", "phys_parabola", "phys_gravity",
+  "phys_spring", "phys_orbit", "phys_particle",
+];
 
-describe("13-16 画布基建 · Phase 2 物理试点（phys 分类）", () => {
+describe("13-16 画布基建 · Phase 2 物理分类满编（phys 7/7）", () => {
   for (const slug of PHYS_PHASE2_SLUGS) {
     const project = getProject(slug) as CourseProject | undefined;
     expect(project, `缺少项目 ${slug}`).toBeTruthy();
@@ -171,8 +174,9 @@ describe("13-16 画布基建 · Phase 2 物理试点（phys 分类）", () => {
       const state = await runCode(code);
       // clearCanvas + 每帧重画：跑完时最后一帧的图元应留在画布上
       expect(state.shapes.length).toBeGreaterThan(0);
-      // 最后一帧必须擦过屏重画，因此 shapes 不该无限堆积（clearCanvas 生效）
-      expect(state.shapes.length).toBeLessThan(20);
+      // 每帧都擦过屏重画，所以 shapes 不该无限堆积（clearCanvas 生效）。
+      // 上限放宽到 60：phys_parabola / phys_orbit 会在最后一帧重画整条轨迹（约 40 个图元）。
+      expect(state.shapes.length).toBeLessThan(60);
     }, 15000);
   }
 
@@ -200,6 +204,83 @@ describe("13-16 画布基建 · Phase 2 物理试点（phys 分类）", () => {
       "  __runtime.wait(dt);\n}\n";
     const state = await runCode(code);
     expect(isGoalAchieved(getProject("phys_bounce")!, state, state.log, code)).toBe(false);
+  });
+
+  it("phys_parabola：只有竖直加速、水平不动不能通过（那还是自由落体）", async () => {
+    const code =
+      "const g = 300;\nconst dt = 0.05;\nlet y = 100;\nlet vy = 120;\n" +
+      "const trailY = [];\n" +
+      "for (let f = 0; f < 34; f++) {\n  vy = vy - g * dt;\n  y = y + vy * dt;\n" +
+      "  trailY.push(y);\n  __runtime.clearCanvas();\n" +
+      '  for (let i = 0; i < trailY.length; i++) __runtime.drawCircle(0, trailY[i], 3, "#64748B");\n' +
+      '  __runtime.drawCircle(0, y, 10, "#F59E0B");\n  __runtime.wait(dt);\n}\n';
+    const state = await runCode(code);
+    // 水平方向没有「x = x + ...」的自更新 → 第 1 步不应通过
+    expect(isGoalAchieved(getProject("phys_parabola")!, state, state.log, code)).toBe(false);
+  });
+
+  it("phys_gravity：三颗球各写一个变量、不用平行数组不能通过", async () => {
+    const code =
+      "const dt = 0.05;\nconst ground = -150;\n" +
+      "let y1 = 140, y2 = 140, y3 = 140;\nlet v1 = 0, v2 = 0, v3 = 0;\n" +
+      "for (let f = 0; f < 30; f++) {\n" +
+      "  v1 = v1 - 300 * dt;\n  y1 = y1 + v1 * dt;\n  if (y1 < ground) { y1 = ground; v1 = 0; }\n" +
+      "  v2 = v2 - 50 * dt;\n  y2 = y2 + v2 * dt;\n  if (y2 < ground) { y2 = ground; v2 = 0; }\n" +
+      "  v3 = v3 - 750 * dt;\n  y3 = y3 + v3 * dt;\n  if (y3 < ground) { y3 = ground; v3 = 0; }\n" +
+      "  __runtime.clearCanvas();\n" +
+      '  __runtime.drawRect(-240, ground - 40, 480, 40, "#334155");\n' +
+      '  __runtime.drawCircle(-140, y1, 12, "#F59E0B");\n' +
+      '  __runtime.drawCircle(0, y2, 12, "#E2E8F0");\n' +
+      '  __runtime.drawCircle(140, y3, 12, "#38bdf8");\n' +
+      "  __runtime.wait(dt);\n}\n";
+    const state = await runCode(code);
+    // 没有数组字面量、也没有下标赋值 → 第 1 步不应通过（教学目标是「平行数组」）
+    expect(isGoalAchieved(getProject("phys_gravity")!, state, state.log, code)).toBe(false);
+  });
+
+  it("phys_spring：加速度恒定、不与位移成正比不能通过（那是重力不是弹簧）", async () => {
+    const code =
+      "const dt = 0.05;\nlet x = 120;\nlet v = 0;\n" +
+      "for (let f = 0; f < 56; f++) {\n  v = v - 300 * dt;\n  x = x + v * dt;\n" +
+      "  __runtime.clearCanvas();\n" +
+      '  __runtime.drawRect(-240, -45, 30, 90, "#475569");\n' +
+      '  __runtime.drawCircle(-180 + 130 + x, 0, 12, "#F59E0B");\n' +
+      "  __runtime.wait(dt);\n}\n";
+    const state = await runCode(code);
+    // 速度增量里没引用位移 x → 第 2 步不应通过
+    expect(isGoalAchieved(getProject("phys_spring")!, state, state.log, code)).toBe(false);
+  });
+
+  it("phys_orbit：不用 cos / sin 换算坐标不能通过", async () => {
+    const code =
+      "const dt = 0.05;\nlet angle = 0;\n" +
+      "for (let f = 0; f < 32; f++) {\n  angle = angle + 4 * dt;\n" +
+      "  __runtime.clearCanvas();\n" +
+      '  __runtime.drawCircle(0, 0, 12, "#F59E0B");\n' +
+      '  __runtime.drawText(-225, 160, "角度：" + angle, "#E2E8F0", 15);\n' +
+      "  __runtime.wait(dt);\n}\n";
+    const state = await runCode(code);
+    // 角度在增加，但没有 Math.cos / Math.sin → 第 1 步不应通过
+    expect(isGoalAchieved(getProject("phys_orbit")!, state, state.log, code)).toBe(false);
+  });
+
+  it("phys_particle：粒子撞地只停下、不反向不能通过（缺反弹）", async () => {
+    const code =
+      "const N = 12;\nconst g = 400;\nconst dt = 0.05;\nconst ground = -150;\nconst r = 7;\n" +
+      "const px = [];\nconst py = [];\nconst vx = [];\nconst vy = [];\n" +
+      "for (let i = 0; i < N; i++) { px.push(-190 + i * 34); py.push(110); vx.push(0); vy.push(0); }\n" +
+      "for (let f = 0; f < 50; f++) {\n" +
+      "  for (let i = 0; i < N; i++) {\n" +
+      "    vy[i] = vy[i] - g * dt;\n    px[i] = px[i] + vx[i] * dt;\n    py[i] = py[i] + vy[i] * dt;\n" +
+      "    if (py[i] < ground + r) { py[i] = ground + r; vy[i] = 0; }\n" +
+      "  }\n" +
+      "  __runtime.clearCanvas();\n" +
+      '  __runtime.drawRect(-240, ground - 40, 480, 40, "#334155");\n' +
+      '  for (let i = 0; i < N; i++) __runtime.drawCircle(px[i], py[i], r, "#F59E0B");\n' +
+      "  __runtime.wait(dt);\n}\n";
+    const state = await runCode(code);
+    // 有数组、有 if，但速度没有反向 → 第 2 步不应通过
+    expect(isGoalAchieved(getProject("phys_particle")!, state, state.log, code)).toBe(false);
   });
 });
 

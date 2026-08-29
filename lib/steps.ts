@@ -29,15 +29,25 @@ const JS_CODE_SLUGS = [
 ];
 
 /**
- * 13-16 分类 M · 物理与模拟（phys 分类，Phase 2 试点）。
+ * 13-16 分类 M · 物理与模拟（phys 分类，Phase 2a 试点 2 项 + Phase 2b 补齐 5 项，共 7/7 满编）。
  * 与 js 分类不同：这里不再依赖画笔轨迹，而是「变量累积 + 循环 + 每帧擦掉重画」的模拟循环。
  * 判定同样基于**真实 JS 标记**：
  *   - `y = y + ...` / `v = v - ...` 形态 → 变量被循环反复改写（模拟的核心）
  *   - `__runtime.clearCanvas()` + `drawXxx(` + `__runtime.wait(` → 真的在逐帧擦掉重画
- *   - `if (` + `v = -v` → 真的做了碰撞反弹
- * 空程序 / 只写注释必然不通过（第 3 步还额外要求「程序执行完毕」日志）。
+ *   - `if (` + `v = -v` / `vx[i] = -vx[i]` → 真的做了碰撞反弹
+ *   - `Math.cos(` / `Math.sin(` → 圆周运动真的用三角函数换算坐标
+ *   - 数组字面量 `[...]` + `px[i] = ...` 下标赋值 → 粒子系统真的用平行数组存状态
+ * 空程序 / 只写注释必然不通过（最后一步还额外要求「程序执行完毕」日志）。
  */
-const PHYS_CODE_SLUGS = ["phys_fall", "phys_bounce"];
+const PHYS_CODE_SLUGS = [
+  "phys_fall",
+  "phys_bounce",
+  "phys_parabola",
+  "phys_gravity",
+  "phys_spring",
+  "phys_orbit",
+  "phys_particle",
+];
 
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
@@ -356,11 +366,22 @@ export function computeSteps(
         code.includes("__runtime.drawRect(") ||
         code.includes("__runtime.drawLine(") ||
         code.includes("__runtime.drawText(");
-      // 变量被「自己加上/减去一个增量」地反复改写 —— 模拟循环的核心形态
-      const updatesPosition = /\by\s*=\s*y\s*[-+]/.test(codeNoComment);
-      const updatesVelocity = /\bv\s*=\s*v\s*[-+]/.test(codeNoComment);
+      // 变量被「自己加上/减去一个增量」地反复改写 —— 模拟循环的核心形态。
+      // 正则允许变量名带后缀与下标（v / vy / vs[i] 都算），因为各关的命名并不统一。
+      // 变量名允许带后缀与下标（v / vy / vs[i] 都算），因为各关的命名并不统一。
+      const updatesPosition = /\by[\w\[\]]*\s*=\s*y[\w\[\]]*\s*[-+]/.test(codeNoComment);
+      const updatesVelocity = /\bv[\w\[\]]*\s*=\s*v[\w\[\]]*\s*[-+]/.test(codeNoComment);
+      const updatesX = /\bx[\w\[\]]*\s*=\s*x[\w\[\]]*\s*[-+]/.test(codeNoComment);
       const hasIf = /\bif\s*\(/.test(codeNoComment);
-      const reversesVelocity = /\bv\s*=\s*-\s*v\b/.test(codeNoComment);
+      const reversesVelocity = /\bv[\w\[\]]*\s*=\s*-\s*v[\w\[\]]*/.test(codeNoComment);
+      // 数组下标被赋值（vs[i] = ...）→ 真的是「一组数据 + 一次循环」在驱动多个物体
+      const updatesIndexed = /\b\w+\s*\[\s*\w+\s*\]\s*=\s*[^=]/.test(codeNoComment);
+      const hasArrayLiteral = /\b(?:let|const|var)\s+\w+\s*=\s*\[/.test(codeNoComment);
+      // 圆周运动：真的用三角函数把角度换算成坐标
+      const usesTrig = /Math\.(cos|sin)\s*\(/.test(codeNoComment);
+      const updatesAngle = /\bangle\s*=\s*angle\s*[-+]/.test(codeNoComment);
+      // 弹簧：速度的增量里引用了位移变量 x（v = v + (-k * x) * dt），即「力与位移成正比」
+      const springPull = /\bv[\w\[\]]*\s*=\s*v[\w\[\]]*\s*[-+][^;]*\bx\b/.test(codeNoComment);
       const finished = logs.includes("[系统] 程序执行完毕");
       if (project.slug === "phys_fall") {
         // 变量记状态 → 循环里改写速度/位置并逐帧重画 → 跑完
@@ -371,6 +392,31 @@ export function computeSteps(
       } else if (project.slug === "phys_bounce") {
         if (id === 1) done = hasLoop && updatesPosition && updatesVelocity;
         else if (id === 2) done = hasIf && reversesVelocity;
+        else if (id === 3) done = hasClear && hasDraw && finished;
+      } else if (project.slug === "phys_parabola") {
+        // 水平匀速 + 竖直加速：两个方向必须各有一条自更新语句，且逐帧重画
+        if (id === 1) done = updatesX && updatesVelocity;
+        else if (id === 2) done = hasLoop && hasClear && hasDraw && hasWait;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "phys_gravity") {
+        // 平行数组：数组字面量 + 下标赋值（vs[i] = ...）+ 撞地停下
+        if (id === 1) done = hasArrayLiteral && updatesIndexed;
+        else if (id === 2) done = updatesVelocity && hasIf;
+        else if (id === 3) done = hasClear && hasDraw && finished;
+      } else if (project.slug === "phys_spring") {
+        // 位移自更新 + 速度的增量里引用了位移（力与位移成正比、方向相反）
+        if (id === 1) done = hasVar && (updatesPosition || updatesX);
+        else if (id === 2) done = springPull;
+        else if (id === 3) done = hasClear && hasDraw && finished;
+      } else if (project.slug === "phys_orbit") {
+        // 三角函数换算坐标 + 角度匀速自增 + 逐帧重画
+        if (id === 1) done = usesTrig;
+        else if (id === 2) done = updatesAngle && hasLoop && hasClear && hasDraw && hasWait;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "phys_particle") {
+        // 粒子系统：平行数组存状态 + 遍历更新 + 碰撞速度反向
+        if (id === 1) done = hasArrayLiteral && updatesIndexed;
+        else if (id === 2) done = updatesVelocity && hasIf && reversesVelocity;
         else if (id === 3) done = hasClear && hasDraw && finished;
       }
     } else if (project.slug === "stars") {
