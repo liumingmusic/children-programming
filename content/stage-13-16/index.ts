@@ -6,6 +6,7 @@ import { stage13CreativeProjects } from "./creative";
 import { stage13WebProjects } from "./web";
 import { stage13AlgoProjects } from "./algo";
 import { stage13AiProjects } from "./ai";
+import { stage13CapstoneProjects } from "./capstone";
 
 /**
  * 13-16 岁 · 进阶工坊 项目集合（按分类拆文件夹，与 9-12 阶段同一约定）。
@@ -18,10 +19,10 @@ import { stage13AiProjects } from "./ai";
  *   web      网页 / 小游戏     P  6/6    Phase 2e 铺满（安全 DOM 面板：输入框/按钮/游戏循环）
  *   algo     算法与数据结构    L  8/8    Phase 3a 铺满（数组/递归/查找/图：画布逐帧可视化）
  *   ai       人工智能启蒙      Q  6/6    Phase 3b 铺满（决策树/K近邻/朴素贝叶斯/感知机/推荐/神经网络）
- *   capstone 毕业项目          R  0/5    待 Phase 3c
+ *   capstone 毕业项目          R  5/5    Phase 3c 铺满（小游戏/数据作品/创意工具/开源库/作品集）
  *
- *  ️全部项目为 codeMode（直接写 JavaScript），完成判定走 lib/steps.ts 的
- * JS_CODE_SLUGS / PHYS_CODE_SLUGS / DATAVIZ_CODE_SLUGS / CREATIVE_CODE_SLUGS / WEB_CODE_SLUGS / ALGO_CODE_SLUGS / AI_CODE_SLUGS 分支
+ *  全部项目为 codeMode（直接写 JavaScript），完成判定走 lib/steps.ts 的
+ * JS_CODE_SLUGS / PHYS_CODE_SLUGS / DATAVIZ_CODE_SLUGS / CREATIVE_CODE_SLUGS / WEB_CODE_SLUGS / ALGO_CODE_SLUGS / AI_CODE_SLUGS / CAPSTONE_CODE_SLUGS 分支
  * （真实 JS 标记 + 运行日志 + 画布图元统计）。
  */
 export const stage13Projects: CourseProject[] = [
@@ -32,4 +33,5 @@ export const stage13Projects: CourseProject[] = [
   ...stage13WebProjects,
   ...stage13AlgoProjects,
   ...stage13AiProjects,
+  ...stage13CapstoneProjects,
 ];

@@ -1,13 +1,32 @@
 import type { Stage } from "@/courses";
 
 export const stages: Stage[] = [
-{
+  {
     id: "stage-6-8",
     ageRange: "6-8 岁",
     name: "图形化积木启蒙",
     tagline: "拖拽彩色积木，让二零动起来、画图案、做小游戏。",
     status: "open",
-    projectSlugs: ["hello", "flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag", "treasure", "dance", "frame", "square", "triangle", "pentagon", "spin", "stairs", "wave", "spiral", "fence", "windmill", "pickfruit", "star5", "flower", "rainbow", "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard", "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog", "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "expression_shake", "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3", "random_branch", "odd_even", "size_threshold", "avoid_obstacle", "escape_badguy", "stars", "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow", "treasure_map", "escort", "traffic_police", "dodge_clouds", "memory_match", "play_doremi", "twinkle", "drum_beat", "random_note", "loop_melody", "pitch_by_click", "pitch_by_move", "chord", "birthday", "compose", "count10", "count_apples", "compare_size", "add_sub", "shape_names", "symmetry", "multiplication", "clock", "geometry_puzzle", "calculator", "self_intro", "expression", "freeze", "animal_sports", "word_chain", "birthday_party", "good_night", "two_talk", "a_day", "magic_show", "day_night", "rain", "snow", "volcano", "color_wheel", "rainbow_bridge", "seed_grow", "earth_sun", "food_chain", "moon_phase", "singing_picture", "two_actor_show", "my_solar_system", "interactive_book"],
+    projectSlugs: [
+      "hello", "flag", "stone", "shapeL", "home", "maze", "arrow", "zigzag",
+      "treasure", "dance", "frame", "square", "triangle", "pentagon", "spin", "stairs",
+      "wave", "spiral", "fence", "windmill", "pickfruit", "star5", "flower", "rainbow",
+      "snowflake", "mandala", "concentric", "connectdot", "house", "letter", "checkerboard",
+      "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
+      "auto_patrol", "key_forward", "edge_bounce", "size_toggle", "expression_shake",
+      "if_touch_star", "if_edge_turn", "if_red_stop", "click_left_right", "collect3",
+      "random_branch", "odd_even", "size_threshold", "avoid_obstacle", "escape_badguy",
+      "stars", "maze_exit", "collect_apples", "light_lanterns", "collect_rainbow",
+      "treasure_map", "escort", "traffic_police", "dodge_clouds", "memory_match",
+      "play_doremi", "twinkle", "drum_beat", "random_note", "loop_melody", "pitch_by_click",
+      "pitch_by_move", "chord", "birthday", "compose", "count10", "count_apples",
+      "compare_size", "add_sub", "shape_names", "symmetry", "multiplication", "clock",
+      "geometry_puzzle", "calculator", "self_intro", "expression", "freeze", "animal_sports",
+      "word_chain", "birthday_party", "good_night", "two_talk", "a_day", "magic_show",
+      "day_night", "rain", "snow", "volcano", "color_wheel", "rainbow_bridge", "seed_grow",
+      "earth_sun", "food_chain", "moon_phase", "singing_picture", "two_actor_show",
+      "my_solar_system", "interactive_book"
+    ],
   },
   {
     id: "stage-9-12",
@@ -15,9 +34,22 @@ export const stages: Stage[] = [
     name: "代码初探",
     tagline: "从积木过渡到 JavaScript，做小工具与互动游戏。",
     status: "open",
-    projectSlugs: ["fn_square", "fn_polygon", "fn_house", "fn_snowflake", "fn_tree", "fn_toolbox", "fn_spiral", "fn_castle", "var_counter", "var_score", "var_lives", "var_speed", "var_parity", "var_gradient", "var_timer", "var_best", "cat_mouse", "guardian_dodge", "two_player", "message_relay", "two_actor_chat", "relay_race", "chorus", "animal_queue", "key_move", "key_maze", "key_piano", "catch_apple", "dodge_fall", "breakout_intro", "space_shooter", "reaction_game", "story_branch", "story_clickable", "story_adventure", "story_growth", "story_science", "story_card", "music_doremi", "music_twinkle", "music_loop", "music_random", "music_pitch_pos", "music_chord", "music_birthday", "music_compose", "math_mul_table", "math_factor_prime", "math_area", "math_fib", "math_prime_sieve", "math_polygon", "math_coords", "math_sudoku", "science_day_night", "science_seasons", "science_orbit", "science_water_cycle", "science_grow", "science_sound", "science_light", "list_shopping", "list_rollcall", "list_ranking", "list_lottery", "list_todo", "list_words", "list_scores", "list_queue",
-    "game_snake", "game_shooter", "game_dodge", "game_race",
-    "game_guess", "game_memory", "game_2048lite", "game_puzzle"],
+    projectSlugs: [
+      "fn_square", "fn_polygon", "fn_house", "fn_snowflake", "fn_tree", "fn_toolbox",
+      "fn_spiral", "fn_castle", "var_counter", "var_score", "var_lives", "var_speed",
+      "var_parity", "var_gradient", "var_timer", "var_best", "cat_mouse", "guardian_dodge",
+      "two_player", "message_relay", "two_actor_chat", "relay_race", "chorus", "animal_queue",
+      "key_move", "key_maze", "key_piano", "catch_apple", "dodge_fall", "breakout_intro",
+      "space_shooter", "reaction_game", "story_branch", "story_clickable", "story_adventure",
+      "story_growth", "story_science", "story_card", "music_doremi", "music_twinkle",
+      "music_loop", "music_random", "music_pitch_pos", "music_chord", "music_birthday",
+      "music_compose", "math_mul_table", "math_factor_prime", "math_area", "math_fib",
+      "math_prime_sieve", "math_polygon", "math_coords", "math_sudoku", "science_day_night",
+      "science_seasons", "science_orbit", "science_water_cycle", "science_grow", "science_sound",
+      "science_light", "list_shopping", "list_rollcall", "list_ranking", "list_lottery",
+      "list_todo", "list_words", "list_scores", "list_queue", "game_snake", "game_shooter",
+      "game_dodge", "game_race", "game_guess", "game_memory", "game_2048lite", "game_puzzle"
+    ],
   },
   {
     id: "stage-13-16",
@@ -25,6 +57,17 @@ export const stages: Stage[] = [
     name: "进阶工坊",
     tagline: "从积木过渡到 JavaScript，做工具、模拟与创意作品。",
     status: "open",
-    projectSlugs: ["js_square", "js_hello", "js_variable", "js_function", "js_array", "js_tool", "js_canvas", "js_compare", "phys_fall", "phys_bounce", "phys_parabola", "phys_gravity", "phys_spring", "phys_orbit", "phys_particle", "dataviz_bar", "dataviz_line", "dataviz_pie", "dataviz_weather", "dataviz_scores", "dataviz_wordcloud", "dataviz_dashboard", "creative_mandala", "creative_random", "creative_generative", "creative_tree", "creative_terrain", "creative_firework", "web_calculator", "web_todo", "web_memory", "web_typing", "web_platformer", "web_chatbot", "algo_bubble", "algo_binary", "algo_stack", "algo_maze", "algo_fib", "algo_prime", "algo_string", "algo_greedy", "ai_tree", "ai_knn", "ai_bayes", "ai_perceptron", "ai_recommend", "ai_network"],
+    projectSlugs: [
+      "js_square", "js_hello", "js_variable", "js_function", "js_array", "js_tool", "js_canvas",
+      "js_compare", "phys_fall", "phys_bounce", "phys_parabola", "phys_gravity", "phys_spring",
+      "phys_orbit", "phys_particle", "dataviz_bar", "dataviz_line", "dataviz_pie", "dataviz_weather",
+      "dataviz_scores", "dataviz_wordcloud", "dataviz_dashboard", "creative_mandala", "creative_random",
+      "creative_generative", "creative_tree", "creative_terrain", "creative_firework",
+      "web_calculator", "web_todo", "web_memory", "web_typing", "web_platformer", "web_chatbot",
+      "algo_bubble", "algo_binary", "algo_stack", "algo_maze", "algo_fib", "algo_prime",
+      "algo_string", "algo_greedy", "ai_tree", "ai_knn", "ai_bayes", "ai_perceptron",
+      "ai_recommend", "ai_network", "capstone_game", "capstone_data", "capstone_tool",
+      "capstone_oss", "capstone_portfolio"
+    ],
   },
 ];

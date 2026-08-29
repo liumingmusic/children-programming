@@ -118,6 +118,11 @@ const AI_CODE_SLUGS = [
   "ai_tree", "ai_knn", "ai_bayes", "ai_perceptron", "ai_recommend", "ai_network",
 ];
 
+/** 13-16 分类 R · 毕业项目（Phase 3c，5 项）。 */
+const CAPSTONE_CODE_SLUGS = [
+  "capstone_game", "capstone_data", "capstone_tool", "capstone_oss", "capstone_portfolio",
+];
+
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
@@ -767,9 +772,44 @@ export function computeSteps(
         else if (id === 2) done = /Math\.(sqrt|cos)/.test(codeNoComment) || /\.\s*dot/.test(codeNoComment);
         else if (id === 3) done = hasDraw && finished;
       } else if (project.slug === "ai_network") {
-        if (id === 1) done = hasArray;
+        if (id === 1)  done = hasArray;
         else if (id === 2) done = hasLoop && /w1|w2/.test(codeNoComment);
         else if (id === 3) done = hasDraw && finished;
+      }
+    } else if (CAPSTONE_CODE_SLUGS.includes(project.slug)) {
+      // 13-16 毕业项目：综合类，抓「学生真的搭了状态/函数/循环、并用画布画出作品」的真实标记。
+      const codeNoComment = code.replace(/\/\/.*$/gm, "");
+      const hasArray = /(const|let|var)\s+\w+\s*=\s*\[/.test(codeNoComment);
+      const hasFunction = /function\s+\w+\s*\(/.test(codeNoComment);
+      const hasLoop = /\b(for|while)\b/.test(codeNoComment);
+      const hasDraw = /__runtime\.(drawRect|drawCircle|drawLine|drawText)\(/.test(codeNoComment);
+      const hasAnim = code.includes("__runtime.clearCanvas(") || code.includes("__runtime.startLoop(");
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (project.slug === "capstone_game") {
+        // 搭好状态（数组/函数）→ 循环 + 逐帧重画做出动的画面 → 跑完且画出来
+        if (id === 1) done = hasArray || hasFunction;
+        else if (id === 2) done = hasLoop && hasAnim && hasDraw;
+        else if (id === 3) done = finished && hasDraw;
+      } else if (project.slug === "capstone_data") {
+        // 准备数据 → 循环把数据映射成图形 → 跑完且画出来
+        if (id === 1) done = hasArray;
+        else if (id === 2) done = hasLoop && hasDraw;
+        else if (id === 3) done = finished && hasDraw;
+      } else if (project.slug === "capstone_tool") {
+        // 写可复用工具函数 → 循环调用生成图案 → 跑完且画出来
+        if (id === 1) done = hasFunction;
+        else if (id === 2) done = hasLoop && hasDraw;
+        else if (id === 3) done = finished && hasDraw;
+      } else if (project.slug === "capstone_oss") {
+        // 写通用工具函数库 → 循环调用演示 → 跑完且画出来
+        if (id === 1) done = hasFunction;
+        else if (id === 2) done = hasLoop && hasDraw;
+        else if (id === 3) done = finished && hasDraw;
+      } else if (project.slug === "capstone_portfolio") {
+        // 把作品画成展板卡片 → 循环批量生成 → 跑完且画出来
+        if (id === 1) done = hasDraw;
+        else if (id === 2) done = hasLoop && hasDraw;
+        else if (id === 3) done = finished && hasDraw;
       }
     } else if (project.slug === "stars") {
       if (id === 1) done = code.includes("__runtime.gotoMouse()");
@@ -2186,6 +2226,32 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 1) return "准备好输入节点、权重和偏置，把三层网络画出来（输入→隐藏→输出）。";
       if (stepId === 2) return "逐层乘权重、加偏置，把输入从输入层传到隐藏层再到输出层（前向传播）。";
       if (stepId === 3) return "标注每个节点数值和最终输出，点「运行」看一次「推理」是怎么算出来的！";
+    }
+  } else if (CAPSTONE_CODE_SLUGS.includes(slug)) {
+    if (slug === "capstone_game") {
+      if (stepId === 1) return "用数组或变量记住游戏状态，比如金币的位置数组、当前得分。";
+      if (stepId === 2) return "用 for 循环配合 __runtime.clearCanvas() 每帧擦掉重画，再用 __runtime.drawXxx 画角色与道具。";
+      if (stepId === 3) return "点「运行」看游戏画面动起来、得分不断变化——你做出了第一个游戏！";
+    }
+    if (slug === "capstone_data") {
+      if (stepId === 1) return "挑一组你关心的数据，存进数组，比如一周气温或最爱的水果票数。";
+      if (stepId === 2) return "用 for 循环遍历数据，把「数值」换算成「柱子的高度 / 点的位置」再画出来。";
+      if (stepId === 3) return "点「运行」得到一张清晰的图表，分享给他人也能一眼看懂！";
+    }
+    if (slug === "capstone_tool") {
+      if (stepId === 1) return "把重复画法写成一个函数，比如 ring(cx,cy,r,n) 在圆上均匀画点。";
+      if (stepId === 2) return "用 for 循环调用你的工具函数，一圈圈批量生成对称图案。";
+      if (stepId === 3) return "点「运行」看工具如何「一行调用、百点生成」，这就是工具思维！";
+    }
+    if (slug === "capstone_oss") {
+      if (stepId === 1) return "写几个通用的小函数（mapRange / dot / grid），不依赖具体业务，谁都能用。";
+      if (stepId === 2) return "用 for 循环批量调用你的工具函数，演示它能画出什么。";
+      if (stepId === 3) return "点「运行」看你的「开源工具库」画出的示例，把它分享给别人就能复用！";
+    }
+    if (slug === "capstone_portfolio") {
+      if (stepId === 1) return "把你的作品主题存成数组，再用 __runtime.drawRect 画成一张张卡片底。";
+      if (stepId === 2) return "用 for 循环批量生成多张卡片，并用 __runtime.drawText 给每张写上标题。";
+      if (stepId === 3) return "点「运行」看完整的「作品集展板」，这就是你的成长记录！";
     }
   }
   return "照着左侧「二零说」的提示一步步搭积木，再点运行试试～";

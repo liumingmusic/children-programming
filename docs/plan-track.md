@@ -13,10 +13,10 @@
 
 ## 一、6-8 岁阶段（图形化启蒙 · Blockly 海龟/二零）
 
-> 现状：已建成 **230 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **48 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；P·网页/小游戏 6/6（Phase 2e 铺满：计算器/待办/记忆/打字/平台跳跃/聊天机器人，安全 DOM 面板基建已建成）；L·算法 8/8（Phase 3a 铺满：冒泡/二分/栈队列/BFS/递归/素数/串频次/贪心，算法可视化地基已建）；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
+> 现状：已建成 **235 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **53 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；P·网页/小游戏 6/6（Phase 2e 铺满：计算器/待办/记忆/打字/平台跳跃/聊天机器人，安全 DOM 面板基建已建成）；L·算法 8/8（Phase 3a 铺满：冒泡/二分/栈队列/BFS/递归/素数/串频次/贪心，算法可视化地基已建）；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
 Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`）；
 Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random`/`creative_generative`/`creative_tree`/`creative_terrain`/`creative_firework`）。
-至此 **Phase 2（画布渲染基建 + M/N/O/P 四个分类）全部完成**，13-16 剩下 L / Q / R 三个分类。
+至此 **Phase 2（画布渲染基建 + M/N/O/P 四个分类）全部完成**，Phase 3a（L·算法）/ 3b（Q·AI）/ 3c（R·毕业项目）也已相继完成，13-16 阶段 8 分类均已满编。
 > 概念梯度沿用 Code.org + ScratchJr + Blockly Games 的「序列→循环→事件→条件」主线。
 
 ### 分类 1 · 基础序列与方向（序列）　✅（11/11 完成）
@@ -292,7 +292,7 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 | **2e** | **P 网页 / 小游戏**：先建 **DOM 渲染基建**（安全 DOM 面板），再做计算器 / 待办 / 记忆 / 打字 / 平台跳跃 / 聊天机器人 | P·`web` | 6 | ✅ 完成（见下方分类 P） |
 | **3a** | L 算法与数据结构（冒泡排序可视化 / 二分查找 / 栈与队列 / BFS 迷宫 / 递归 / 素数 / 贪心） | L·`algo` | 8 | ✅ 完成（本分类 8/8 满编） |
 | **3b** | Q 人工智能启蒙（决策树 / 分类器 / 规则聊天机器人 / 推荐直觉 / 神经网络可视化） | Q·`ai` | 6 | ✅ 完成（本分类 6/6 满编） |
-| **3c** | R 毕业项目（完整小游戏 / 数据作品 / 创意工具 / 作品集…） | R·`capstone` | 5 | ⬜ 待做 |
+| **3c** | R 毕业项目（完整小游戏 / 数据作品 / 创意工具 / 开源贡献 / 作品集） | R·`capstone` | 5 | ✅ 完成（R 5/5 满编） |
 
 **节奏与依赖说明**
 
@@ -418,14 +418,15 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 - ✅ [需: 列表] 推荐系统直觉（`ai_recommend` · 余弦相似度找最像用户）
 - ✅ [需: JS模式+可视化] 神经网络可视化（`ai_network` · 前向传播逐层乘权重加偏置）
 
-### 分类 R · 毕业项目（Capstone）
-- ⬜ [需: 综合] 我的完整小游戏
-- ⬜ [需: 综合] 我的数据作品
-- ⬜ [需: 综合] 我的创意工具
-- ⬜ [需: 综合] 开源贡献
-- ⬜ [需: 综合] 作品集网站
+### 分类 R · 毕业项目（Capstone）　✅（5/5 完成）
+> 实现分类 id = `capstone`。**Phase 3c 一次铺满 5/5**，全部 `codeMode`（学生直接写 JS），判定走 `lib/steps.ts` 的 `CAPSTONE_CODE_SLUGS` 分支（基于真实 JS 标记：数组/函数/循环/drawXxx/clearCanvas/`[系统] 程序执行完毕`；空程序必然不通过）。
+- ✅ [JS模式+画布] 我的完整小游戏：接金币（`capstone_game` · 数组存金币位置 + 逐帧 clearCanvas + 落地判定加分）
+- ✅ [JS模式+画布] 我的数据作品：气温可视化（`capstone_data` · 数组 + 循环映射成柱状图）
+- ✅ [JS模式+画布] 我的创意工具：万花尺（`capstone_tool` · 可复用 ring() 工具函数 + 循环批量生成对称图案）
+- ✅ [JS模式+画布] 开源贡献：绘图工具库（`capstone_oss` · mapRange/dot/grid 通用函数 + 循环演示）
+- ✅ [JS模式+画布] 我的作品集：成长展板（`capstone_portfolio` · 数组循环批量画卡片展板）
 
-> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **48**
+> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **53**
 > （K·`js` **8/8 铺满**：Phase 0 试点 `js_square` + Phase 1 七个 `js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`；
 > L·`algo` **8/8 满编**：`algo_bubble`/`algo_binary`/`algo_stack`/`algo_maze`/`algo_fib`/`algo_prime`/`algo_string`/`algo_greedy`，算法可视化（数组+画布逐帧重画）地基已落地；
 > M·`phys` **7/7 满编**：`phys_fall` 自由落体 / `phys_bounce` 弹跳球 / `phys_parabola` 抛物线 / `phys_gravity` 重力对比 /
@@ -433,9 +434,10 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 > N·`dataviz` **7/7 满编**：`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`；
 > O·`creative` **6/6 满编**：`creative_mandala`/`creative_random`/`creative_generative`/`creative_tree`/`creative_terrain`/`creative_firework`；
 > P·`web` **6/6 满编**：`web_calculator`/`web_todo`/`web_memory`/`web_typing`/`web_platformer`/`web_chatbot`，安全 DOM 面板基建已落地；
-> Q·`ai` **6/6 满编**：`ai_tree`/`ai_knn`/`ai_bayes`/`ai_perceptron`/`ai_recommend`/`ai_network`，AI 启蒙（决策树/分类/贝叶斯/感知机/推荐/神经网络）地基已落地）。
+> Q·`ai` **6/6 满编**：`ai_tree`/`ai_knn`/`ai_bayes`/`ai_perceptron`/`ai_recommend`/`ai_network`，AI 启蒙（决策树/分类/贝叶斯/感知机/推荐/神经网络）地基已落地；
+> R·`capstone` **5/5 满编**：`capstone_game`/`capstone_data`/`capstone_tool`/`capstone_oss`/`capstone_portfolio`，毕业项目（综合前面所有能力）地基已落地）。
 > JS 模式地基与画布渲染基建均已落地，**Phase 2 的四个画布分类（M/N/O/P 全部 + 地基）已全部铺满**；
-> Phase 3a（L·算法 8 项）与 Phase 3b（Q·AI 启蒙 6 项）均已完成，**仅剩分类 R·capstone（毕业项目）待 Phase 3c 铺开**。
+> Phase 3a（L·算法 8 项）、Phase 3b（Q·AI 启蒙 6 项）、Phase 3c（R·毕业项目 5 项）均已完成，**13-16 阶段 8 分类已全部满编**。
 
 ---
 
@@ -445,12 +447,11 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 |---|---|---|---|---|
 | 6-8 岁 | 11 | 105 | **105** + 造物工坊（含分类11·综合 4 个总结项目） | 分类7·故事 ✅ / 分类10·科学 ✅ / 分类11·综合 ✅ / 造物工坊 ✅ 全部交付 |
 | 9-12 岁 | 10 | 77 | **77** | 全部轻量运行时已落地（含列表 7 原语 / 时间轴引擎）；9-12 阶段 10 分类全部满编 |
-| 13-16 岁 | 8 | 53 | **48**（K·js 8/8 + L·algo 8/8 + M·phys 7/7 + N·dataviz 7/7 + O·creative 6/6 + P·web 6/6 + Q·ai 6/6） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地，M、N、O、P 四个分类全部铺满** / 算法可视化（L 已铺满）/ AI 启蒙（Q 已完成）/ 毕业项目（待 Phase 3c） |
+| 13-16 岁 | 8 | 53 | **53**（K·js 8/8 + L·algo 8/8 + M·phys 7/7 + N·dataviz 7/7 + O·creative 6/6 + P·web 6/6 + Q·ai 6/6 + R·capstone 5/5） | 文本 JS 模式 / 画布渲染基建 / 算法可视化（L）/ AI 启蒙（Q）/ 毕业项目（R）八分类全部满编，13-16 阶段整体交付完成 |
 
-**当前下一步**：6-8（105/105）与 9-12（77/77）已全部满编，13-16 阶段已完成 48/53。
-按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，**Phase 3a（L·算法与数据结构 8 项）** 与 **Phase 3b（Q·人工智能启蒙 6 项）均已完成**——算法可视化（数组/递归/查找/图 + 画布逐帧重画）与 AI 启蒙（决策树/分类/贝叶斯/感知机/推荐/神经网络）地基已落地，14 个 codeMode 项目全部上线并通过 48 关链式浏览器冒烟。
-下一步进入 **Phase 3c**：R 毕业项目（我的完整小游戏 / 我的数据作品 / 我的创意工具 / 开源贡献 / 作品集网站，5 项）。
-另外，「真交互」（鼠标跟随 / 点击事件回调）也依赖这套基建，届时可与分类 O 的「交互视觉」一并补上。
+**当前下一步**：6-8（105/105）、9-12（77/77）、13-16（53/53）三阶段已全部满编，全站累计 **235 个**引导项目（含造物工坊）均已上线。
+按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序，**Phase 0/1**（K·js 8 项）、**Phase 2a-2e**（M/N/O/P 四个画布分类 26 项 + DOM 基建）、**Phase 3a**（L·算法 8 项）、**Phase 3b**（Q·AI 启蒙 6 项）、**Phase 3c**（R·毕业项目 5 项）全部完成——53 个 codeMode 项目全部上线并已通过 53 关链式浏览器冒烟。至此「造物星球」全课程交付完毕。
+后续可考虑：① 「真交互」（鼠标跟随 / 点击事件回调）作为可选增强；② 内容/教学打磨与线上数据复盘。
 
 **如何完善（单会话工作流）**：
 1. 从本表挑一个 ⬜ 项目（或一整个分类）。

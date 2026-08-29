@@ -152,6 +152,7 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
       "algo_bubble", "algo_binary", "algo_stack", "algo_maze",
       "algo_fib", "algo_prime", "algo_string", "algo_greedy",
       "ai_tree", "ai_knn", "ai_bayes", "ai_perceptron", "ai_recommend", "ai_network",
+      "capstone_game", "capstone_data", "capstone_tool", "capstone_oss", "capstone_portfolio",
     ]);
   });
 
@@ -264,10 +265,10 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     ]);
   });
 
-  it("stage-13-16 已开放，getStageCategories 返回 js / phys / dataviz / creative / web / algo 六个非空分类（顺序遵循 CATEGORIES 注册表）", () => {
+  it("stage-13-16 已开放，getStageCategories 返回 js / phys / dataviz / creative / web / algo / ai / capstone 八个非空分类（顺序遵循 CATEGORIES 注册表）", () => {
     const cats = getStageCategories("stage-13-16");
-    expect(cats).toHaveLength(7);
-    expect(cats.map((c) => c.id)).toEqual(["js", "phys", "dataviz", "creative", "web", "algo", "ai"]);
+    expect(cats).toHaveLength(8);
+    expect(cats.map((c) => c.id)).toEqual(["js", "phys", "dataviz", "creative", "web", "algo", "ai", "capstone"]);
     expect(cats[0].id).toBe("js");
     expect(cats[0].projects.map((p) => p.slug)).toEqual([
       "js_square", "js_hello", "js_variable", "js_function",
@@ -301,6 +302,10 @@ describe("课程层级（学龄段 → 多项目 → 独立项目）", () => {
     expect(cats[6].id).toBe("ai");
     expect(cats[6].projects.map((p) => p.slug)).toEqual([
       "ai_tree", "ai_knn", "ai_bayes", "ai_perceptron", "ai_recommend", "ai_network",
+    ]);
+    expect(cats[7].id).toBe("capstone");
+    expect(cats[7].projects.map((p) => p.slug)).toEqual([
+      "capstone_game", "capstone_data", "capstone_tool", "capstone_oss", "capstone_portfolio",
     ]);
   });
 });
