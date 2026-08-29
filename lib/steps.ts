@@ -73,6 +73,26 @@ const DATAVIZ_CODE_SLUGS = [
   "dataviz_dashboard",
 ];
 
+/**
+ * 13-16 分类 O · 创意编程（creative 分类，Phase 2d 一次铺满 6/6）。
+ * 这里不追求「算得对」，而是让学生体会**几条规则就能生成复杂图案**。判定抓各自的生成机制：
+ *   - 数组 + `Math.cos/sin` 双层循环      → 曼陀罗的对称复制
+ *   - `Math.random()` 出现多次           → 随机艺术真的引入了变化（且随机被用在绘图参数里）
+ *   - 三角函数嵌套（`Math.cos(k * a)` 型）→ 生成艺术的参数方程
+ *   - 函数体内调用自己                    → 分形树的递归（用大括号配对找出函数体再查）
+ *   - 多个 `Math.sin` 且频率不同          → 噪声地形的多频波叠加
+ *   - `v = v * 0.97` 形态的速度衰减       → 粒子烟花的阻尼
+ * 空程序 / 只写注释必然不通过（最后一步仍要求「程序执行完毕」日志）。
+ */
+const CREATIVE_CODE_SLUGS = [
+  "creative_mandala",
+  "creative_random",
+  "creative_generative",
+  "creative_tree",
+  "creative_terrain",
+  "creative_firework",
+];
+
 /** 分类 4 · 事件与互动 */
 const EVENT_SLUGS = [
   "click_jump", "click_color", "click_dialog", "two_events", "click_play_dialog",
@@ -519,6 +539,79 @@ export function computeSteps(
         // 滑动窗口：push 新数据、shift 老数据，并逐帧擦掉重画
         if (id === 1) done = hasArrayLiteral && usesPush;
         else if (id === 2) done = hasLoop && usesShift && hasClear && hasWait;
+        else if (id === 3) done = finished;
+      }
+    } else if (CREATIVE_CODE_SLUGS.includes(project.slug)) {
+      // 13-16 创意编程类：抓各自的「生成机制」，证明图案是算出来的而不是随手画的。
+      const codeNoComment = code.replace(/\/\/.*$/gm, "");
+      const hasArrayLiteral = /\b(?:let|const|var)\s+\w+\s*=\s*\[/.test(codeNoComment);
+      const hasCircle = code.includes("__runtime.drawCircle(");
+      const hasLine = code.includes("__runtime.drawLine(");
+      const hasClear = code.includes("__runtime.clearCanvas()");
+      const hasWait = code.includes("__runtime.wait(");
+      const usesTrig = /Math\.(cos|sin)\s*\(/.test(codeNoComment);
+      const randomCount = (codeNoComment.match(/Math\.random\s*\(/g) ?? []).length;
+      const sinCount = (codeNoComment.match(/Math\.sin\s*\(/g) ?? []).length;
+      // 多个不同频率的波叠加：Math.sin 里出现至少两个不同的频率系数
+      const multiFreq =
+        sinCount >= 3 &&
+        new Set(codeNoComment.match(/Math\.sin\(\s*\w+\s*\*\s*([\d.]+)/g) ?? []).size >= 3;
+      // 参数方程：三角函数的参数里是一个「系数 * 角度」的复合表达式。
+      // 注意参数里可能带嵌套括号（如 Math.cos((R - r) / r * a)），故用非贪婪的 [\s\S]*?，
+      // 不能写成 [^()]*——那会在 (R - r) 的第一个 ) 处提前截断。
+      const nestedTrig = /Math\.(cos|sin)\([\s\S]*?\*\s*[a-zA-Z_$][\w$]*\s*\)/.test(codeNoComment);
+      // 递归：找出函数体（大括号配对），再看里面有没有调用自己
+      const recurses = (() => {
+        const m = codeNoComment.match(/function\s+([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/);
+        if (!m) return false;
+        const name = m[1];
+        const start = m.index! + m[0].length - 1; // 指向函数体的左花括号
+        let depth = 0;
+        let end = start;
+        for (let k = start; k < codeNoComment.length; k++) {
+          if (codeNoComment[k] === "{") depth++;
+          else if (codeNoComment[k] === "}") {
+            depth--;
+            if (depth === 0) { end = k; break; }
+          }
+        }
+        return new RegExp(`\\b${name}\\s*\\(`).test(codeNoComment.slice(start, end));
+      })();
+      // 阻尼：速度被乘上一个小于 1 的系数。乘数可能是字面量（v * 0.97）也可能是变量（v * drag），
+      // 故两者都接受；但只认小数或变量，不接受 v * 2 这种放大写法。
+      const hasDrag = /\bv[\w\[\]]*\s*=\s*v[\w\[\]]*\s*\*\s*(0?\.\d+|[A-Za-z_$][\w$]*)\s*;/.test(
+        codeNoComment
+      );
+      const finished = logs.includes("[系统] 程序执行完毕");
+      if (project.slug === "creative_mandala") {
+        // 数组描述各层参数 → 双层循环用极坐标把小圆排成一圈圈
+        if (id === 1) done = hasArrayLiteral;
+        else if (id === 2) done = hasLoop && hasCircle && usesTrig;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "creative_random") {
+        // 随机制造变化，且随机被真正用在绘图参数里
+        if (id === 1) done = randomCount >= 2;
+        else if (id === 2) done = hasLoop && hasCircle && randomCount >= 2;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "creative_generative") {
+        // 参数方程（三角函数嵌套）算坐标 → 画点成线
+        if (id === 1) done = hasLoop && usesTrig && nestedTrig;
+        else if (id === 2) done = hasCircle;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "creative_tree") {
+        // 定义函数 → 函数体内调用自己（递归）
+        if (id === 1) done = /function\s+\w+\s*\(/.test(codeNoComment);
+        else if (id === 2) done = recurses && hasLine;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "creative_terrain") {
+        // 多个不同频率的波叠加 → 把高度画成山体
+        if (id === 1) done = multiFreq;
+        else if (id === 2) done = hasLoop && hasLine;
+        else if (id === 3) done = finished;
+      } else if (project.slug === "creative_firework") {
+        // 粒子炸开（平行数组）→ 重力 + 阻尼，并逐帧擦掉重画
+        if (id === 1) done = hasArrayLiteral && usesTrig;
+        else if (id === 2) done = hasDrag && hasClear && hasWait && hasLoop;
         else if (id === 3) done = finished;
       }
     } else if (project.slug === "stars") {

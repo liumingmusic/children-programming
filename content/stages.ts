@@ -25,6 +25,6 @@ export const stages: Stage[] = [
     name: "进阶工坊",
     tagline: "从积木过渡到 JavaScript，做工具、模拟与创意作品。",
     status: "open",
-    projectSlugs: ["js_square", "js_hello", "js_variable", "js_function", "js_array", "js_tool", "js_canvas", "js_compare", "phys_fall", "phys_bounce", "phys_parabola", "phys_gravity", "phys_spring", "phys_orbit", "phys_particle", "dataviz_bar", "dataviz_line", "dataviz_pie", "dataviz_weather", "dataviz_scores", "dataviz_wordcloud", "dataviz_dashboard"],
+    projectSlugs: ["js_square", "js_hello", "js_variable", "js_function", "js_array", "js_tool", "js_canvas", "js_compare", "phys_fall", "phys_bounce", "phys_parabola", "phys_gravity", "phys_spring", "phys_orbit", "phys_particle", "dataviz_bar", "dataviz_line", "dataviz_pie", "dataviz_weather", "dataviz_scores", "dataviz_wordcloud", "dataviz_dashboard", "creative_mandala", "creative_random", "creative_generative", "creative_tree", "creative_terrain", "creative_firework"],
   },
 ];

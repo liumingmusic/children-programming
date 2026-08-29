@@ -450,3 +450,139 @@ describe("13-16 数据可视化 · Phase 2c 铺满（dataviz 7/7）", () => {
     expect(isGoalAchieved(getProject("dataviz_dashboard")!, state, state.log, code)).toBe(false);
   });
 });
+
+/**
+ * 13-16 · Phase 2d：O 创意编程分类 6 项（一次铺满）。
+ *
+ * 这里不追求「算得对」，而是让学生体会「几条规则就能生成复杂图案」。
+ * 判定抓的是各自的**生成机制**（对称复制 / 随机 / 参数方程 / 递归 / 多频叠加 / 阻尼），
+ * 而不是「画了多少个图元」。前 5 项是静态作品，只有粒子烟花需要逐帧重画。
+ */
+const CREATIVE_PHASE2D_SLUGS = [
+  "creative_mandala", "creative_random", "creative_generative",
+  "creative_tree", "creative_terrain", "creative_firework",
+];
+
+describe("13-16 创意编程 · Phase 2d 铺满（creative 6/6）", () => {
+  for (const slug of CREATIVE_PHASE2D_SLUGS) {
+    const project = getProject(slug) as CourseProject | undefined;
+    expect(project, `缺少项目 ${slug}`).toBeTruthy();
+    if (!project) continue;
+
+    it(`${slug}：数据字段齐备（creative 分类 + codeMode + defaultCode）`, () => {
+      expect(project.category).toBe("creative");
+      expect(project.codeMode).toBe(true);
+      expect(typeof project.defaultCode).toBe("string");
+      expect(project.defaultCode!.length).toBeGreaterThan(0);
+    });
+
+    it(`${slug}：示范代码跑通，完成门禁全绿`, async () => {
+      const code = project.defaultCode!;
+      const state = await runCode(code);
+      expect(state.log).toContain("[系统] 程序执行完毕");
+
+      const steps = computeSteps(project, code, state.log);
+      const undone = steps.filter((s) => !s.done).map((s) => s.title);
+      expect(undone, `${slug} 未完成的步骤：${undone.join("、")}`).toEqual([]);
+      expect(isGoalAchieved(project, state, state.log, code)).toBe(true);
+    }, 15000);
+
+    it(`${slug}：空代码不能通过完成门禁`, async () => {
+      const state = await runCode("");
+      expect(isGoalAchieved(project, state, state.log, "")).toBe(false);
+    });
+
+    it(`${slug}：作品图元真的进了 state.shapes`, async () => {
+      const code = project.defaultCode!;
+      const state = await runCode(code);
+      expect(state.shapes.length).toBeGreaterThan(0);
+      // 生成艺术有 377 个点、分形树有 127 条线段，故上限放到 500
+      expect(state.shapes.length).toBeLessThan(500);
+    }, 15000);
+  }
+
+  // 定向拦截：证明门禁校验的是「生成机制」，而不是画了东西就算过
+  it("creative_mandala：不用数组描述各层参数不能通过", async () => {
+    const code =
+      "for (let i = 0; i < 8; i++) {\n" +
+      "  const a = i / 8 * Math.PI * 2;\n" +
+      '  __runtime.drawCircle(60 * Math.cos(a), 60 * Math.sin(a), 7, "#F59E0B");\n' +
+      "}\n";
+    const state = await runCode(code);
+    // 只是手画了一圈，没有用数组描述各层 → 第 1 步不应通过
+    expect(isGoalAchieved(getProject("creative_mandala")!, state, state.log, code)).toBe(false);
+  });
+
+  it("creative_random：不用随机数、纯手画图案不能通过", async () => {
+    const code =
+      "for (let ring = 0; ring < 5; ring++) {\n" +
+      "  for (let i = 0; i < 12; i++) {\n" +
+      "    const a = i / 12 * Math.PI * 2;\n" +
+      "    const R = 40 + ring * 26;\n" +
+      '    __runtime.drawCircle(R * Math.cos(a), R * Math.sin(a), 4, "#F59E0B");\n' +
+      "  }\n" +
+      "}\n";
+    const state = await runCode(code);
+    // 一次 Math.random 都没有 → 第 1 步不应通过
+    expect(isGoalAchieved(getProject("creative_random")!, state, state.log, code)).toBe(false);
+  });
+
+  it("creative_generative：普通单参数三角函数、不是参数方程不能通过", async () => {
+    const code =
+      "for (let t = 0; t < 377; t++) {\n" +
+      "  const a = t * 0.05;\n" +
+      '  __runtime.drawCircle(100 * Math.cos(a), 100 * Math.sin(a), 2.5, "#F59E0B");\n' +
+      "}\n";
+    const state = await runCode(code);
+    // 只有一个普通圆，没有嵌套的参数方程（Math.cos(k * a) 型）→ 第 1 步不应通过
+    expect(isGoalAchieved(getProject("creative_generative")!, state, state.log, code)).toBe(false);
+  });
+
+  it("creative_tree：定义了函数但不调用自己（无递归）不能通过", async () => {
+    const code =
+      "function branch(x, y, angle, len) {\n" +
+      "  const rad = angle * Math.PI / 180;\n" +
+      '  __runtime.drawLine(x, y, x + len * Math.cos(rad), y + len * Math.sin(rad), "#22C55E", 3);\n' +
+      "}\n" +
+      "branch(0, -170, 90, 72);\n" +
+      "branch(0, -170, 60, 60);\n" +
+      "branch(0, -170, 120, 60);\n";
+    const state = await runCode(code);
+    // 有函数、也画了线，但函数内部没有调用自己 → 第 2 步不应通过
+    expect(isGoalAchieved(getProject("creative_tree")!, state, state.log, code)).toBe(false);
+  });
+
+  it("creative_terrain：只用一个频率的波、不是噪声叠加不能通过", async () => {
+    const code =
+      "for (let x = -240; x <= 240; x = x + 8) {\n" +
+      "  const h = 46 * Math.sin(x * 0.018);\n" +
+      '  __runtime.drawLine(x, -50 + h, x, -180, "#22C55E", 8);\n' +
+      "}\n";
+    const state = await runCode(code);
+    // 只有一个频率，没有多频叠加 → 第 1 步不应通过
+    expect(isGoalAchieved(getProject("creative_terrain")!, state, state.log, code)).toBe(false);
+  });
+
+  it("creative_firework：有重力但没有阻尼（不衰减）不能通过", async () => {
+    const code =
+      "const N = 24;\nconst g = 55;\nconst dt = 0.05;\n" +
+      "const px = [], py = [], vx = [], vy = [];\n" +
+      "for (let i = 0; i < N; i++) {\n" +
+      "  const a = i / N * Math.PI * 2;\n" +
+      "  px.push(0); py.push(20);\n" +
+      "  vx.push(60 * Math.cos(a)); vy.push(60 * Math.sin(a));\n" +
+      "}\n" +
+      "for (let f = 0; f < 20; f++) {\n" +
+      "  for (let i = 0; i < N; i++) {\n" +
+      "    vy[i] = vy[i] - g * dt;\n" +
+      "    px[i] = px[i] + vx[i] * dt;\n    py[i] = py[i] + vy[i] * dt;\n" +
+      "  }\n" +
+      "  __runtime.clearCanvas();\n" +
+      '  for (let i = 0; i < N; i++) __runtime.drawCircle(px[i], py[i], 4, "#F59E0B");\n' +
+      "  __runtime.wait(dt);\n" +
+      "}\n";
+    const state = await runCode(code);
+    // 粒子只会越掉越快、一瞬间飞出画面——没有 v = v * 0.97 的阻尼 → 第 2 步不应通过
+    expect(isGoalAchieved(getProject("creative_firework")!, state, state.log, code)).toBe(false);
+  });
+});

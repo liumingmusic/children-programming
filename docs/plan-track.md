@@ -13,8 +13,10 @@
 
 ## 一、6-8 岁阶段（图形化启蒙 · Blockly 海龟/二零）
 
-> 现状：已建成 **204 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **22 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
-Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`）。
+> 现状：已建成 **210 个**项目（6-8 阶段 **105 个**·11 分类全交付 + 9-12 阶段 **77 个** + 13-16 阶段 **28 个**：A·函数/B·变量/C·多角色/D·键盘/E·音乐/F·数学/G·列表/H·综合小游戏 各 8/8、I·故事 6/6、J·科学 7/7，均已上线；13-16 阶段 分 Phase 推进 —— Phase 0/1 js 分类 **8/8 已铺满**（`js_square`/`js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`，JS 模式地基已建）；Phase 2 画布渲染基建已落地（Runtime 新增 `drawRect`/`drawCircle`/`drawLine`/`drawText`/`clearCanvas` + `state.shapes`，StagePlayer 统一渲染），M·物理分类 **7/7 已铺满**（`phys_fall`/`phys_bounce`/`phys_parabola`/`phys_gravity`/`phys_spring`/`phys_orbit`/`phys_particle`）；
+Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`）；
+Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random`/`creative_generative`/`creative_tree`/`creative_terrain`/`creative_firework`）。
+至此 **Phase 2（画布渲染基建 + M/N/O 三个分类）全部完成**，13-16 剩下 L / P / Q / R 四个分类。
 > 概念梯度沿用 Code.org + ScratchJr + Blockly Games 的「序列→循环→事件→条件」主线。
 
 ### 分类 1 · 基础序列与方向（序列）　✅（11/11 完成）
@@ -286,8 +288,8 @@ Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`da
 | **2a** | **画布渲染基建**（Runtime 五原语 + `state.shapes` + StagePlayer 统一渲染）+ M 物理试点 2 项 | M·`phys` | 2 | ✅ 完成（`affc3776`） |
 | **2b** | M 物理补齐（抛物线 / 重力模拟 / 弹簧振子 / 圆周运动 / 粒子系统） | M·`phys` | 5 | ✅ 完成（本分类 7/7 满编） |
 | **2c** | **N 数据可视化**（柱状图 / 折线图 / 饼图 / 天气图 / 成绩分布 / 词云 / 实时仪表盘） | N·`dataviz` | 7 | ✅ 完成（本分类 7/7 满编） |
-| **2d** | O 创意编程（分形树 / 曼陀罗 / 粒子烟花 / 生成艺术…）——纯画布 | O·`creative` | 6 | ⬜ 下一步 |
-| **2e** | **DOM 渲染基建**（在舞台旁挂一块可控 HTML 面板）+ P 网页小游戏（计算器 / 待办 / 记忆 / 打字…） | P·`web` | 6 | ⬜ 待做（须先建 DOM 能力） |
+| **2d** | O 创意编程（曼陀罗 / 随机艺术 / 生成艺术 / 分形树 / 噪声地形 / 粒子烟花） | O·`creative` | 6 | ✅ 完成（本分类 6/6 满编） |
+| **2e** | **P 网页 / 小游戏**：先建 **DOM 渲染基建**（安全 DOM 面板），再做计算器 / 待办 / 记忆 / 打字… | P·`web` | 6 | ⬜ 下一步（须先建 DOM 能力） |
 | **3a** | L 算法与数据结构（冒泡排序可视化 / 二分查找 / 栈与队列 / BFS 迷宫 / 递归 / 素数 / 贪心） | L·`algo` | 8 | ⬜ 待做 |
 | **3b** | Q 人工智能启蒙（决策树 / 分类器 / 规则聊天机器人 / 推荐直觉 / 神经网络可视化） | Q·`ai` | 6 | ⬜ 待做 |
 | **3c** | R 毕业项目（完整小游戏 / 数据作品 / 创意工具 / 作品集…） | R·`capstone` | 5 | ⬜ 待做 |
@@ -299,6 +301,9 @@ Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`da
 - **2e 是本阶段唯一需要新建运行时能力的 Phase**：画布只能画像素，做不了按钮 / 输入框 / 列表 DOM。
   需先设计「安全 DOM 面板」（受控容器 + 有限 API，如 `__ui.button()` / `__ui.text()` / `__ui.input()`），
   不能直接把 `document` 交给学生代码（会破坏舞台与 React 渲染）。
+  另：代码模式目前的模型是「eval 一次性生成动作队列 → 队列回放」，查询类方法（如 `__runtime.mouseX()`）
+  **在 eval 阶段就已求值**，拿不到「播放时」的鼠标 / 键盘状态，所以**「真交互」也依赖这套事件基建**——
+  届时可与分类 O 的「交互视觉」一并补上（该蓝图项本轮已改为随机艺术，见分类 O 的说明）。
 - **3a/3b 依赖列表与可视化**：算法可视化本质是「列表 + 画布逐帧重画」，AI 启蒙依赖列表与条件逻辑，
   两者都建立在 Phase 2 的画布基建之上，故排在 Phase 3。
 - **3c 毕业项目放最后**：需要前面所有能力都齐备，学生才有材料可综合。
@@ -371,12 +376,26 @@ Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`da
 - ✅ [JS模式+画布] 实时数据仪表盘（`dataviz_dashboard` · 数组当滑动窗口 push/shift，每帧重算统计并擦掉重画）
 
 ### 分类 O · 创意编程（创意）
-- ⬜ [需: JS模式+画布] 分形树
-- ⬜ [需: JS模式+画布] 曼陀罗生成
-- ⬜ [需: JS模式+粒子] 粒子烟花
-- ⬜ [需: JS模式+噪声] 噪声地形
-- ⬜ [需: JS模式+画布] 生成艺术
-- ⬜ [需: JS模式+交互] 交互视觉
+> 实现分类 id = `creative`。**Phase 2d 一次铺满 6/6**。
+> 与物理/数据可视化不同：这里不追求「算得对」，而是让学生体会**几条规则就能生成复杂图案**。
+> 判定抓各自的**生成机制**（走 `lib/steps.ts` 的 `CREATIVE_CODE_SLUGS` 分支）：
+> 对称复制（数组 + 双层极坐标循环）、`Math.random()` 多次用于绘图参数、参数方程（三角函数嵌套）、
+> **递归**（大括号配出函数体、再看里面有没有调用自己）、多频波叠加（≥3 个不同频率的 `Math.sin`）、
+> 阻尼（速度乘一个小于 1 的系数）。前 5 项是静态作品，只有粒子烟花需要逐帧重画。
+>
+> **概念落地说明（对原蓝图的偏离）**：蓝图最后一项是「交互视觉」，本轮改为 **`creative_random` 随机艺术**。
+> 原因：代码模式的执行模型是「eval 一次性生成动作队列 → 队列回放」，
+> 而 `__runtime.mouseX()` 之类的查询在 **eval 阶段就已求值**，拿不到「播放时」的鼠标位置；
+> 且 `setMouse` 目前只在**点击舞台**时更新、codeMode 没有 click 脚本入口。
+> 要做真交互需要把「事件回调」引入学生代码（新建运行时能力），
+> 留到 Phase 2e 做 DOM / 事件基建时一并考虑（见分类 P）。
+> 教学目标（用代码生成变化、每件作品独一无二）不变，且随机性本身就是生成艺术的核心。
+- ✅ [JS模式+画布] 曼陀罗生成（`creative_mandala` · 三个平行数组描述各层，双层循环按极坐标摆出对称图案）
+- ✅ [JS模式+画布] 随机艺术（`creative_random` · 规则定骨架 + 随机制造变化，每次运行都是新作品）
+- ✅ [JS模式+画布] 生成艺术（`creative_generative` · 万花尺参数方程，颜色随角度 hsl 渐变，3 圈闭合）
+- ✅ [JS模式+画布] 分形树（`creative_tree` · **递归**：函数体内调用自己 + 终止条件，127 段树枝）
+- ✅ [JS模式+噪声] 噪声地形（`creative_terrain` · 四个不同频率的波叠加，振幅随频率递减，按高度三档上色）
+- ✅ [JS模式+粒子] 粒子烟花（`creative_firework` · 均匀炸开 + 重力 + **空气阻尼** 0.97，否则会飞出画面）
 
 ### 分类 P · 网页 / 小游戏开发（Web / Game）
 - ⬜ [需: JS模式+DOM] 计算器网页
@@ -401,13 +420,14 @@ Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`da
 - ⬜ [需: 综合] 开源贡献
 - ⬜ [需: 综合] 作品集网站
 
-> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **22**
+> **13-16 阶段小计**：8 分类，**53 项目**（K 8 + L 8 + M 7 + N 7 + O 6 + P 6 + Q 6 + R 5），已完成 **28**
 > （K·`js` **8/8 铺满**：Phase 0 试点 `js_square` + Phase 1 七个 `js_hello`/`js_variable`/`js_function`/`js_array`/`js_tool`/`js_canvas`/`js_compare`；
 > M·`phys` **7/7 满编**：`phys_fall` 自由落体 / `phys_bounce` 弹跳球 / `phys_parabola` 抛物线 / `phys_gravity` 重力对比 /
 > `phys_spring` 弹簧振子 / `phys_orbit` 圆周运动 / `phys_particle` 粒子系统；
-> N·`dataviz` **7/7 满编**：`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`）。
-> JS 模式地基与画布渲染基建均已落地；分类 L / O / P / Q / R 按上方「推进路线图」的 Phase 节奏铺开，
-> 其中 P·`web` 还需先补 DOM 渲染能力。
+> N·`dataviz` **7/7 满编**：`dataviz_bar`/`dataviz_line`/`dataviz_pie`/`dataviz_weather`/`dataviz_scores`/`dataviz_wordcloud`/`dataviz_dashboard`；
+> O·`creative` **6/6 满编**：`creative_mandala`/`creative_random`/`creative_generative`/`creative_tree`/`creative_terrain`/`creative_firework`）。
+> JS 模式地基与画布渲染基建均已落地，**Phase 2 的四个画布分类（M/N/O 全部 + 地基）已全部铺满**；
+> 分类 L / P / Q / R 按上方「推进路线图」的 Phase 节奏铺开，其中 P·`web` 还需先补 DOM 渲染能力。
 
 ---
 
@@ -417,10 +437,14 @@ Phase 2c N·数据可视化 **7/7 已铺满**（`dataviz_bar`/`dataviz_line`/`da
 |---|---|---|---|---|
 | 6-8 岁 | 11 | 105 | **105** + 造物工坊（含分类11·综合 4 个总结项目） | 分类7·故事 ✅ / 分类10·科学 ✅ / 分类11·综合 ✅ / 造物工坊 ✅ 全部交付 |
 | 9-12 岁 | 10 | 77 | **77** | 全部轻量运行时已落地（含列表 7 原语 / 时间轴引擎）；9-12 阶段 10 分类全部满编 |
-| 13-16 岁 | 8 | 53 | **22**（K·js 8/8 + M·phys 7/7 + N·dataviz 7/7） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地，M、N 均已铺满** / DOM（待 Phase 2e）/ 算法与数据（待 Phase 3） |
+| 13-16 岁 | 8 | 53 | **28**（K·js 8/8 + M·phys 7/7 + N·dataviz 7/7 + O·creative 6/6） | 文本 JS 模式（地基已建，K 已铺满）/ **画布渲染基建已落地，M、N、O 三个分类全部铺满** / DOM（待 Phase 2e）/ 算法与数据（待 Phase 3） |
 
 **当前下一步**：6-8（105/105）与 9-12（77/77）已全部满编，只剩 13-16 阶段。
-按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，当前处于 **Phase 2c 已完成 → 下一步 Phase 2d**（O·创意编程 6 项，纯画布、基建已就绪，无需新运行时能力）。
+按「**三、13-16 岁阶段 · 推进路线图**」的 Phase 顺序推进，当前处于 **Phase 2d 已完成 → 下一步 Phase 2e**（P·网页 / 小游戏 6 项）。
+⚠️ **Phase 2e 是本阶段最后一个需要新建运行时能力的 Phase**：画布只能画像素，做不了按钮 / 输入框 / 列表。
+需先设计「安全 DOM 面板」（受控容器 + 有限 API，如 `__ui.button()` / `__ui.text()` / `__ui.input()`），
+**不能直接把 `document` 交给学生代码**——理由和画布一样，会破坏舞台的 React 渲染。
+另外，「真交互」（鼠标跟随 / 点击事件回调）也依赖这套基建，届时可与分类 O 的「交互视觉」一并补上。
 
 **如何完善（单会话工作流）**：
 1. 从本表挑一个 ⬜ 项目（或一整个分类）。

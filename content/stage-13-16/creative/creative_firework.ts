@@ -1,0 +1,56 @@
+import type { CourseProject } from "@/courses";
+
+/**
+ * O·创意编程 · 粒子烟花：粒子向四面八方炸开，受重力缓缓下坠、被空气阻力拖慢。
+ * 与 phys_particle 的区别：那里研究「碰撞与规律」，这里追求「好看的效果」。
+ */
+export const creativeFirework: CourseProject = {
+  slug: "creative_firework",
+  title: "粒子烟花：让代码绽放",
+  ageGroup: "13-16 岁",
+  description: "48 个粒子同时炸开、受重力下坠、被空气拖慢——把学过的物理变成一场烟花。",
+  category: "creative",
+  missionBrief:
+    "学过的物理，都能拿来做好看的东西。这一关做一场烟花。\n\n**第一步：让它炸开。**\n48 个粒子，每个朝一个方向飞出去。方向怎么定？让角度在整圈里均匀分布：\n· a = i / N * Math.PI * 2;\n· vx = speed * Math.cos(a);   vy = speed * Math.sin(a);\n再把速度分成几档（`45 + (i % 5) * 13`），粒子就有前有后，炸开时形成层次。\n\n**第二步：让它落下。**\n每帧 `vy = vy - g * dt;` 加上重力，粒子就开始下坠。\n\n**第三步（关键）：加上空气阻力。**\n如果只有重力，粒子会越掉越快，一瞬间全飞出画面，一点都不像烟花。\n真实世界里空气会拖住它们，代码里就是**每帧把速度乘一个略小于 1 的数**：\n· vx = vx * 0.97;\n· vy = vy * 0.97;\n这个 0.97 叫**阻尼系数**。有了它，粒子炸开后会慢慢停住、再缓缓飘落——正是烟花的样子。\n\n试试把 0.97 改成 0.99（几乎没阻力，飞得远）或 0.9（像在水里，很快黏住），感受手感的差别。",
+  erLingHint:
+    "提示：先用循环初始化 48 个粒子（角度均匀分布、速度分档）；主循环里每帧先乘阻尼 0.97 再减重力、更新位置，然后 clearCanvas → 循环画所有粒子 → wait(dt)。",
+  steps: [
+    { id: 1, title: "让粒子朝四面八方炸开" },
+    { id: 2, title: "加上重力与空气阻力" },
+    { id: 3, title: "每帧擦掉重画，看烟花绽放" },
+  ],
+  codeMode: true,
+  defaultCode:
+    "// 粒子烟花：炸开 → 被重力拉下 → 被空气拖慢\n" +
+    "const N = 48;               // 粒子数量\n" +
+    "const g = 55;               // 重力\n" +
+    "const drag = 0.97;          // 阻尼：每帧速度保留 97%（空气阻力）\n" +
+    "const dt = 0.05;\n" +
+    "const colors = [\"#F59E0B\", \"#FBBF24\", \"#38bdf8\", \"#F472B6\", \"#22C55E\", \"#A78BFA\"];\n" +
+    "\n" +
+    "const px = [], py = [], vx = [], vy = [];\n" +
+    "for (let i = 0; i < N; i++) {\n" +
+    "  const a = i / N * Math.PI * 2;        // 方向：整圈均匀分布\n" +
+    "  const speed = 45 + (i % 5) * 13;      // 速度分档，炸开时有层次\n" +
+    "  px.push(0);\n" +
+    "  py.push(20);                          // 从舞台中央偏上一点炸开\n" +
+    "  vx.push(speed * Math.cos(a));\n" +
+    "  vy.push(speed * Math.sin(a));\n" +
+    "}\n" +
+    "\n" +
+    "for (let frame = 0; frame < 34; frame++) {\n" +
+    "  for (let i = 0; i < N; i++) {\n" +
+    "    vx[i] = vx[i] * drag;               // 空气阻力\n" +
+    "    vy[i] = vy[i] * drag;\n" +
+    "    vy[i] = vy[i] - g * dt;             // 重力\n" +
+    "    px[i] = px[i] + vx[i] * dt;\n" +
+    "    py[i] = py[i] + vy[i] * dt;\n" +
+    "  }\n" +
+    "\n" +
+    "  __runtime.clearCanvas();\n" +
+    "  for (let i = 0; i < N; i++) {\n" +
+    "    __runtime.drawCircle(px[i], py[i], 4, colors[i % colors.length]);\n" +
+    "  }\n" +
+    "  __runtime.wait(dt);\n" +
+    "}\n",
+};
