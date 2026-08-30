@@ -231,3 +231,83 @@ export async function clearStore(): Promise<void> {
   }
   for (const k of keys) del(k);
 }
+
+// ---- 备份导出 / 导入（纯前端，全过程不经过任何服务器）----
+//
+// 为什么需要：作品、进度、学习时长**只存在浏览器本地**，清缓存 / 换设备 / 换浏览器就会全部丢失。
+// 对孩子来说「辛苦搭的作品没了」是很实在的伤害。这里把本应用占用的全部 `mp:` 键导出成 JSON 文件，
+// 家长自行保存；换设备时再导入恢复——不需要注册、不需要后端，也就不收集任何信息。
+//
+// 设计取舍：
+// 1. 直接搬运 `mp:` 前缀的原始键值对，而不是逐个字段序列化。这样未来新增存储字段会自动被囊括，
+//    不必回头改备份格式；也避免漏掉某一类数据导致「恢复了作品但进度没了」。
+// 2. 只认 `mp:` 前缀：既不把浏览器里其他站点的数据卷进来，导入时也防御脏数据。
+// 3. 导入采用「同名覆盖、不清空其他」，而不是「先清空再写入」——后者一旦选错文件，
+//    会把现有作品一起抹掉；本地存储没有后端兜底，这个风险不值得冒。
+
+export const BACKUP_FORMAT = "zaowu-backup";
+export const BACKUP_VERSION = 1;
+
+export interface BackupFile {
+  format: string;
+  version: number;
+  exportedAt: string;
+  /** 各类数据条目数，用于导出后给用户一个直观反馈 */
+  counts: { projects: number; progress: number; timeLogs: number };
+  /** 原始键值对（键均带 `mp:` 前缀） */
+  entries: Record<string, string>;
+}
+
+/** 导出本应用的全部本地数据为备份对象。 */
+export async function exportBackup(): Promise<BackupFile> {
+  const s = ls();
+  const entries: Record<string, string> = {};
+  if (s) {
+    for (let i = 0; i < s.length; i++) {
+      const k = s.key(i);
+      if (!k || !k.startsWith(`${NS}:`)) continue;
+      const v = s.getItem(k);
+      if (v !== null) entries[k] = v;
+    }
+  }
+  return {
+    format: BACKUP_FORMAT,
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    counts: {
+      projects: Object.keys(entries).filter((k) => k.startsWith(`${NS}:xml:`)).length,
+      progress: Object.keys(entries).filter((k) => k.startsWith(`${NS}:prog:`)).length,
+      timeLogs: Object.keys(entries).filter((k) => k.startsWith(`${NS}:time:`)).length,
+    },
+    entries,
+  };
+}
+
+/** 解析并校验备份文本；不是合法备份时返回 null（不抛错，便于 UI 友好提示）。 */
+export function parseBackup(text: string): BackupFile | null {
+  try {
+    const o = JSON.parse(text) as unknown;
+    if (!o || typeof o !== "object") return null;
+    const b = o as Partial<BackupFile>;
+    if (b.format !== BACKUP_FORMAT) return null;
+    if (!b.entries || typeof b.entries !== "object") return null;
+    return b as BackupFile;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 导入备份：把备份里的键写回本地存储（同名键覆盖，不动其他数据）。
+ * @returns 实际写入的条目数
+ */
+export async function importBackup(backup: BackupFile): Promise<number> {
+  let n = 0;
+  for (const [k, v] of Object.entries(backup.entries)) {
+    if (!k.startsWith(`${NS}:`)) continue;
+    if (typeof v !== "string") continue;
+    set(k, v);
+    n++;
+  }
+  return n;
+}

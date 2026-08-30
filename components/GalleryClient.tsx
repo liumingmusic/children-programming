@@ -218,6 +218,8 @@ export default function GalleryClient() {
                       resetPage();
                     }}
                     placeholder="搜索作品名"
+                    // placeholder 在不少读屏软件上不会被当作无障碍名称，补一个等价的 aria-label
+                    aria-label="搜索作品名"
                     className="w-44 rounded-lg border border-black/10 bg-white py-2 pl-9 pr-3 text-sm text-[#04342C] outline-none focus:border-[#0F6E56]"
                   />
                 </div>

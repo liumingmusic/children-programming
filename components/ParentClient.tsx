@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles, Calendar, Flag, PartyPopper, PencilLine, Search, ChevronDown } from "lucide-react";
+import {
+  ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles, Calendar, Flag,
+  PartyPopper, PencilLine, Search, ChevronDown, Download, Upload, ShieldCheck,
+} from "lucide-react";
 import type { Project, Progress } from "@/lib/db";
-import { getAllProjects, getAllProgress, getTimeStats, type TimeStats } from "@/lib/db";
+import {
+  getAllProjects, getAllProgress, getTimeStats,
+  exportBackup, parseBackup, importBackup,
+  type TimeStats,
+} from "@/lib/db";
 import { projects as allCourses, stages, getStageProjects, CATEGORIES, type CourseProject } from "@/courses";
 
 function ErLingAvatar({ className = "" }: { className?: string }) {
@@ -40,9 +47,12 @@ export default function ParentClient() {
   const [search, setSearch] = useState("");
   // 默认展开「孩子已经开始」的分类；搜索时强制全部展开
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  // 备份导出 / 导入的结果提示
+  const [backupMsg, setBackupMsg] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    async function load() {
+  // 抽成 useCallback：导入备份后可再次调用，页面上的进度立刻刷新，不必手动刷新浏览器
+  const load = useCallback(async () => {
       const [savedProjects, progressList, times] = await Promise.all([
         getAllProjects(),
         getAllProgress(),
@@ -97,9 +107,11 @@ export default function ParentClient() {
       }
       setExpanded(defaultOpen);
       setLoading(false);
-    }
-    load();
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const bySlug = new Map(items.map((i) => [i.course.slug, i]));
   const kw = search.trim().toLowerCase();
@@ -112,6 +124,47 @@ export default function ParentClient() {
       return n;
     });
   };
+
+  // ---- 作品备份：导出成 JSON 文件 / 从文件恢复（纯前端，不经过任何服务器）----
+  const handleExport = useCallback(async () => {
+    try {
+      const backup = await exportBackup();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const d = new Date();
+      const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+      a.download = `造物星球-作品备份-${stamp}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setBackupMsg(`已导出 ${backup.counts.projects} 份作品、${backup.counts.progress} 条进度记录。请把这个文件收好～`);
+    } catch {
+      setBackupMsg("导出失败：当前浏览器不允许下载文件，换一个浏览器再试试。");
+    }
+  }, []);
+
+  const handleImportFile = useCallback(
+    async (file: File) => {
+      setBackupMsg("正在读取备份文件…");
+      try {
+        const text = await file.text();
+        const backup = parseBackup(text);
+        if (!backup) {
+          setBackupMsg("这个文件不是造物星球的备份文件，请重新选择。");
+          return;
+        }
+        const n = await importBackup(backup);
+        await load();
+        setBackupMsg(
+          `恢复完成：导入了 ${backup.counts.projects} 份作品、${backup.counts.progress} 条进度（共 ${n} 条记录）。`
+        );
+      } catch {
+        setBackupMsg("导入失败：文件读不出来，换一个备份文件再试试。");
+      }
+    },
+    [load]
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-[#fafbfc]">
@@ -198,6 +251,57 @@ export default function ParentClient() {
                 </div>
               )}
 
+              {/* 作品备份与隐私：作品只存在本地，清缓存 / 换设备会丢，所以要把「自己导出」这条路给到家长 */}
+              <div className="mb-10 rounded-2xl border border-[#5DCAA5]/30 bg-[#E1F5EE] p-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-[#0F6E56]" />
+                  <h2 className="text-lg font-medium text-[#04342C]">作品备份与隐私</h2>
+                </div>
+                <p className="mb-4 text-sm leading-relaxed text-[#0F6E56]">
+                  孩子的作品、进度和学习时长都只保存在
+                  <strong className="font-medium text-[#04342C]">这台设备的浏览器里</strong>
+                  ，造物星球<strong className="font-medium text-[#04342C]">不会上传任何信息</strong>
+                  ，也不需要注册账号。但清理浏览器数据、换设备或换浏览器时这些记录会丢失——
+                  建议偶尔导出一份备份收好，换设备时再导入回来。
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* 这两个按钮刻意**不写** aria-label：可见文字已经清楚，
+                      文字本身就是可访问名称。若另写一个措辞不同的 aria-label，
+                      会违反 WCAG 2.5.3（名称须包含可见文字），导致语音控制用户说
+                      「点击导出备份文件」反而失效。 */}
+                  <button
+                    onClick={handleExport}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6E56] px-4 py-2 text-sm font-medium text-white hover:bg-[#0A5544]"
+                  >
+                    <Download className="h-4 w-4" />
+                    导出备份文件
+                  </button>
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#0F6E56]/30 bg-white px-4 py-2 text-sm font-medium text-[#0F6E56] hover:bg-[#E1F5EE]"
+                  >
+                    <Upload className="h-4 w-4" />
+                    从备份文件恢复
+                  </button>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="application/json,.json"
+                    className="hidden"
+                    aria-label="选择备份文件"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      // 先清空 value，否则连续选同一个文件不会再触发 change
+                      e.target.value = "";
+                      if (f) void handleImportFile(f);
+                    }}
+                  />
+                </div>
+                {backupMsg && (
+                  <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-sm text-[#0F6E56]">{backupMsg}</p>
+                )}
+              </div>
+
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-lg font-medium text-[#04342C]">各阶段进展</h2>
                 <div className="relative">
@@ -206,6 +310,8 @@ export default function ParentClient() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="搜索某个项目"
+                    // placeholder 在不少读屏软件上不会被当作无障碍名称，补一个等价的 aria-label
+                    aria-label="搜索某个项目"
                     className="w-52 rounded-lg border border-black/10 bg-white py-2 pl-9 pr-3 text-sm text-[#04342C] outline-none focus:border-[#0F6E56]"
                   />
                 </div>

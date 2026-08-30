@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from "react";
+import { useEffect, useMemo, useRef, useImperativeHandle, forwardRef, useCallback } from "react";
 import * as Blockly from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
@@ -38,11 +38,19 @@ interface BlocklyEditorProps {
    * 不传则维持现状（外部手风琴或只读视图），互不影响。
    */
   toolboxCategories?: string[];
+  /**
+   * 把对外暴露的 handle 通过回调交给父组件。
+   * 存在理由：上层若用 next/dynamic 懒加载本组件，ref 可能透传不进来
+   * （实测 React 19 + next/dynamic 下 ref 为 null、useImperativeHandle 的工厂不会被调用），
+   * 此时父组件里 `if (!editor) return` 不报错，只会「点了保存没反应」——极难发现的静默故障。
+   * 用回调可完全绕开 ref 透传问题。
+   */
+  onReady?: (handle: ProjectEditorHandle | null) => void;
 }
 
 const BlocklyEditor = forwardRef<ProjectEditorHandle, BlocklyEditorProps>(
   function BlocklyEditor(
-    { onChange, onAutoSave, bootstrapXml, onFlush, disableNativeFlyout = true, toolboxCategories },
+    { onChange, onAutoSave, bootstrapXml, onFlush, disableNativeFlyout = true, toolboxCategories, onReady },
     ref
   ) {
     const blocklyDiv = useRef<HTMLDivElement>(null);
@@ -236,8 +244,9 @@ const BlocklyEditor = forwardRef<ProjectEditorHandle, BlocklyEditorProps>(
       };
     }, [onChange, doLoadXml]);
 
-    useImperativeHandle(
-      ref,
+    // 抽成 useMemo 而非直接写在 useImperativeHandle 里：这样 handle 一定会生成，
+    // 即使 ref 透传失败（懒加载场景）也能通过 onReady 交给父组件。
+    const handle = useMemo<ProjectEditorHandle>(
       () => ({
         getXml: () => {
           const workspace = workspaceRef.current;
@@ -283,6 +292,19 @@ const BlocklyEditor = forwardRef<ProjectEditorHandle, BlocklyEditorProps>(
       }),
       [doLoadXml, addBlockInternal]
     );
+
+    useImperativeHandle(ref, () => handle, [handle]);
+
+    // 懒加载时 ref 可能透传不进来，用回调兜底把 handle 交给父组件。
+    // 用 ref 存 onReady 是为了让下面的 effect 只依赖 handle，避免父组件传内联箭头函数时反复触发。
+    const onReadyRef = useRef(onReady);
+    useEffect(() => {
+      onReadyRef.current = onReady;
+    }, [onReady]);
+    useEffect(() => {
+      onReadyRef.current?.(handle);
+      return () => onReadyRef.current?.(null);
+    }, [handle]);
 
     return (
       <div

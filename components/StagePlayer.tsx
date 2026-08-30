@@ -637,9 +637,11 @@ export default function StagePlayer({ state, scene, onStageClick, onTimeline, on
               return (
                 <input
                   key={el.id}
-                  value={el.value ?? ""}
-                  placeholder={el.placeholder}
-                  onChange={(e) => onUiChange?.(el.id, e.target.value)}
+                    value={el.value ?? ""}
+                    placeholder={el.placeholder}
+                    // 学生代码创建的输入框：placeholder 不可靠，用提示文字兜底作为无障碍名称
+                    aria-label={el.placeholder ?? "输入框"}
+                    onChange={(e) => onUiChange?.(el.id, e.target.value)}
                   className="w-full rounded-lg border border-[#04342C]/20 bg-white px-3 py-2 text-sm text-[#04342C] outline-none focus:border-[#F59E0B]"
                 />
               );

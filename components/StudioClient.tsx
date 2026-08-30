@@ -325,6 +325,8 @@ export default function StudioClient() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="例如：我的星空画"
+                  // 上方已有可见文字「给作品起个名字：」，用它作无障碍名称（比 placeholder 可靠）
+                  aria-label="给作品起个名字"
                   className="mb-2 w-full rounded-md border border-black/10 px-2 py-1.5 text-sm text-[#04342C] outline-none focus:border-[#0F6E56]"
                   autoFocus
                 />

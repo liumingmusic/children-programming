@@ -3,12 +3,33 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Play, RotateCcw, Save, CheckCircle, BookOpen, Info, X } from "lucide-react";
-import BlocklyEditor from "@/components/BlocklyEditor";
+import dynamic from "next/dynamic";
+// Blockly 体积约 860KB，但它只被「积木模式」项目需要：53 个 13-16 手写代码页、
+// 2 个读代码页、翻牌页都用不到。改为按需加载后，这些页面不再下载这块 JS，
+// 对弱网 / 低端设备更友好（此前全部 243 个页面都会拉它）。
+// ⚠️ 风险点：必须保证 ref 仍能拿到 handle。handleSave 里是 `if (!editor) return`，
+// ref 一旦透传失败不会报错，只会「点了保存没反应」，属于极难发现的静默故障——已由测试守住。
+const BlocklyEditor = dynamic(() => import("@/components/BlocklyEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center rounded-xl border border-black/10 bg-white text-sm text-[#5F5E5A]">
+      正在加载积木工作区…
+    </div>
+  ),
+});
 import ToolboxAccordion from "@/components/ToolboxAccordion";
 import StagePlayer from "@/components/StagePlayer";
 import DemoOverlay from "@/components/DemoOverlay";
 import ErLingAvatar from "@/components/ErLingAvatar";
-import CodeEditor from "@/components/CodeEditor";
+// 代码编辑器（CodeMirror）只有 13-16 代码模式用得到，积木页不该为它买单。
+const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center rounded-xl border border-black/10 bg-white text-sm text-[#5F5E5A]">
+      正在加载代码编辑器…
+    </div>
+  ),
+});
 import type { ProjectEditorHandle } from "@/components/editorHandle";
 import { Runtime, StageState, type Hazard, type Cloud, type Apple, type Species } from "@/lib/runtime";
 
@@ -459,6 +480,13 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     }
   }, [project.slug]);
 
+  // 编辑器改成懒加载后，实测 ref 透传不进来（ref 为 null 时 useImperativeHandle 的工厂不会执行），
+  // 因此改用 onReady 回调拿 handle。若沿用 ref，editorRef.current 会一直是 null，
+  // 而 handleSave / handleRun 里都是 `if (!editor) return`——不报错，只是点了没反应。
+  const handleEditorReady = useCallback((handle: ProjectEditorHandle | null) => {
+    editorRef.current = handle;
+  }, []);
+
   const handleSave = useCallback(async () => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -717,7 +745,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
               <div className="min-h-0 flex-1">
                 {project.codeMode ? (
                   <CodeEditor
-                    ref={editorRef}
+                    onReady={handleEditorReady}
                     onChange={handleEditorChange}
                     onAutoSave={scheduleAutoSave}
                     bootstrapXml={bootstrapXml}
@@ -726,7 +754,7 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
                   />
                 ) : (
                   <BlocklyEditor
-                    ref={editorRef}
+                    onReady={handleEditorReady}
                     onChange={handleEditorChange}
                     onAutoSave={scheduleAutoSave}
                     bootstrapXml={bootstrapXml}
