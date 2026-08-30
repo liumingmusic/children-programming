@@ -1,0 +1,55 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T73a,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_func_call">
+          <field name="NAME">前进</field>
+          <next>
+            <block type="maker_func_call">
+              <field name="NAME">画圆</field>
+              <next>
+                <block type="maker_func_call"><field name="NAME">前进</field></block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_func_def" x="60" y="300">
+      <field name="NAME">前进</field>
+      <statement name="DO">
+        <block type="maker_move">
+          <value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_func_def" x="60" y="460">
+      <field name="NAME">画圆</field>
+      <statement name="DO">
+        <block type="maker_pen_down">
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">36</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">6</field></shadow></value>
+                  <next>
+                    <block type="maker_turn">
+                      <value name="DEGREES"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_pen_up"></block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"fn_toolbox","category":"fn","title":"我的画图工具箱","ageGroup":"9-12 岁","description":"定义好几个小积木（前进、画圆），组合成一个属于你的工具箱。","missionBrief":"定义「前进」和「画圆」两个积木，再在程序里随意调用它们，感受「工具箱」带来的方便。","erLingHint":"① 定义积木 前进（里面放 移动 60）；② 定义积木 画圆（里面放 落笔 → 重复 36 次（移动 6、右转 10）→ 抬笔）；③ 当开始运行里依次「调用 前进」「调用 画圆」「调用 前进」。","steps":[{"id":1,"title":"定义多个自己的积木"},{"id":2,"title":"组合调用它们"},{"id":3,"title":"运行看到作品"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

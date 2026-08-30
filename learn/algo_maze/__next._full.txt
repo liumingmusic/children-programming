@@ -1,0 +1,62 @@
+1:"$Sreact.fragment"
+2:I[52197,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+3:I[15167,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+4:I[39756,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+5:I[37457,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+7:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+b:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"ViewportBoundary"]
+d:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"MetadataBoundary"]
+f:I[68027,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default",1]
+:HL["/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","style"]
+0:{"P":null,"c":["","learn","algo_maze"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["id","algo_maze","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/children-programming/_next/static/chunks/3esszyw7dl5_w.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/2228ow89um_7z.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col font-sans","children":[["$","$L2",null,{}],["$","$L3",null,{}],["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":["$L6",[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true,"nonce":"$undefined"}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true,"nonce":"$undefined"}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true,"nonce":"$undefined"}]],["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]]}],{},null,false,null]},null,false,"$@a"]},null,false,"$@a"]},null,false,null],["$","$1","h",{"children":[null,["$","$Lb",null,{"children":"$Lc"}],["$","div",null,{"hidden":true,"children":["$","$Ld",null,{"children":["$","$8",null,{"name":"Next.Metadata","children":"$Le"}]}]}],null]}],false]],"m":"$undefined","G":["$f",[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ioncht-W3ESqzQkr4v2Kr"}
+10:[]
+a:"$W10"
+11:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+12:T5e2,// 广度优先搜索（BFS）：像水波一样一层层向外扩散
+const maze = [
+  [0, 1, 0, 0, 0],
+  [0, 1, 0, 1, 0],
+  [0, 0, 0, 1, 0],
+  [1, 1, 0, 0, 0],
+  [0, 0, 0, 1, 0],
+];
+const rows = maze.length, cols = maze[0].length;
+const start = [0, 0], end = [rows - 1, cols - 1];
+const visited = [];
+for (let r = 0; r < rows; r++) { visited.push([]); for (let c = 0; c < cols; c++) visited[r].push(false); }
+const queue = [start];
+visited[start[0]][start[1]] = true;
+const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const cell = 40, ox = -100, oy = -100;
+
+function draw(found) {
+  __runtime.clearCanvas();
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const x = ox + c * cell, y = oy + r * cell;
+    const color = maze[r][c] === 1 ? "#475569" : (visited[r][c] ? "#FBBF24" : "#FFFFFF");
+    __runtime.drawRect(x, y, cell - 4, cell - 4, color);
+  }
+  if (found) __runtime.drawRect(ox + end[1] * cell, oy + end[0] * cell, cell - 4, cell - 4, "#22C55E");
+}
+
+let found = false;
+while (queue.length > 0) {
+  const cur = queue.shift();
+  if (cur[0] === end[0] && cur[1] === end[1]) { found = true; break; }
+  for (const d of dirs) {
+    const nr = cur[0] + d[0], nc = cur[1] + d[1];
+    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !visited[nr][nc] && maze[nr][nc] === 0) {
+      visited[nr][nc] = true; queue.push([nr, nc]);
+    }
+  }
+  draw(false);
+  __runtime.wait(0.25);
+}
+draw(found);
+__runtime.drawText(-100, 130, found ? "找到出路！" : "无路可走", "#22C55E", 18);
+6:["$","$L11",null,{"project":{"slug":"algo_maze","title":"迷宫求解：广度优先搜索 BFS","ageGroup":"13-16 岁","description":"把迷宫当成网格，从入口出发，用「队列」一层层向外扩散探索，直到触到出口——这就是广度优先搜索。","category":"algo","missionBrief":"迷宫是一张网格：0 是可以走的路，1 是墙。广度优先搜索（BFS）像一个水面波纹，从起点一圈圈向外扩散：\n· 用一个队列 queue 存放「待探索的格子」\n· 每取出一个格子，看它上下左右四个邻居\n· 没走过、也不是墙的邻居，标记为已访问并加入队列\n· 一旦取出的是出口，就找到了路\n\n我们用 visited 二维数组记录「已经扩散到哪些格子」，把它染成黄色，看波纹如何铺开。","erLingHint":"提示：const maze = [[0,1,0,...],...]; 建 visited 二维数组全 false；queue = [起点]；while (queue.length > 0) 里 cur = queue.shift()，遍历四个方向，合法且未访问就 visited=true 并 queue.push(邻居)。每轮 clearCanvas 重画网格并 wait(0.25)。","steps":[{"id":1,"title":"用二维数组表示迷宫地图"},{"id":2,"title":"用队列（push/shift）做广度优先扩散"},{"id":3,"title":"运行，看探索波纹如何找到出口"}],"codeMode":true,"defaultCode":"$12"}}]
+c:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+13:I[27201,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"IconMark"]
+9:null
+e:[["$","title","0",{"children":"迷宫求解：广度优先搜索 BFS（13-16 岁·算法） - 造物星球"}],["$","meta","1",{"name":"description","content":"把迷宫当成网格，从入口出发，用「队列」一层层向外扩散探索，直到触到出口——这就是广度优先搜索。"}],["$","meta","2",{"property":"og:title","content":"迷宫求解：广度优先搜索 BFS"}],["$","meta","3",{"property":"og:description","content":"把迷宫当成网格，从入口出发，用「队列」一层层向外扩散探索，直到触到出口——这就是广度优先搜索。"}],["$","meta","4",{"property":"og:image","content":"https://liumingmusic.github.io/children-programming/og-image.png"}],["$","meta","5",{"property":"og:type","content":"article"}],["$","meta","6",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","7",{"name":"twitter:title","content":"造物星球 - 和二零一起，把想法种成作品"}],["$","meta","8",{"name":"twitter:description","content":"免费、无广告、项目驱动的少儿编程学习平台"}],["$","meta","9",{"name":"twitter:image","content":"https://liumingmusic.github.io/children-programming/og-image.png"}],["$","link","10",{"rel":"icon","href":"/children-programming/sun-parrot.svg"}],["$","$L13","11",{}]]

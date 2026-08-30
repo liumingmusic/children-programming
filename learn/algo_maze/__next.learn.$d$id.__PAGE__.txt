@@ -1,0 +1,48 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T5e2,// 广度优先搜索（BFS）：像水波一样一层层向外扩散
+const maze = [
+  [0, 1, 0, 0, 0],
+  [0, 1, 0, 1, 0],
+  [0, 0, 0, 1, 0],
+  [1, 1, 0, 0, 0],
+  [0, 0, 0, 1, 0],
+];
+const rows = maze.length, cols = maze[0].length;
+const start = [0, 0], end = [rows - 1, cols - 1];
+const visited = [];
+for (let r = 0; r < rows; r++) { visited.push([]); for (let c = 0; c < cols; c++) visited[r].push(false); }
+const queue = [start];
+visited[start[0]][start[1]] = true;
+const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const cell = 40, ox = -100, oy = -100;
+
+function draw(found) {
+  __runtime.clearCanvas();
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const x = ox + c * cell, y = oy + r * cell;
+    const color = maze[r][c] === 1 ? "#475569" : (visited[r][c] ? "#FBBF24" : "#FFFFFF");
+    __runtime.drawRect(x, y, cell - 4, cell - 4, color);
+  }
+  if (found) __runtime.drawRect(ox + end[1] * cell, oy + end[0] * cell, cell - 4, cell - 4, "#22C55E");
+}
+
+let found = false;
+while (queue.length > 0) {
+  const cur = queue.shift();
+  if (cur[0] === end[0] && cur[1] === end[1]) { found = true; break; }
+  for (const d of dirs) {
+    const nr = cur[0] + d[0], nc = cur[1] + d[1];
+    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !visited[nr][nc] && maze[nr][nc] === 0) {
+      visited[nr][nc] = true; queue.push([nr, nc]);
+    }
+  }
+  draw(false);
+  __runtime.wait(0.25);
+}
+draw(found);
+__runtime.drawText(-100, 130, found ? "找到出路！" : "无路可走", "#22C55E", 18);
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"algo_maze","title":"迷宫求解：广度优先搜索 BFS","ageGroup":"13-16 岁","description":"把迷宫当成网格，从入口出发，用「队列」一层层向外扩散探索，直到触到出口——这就是广度优先搜索。","category":"algo","missionBrief":"迷宫是一张网格：0 是可以走的路，1 是墙。广度优先搜索（BFS）像一个水面波纹，从起点一圈圈向外扩散：\n· 用一个队列 queue 存放「待探索的格子」\n· 每取出一个格子，看它上下左右四个邻居\n· 没走过、也不是墙的邻居，标记为已访问并加入队列\n· 一旦取出的是出口，就找到了路\n\n我们用 visited 二维数组记录「已经扩散到哪些格子」，把它染成黄色，看波纹如何铺开。","erLingHint":"提示：const maze = [[0,1,0,...],...]; 建 visited 二维数组全 false；queue = [起点]；while (queue.length > 0) 里 cur = queue.shift()，遍历四个方向，合法且未访问就 visited=true 并 queue.push(邻居)。每轮 clearCanvas 重画网格并 wait(0.25)。","steps":[{"id":1,"title":"用二维数组表示迷宫地图"},{"id":2,"title":"用队列（push/shift）做广度优先扩散"},{"id":3,"title":"运行，看探索波纹如何找到出口"}],"codeMode":true,"defaultCode":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

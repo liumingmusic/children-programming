@@ -1,0 +1,45 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T626,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+          <statement name="DO">
+            <block type="maker_random_note">
+              <next>
+                <block type="maker_random_note">
+                  <next>
+                    <block type="maker_random_note">
+                      <next>
+                        <block type="maker_random_note">
+                          <next>
+                            <block type="maker_random_note">
+                              <next>
+                                <block type="maker_random_note">
+                                  <next>
+                                    <block type="maker_random_note">
+                                      <next>
+                                        <block type="maker_random_note"></block>
+                                      </next>
+                                    </block>
+                                  </next>
+                                </block>
+                              </next>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </statement>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"music_random","category":"music","title":"随机音符","ageGroup":"9-12 岁","description":"用「随机弹一个音」积木，让程序每次运行都弹出不一样的音，听听随机性是怎么给音乐带来惊喜的。","missionBrief":"写一个程序：当开始运行时，用「重复执行 8 次」包住「随机弹一个音」，每次运行都会听到一条不一样的旋律。","erLingHint":"① 拖绿色「当开始运行」→ 接「重复执行 8 次」；② 在重复里面放一个「随机弹一个音」；③ 多点几次运行，听每次都不一样。","steps":[{"id":1,"title":"用「当开始运行」开始"},{"id":2,"title":"用「重复执行」包住「随机弹一个音」"},{"id":3,"title":"点运行，听每次都不一样"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

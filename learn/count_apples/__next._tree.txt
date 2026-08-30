@@ -1,0 +1,2 @@
+:HL["/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"learn","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"count_apples","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"ioncht-W3ESqzQkr4v2Kr"}

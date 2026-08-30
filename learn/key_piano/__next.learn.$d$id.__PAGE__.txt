@@ -1,0 +1,55 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T770,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_key_pressed" x="40" y="20">
+      <field name="KEY">a</field>
+      <statement name="STACK">
+        <block type="maker_play_note"><field name="NOTE">do</field></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="120">
+      <field name="KEY">s</field>
+      <statement name="STACK">
+        <block type="maker_play_note"><field name="NOTE">re</field></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="220">
+      <field name="KEY">d</field>
+      <statement name="STACK">
+        <block type="maker_play_note"><field name="NOTE">mi</field></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="320">
+      <field name="KEY">f</field>
+      <statement name="STACK">
+        <block type="maker_play_note"><field name="NOTE">fa</field></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="420">
+      <field name="KEY">g</field>
+      <statement name="STACK">
+        <block type="maker_play_note"><field name="NOTE">sol</field></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="520">
+      <field name="KEY">h</field>
+      <statement name="STACK">
+        <block type="maker_play_note"><field name="NOTE">la</field></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="620">
+      <field name="KEY">j</field>
+      <statement name="STACK">
+        <block type="maker_play_note"><field name="NOTE">ti</field></block>
+      </statement>
+    </block>
+    <block type="maker_when_key_pressed" x="40" y="720">
+      <field name="KEY">k</field>
+      <statement name="STACK">
+        <block type="maker_play_note"><field name="NOTE">do</field></block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"key_piano","category":"key","title":"键盘弹琴","ageGroup":"9-12 岁","description":"用键盘字母键 A S D F G H J K 当琴键，按下就发出对应音符，亲手弹一首。","missionBrief":"把电脑键盘变成一架小钢琴！编写 8 个「当按下」字母键事件（A 哆、S 来、D 米、F 发、G 索、H 拉、J 西、K 哆↑），每个里面放「弹奏 音符」。点运行后，敲键盘就能弹琴啦！","erLingHint":"① 拖 8 个「当按下」事件，KEY 分别选 A·哆 / S·来 / D·米 / F·发 / G·索 / H·拉 / J·西 / K·哆↑；② 每个里面放「弹奏 音符」（do/re/mi/fa/sol/la/ti/do）；③ 点运行后，用键盘字母键弹一段旋律。","steps":[{"id":1,"title":"用「当按下字母键」事件做琴键"},{"id":2,"title":"每个琴键里放「弹奏 音符」"},{"id":3,"title":"敲键盘真的弹出声音"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

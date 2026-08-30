@@ -1,0 +1,33 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T499,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_say">
+          <value name="TEXT"><shadow type="text"><field name="TEXT">翻开绘本第一页～</field></shadow></value>
+          <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_when_stage_clicked" x="40" y="160">
+      <statement name="STACK">
+        <block type="maker_set_scene">
+          <field name="SCENE">park</field>
+          <next>
+            <block type="maker_control_actor">
+              <field name="ACTOR">sanqi</field>
+              <next>
+                <block type="maker_say">
+                  <value name="TEXT"><shadow type="text"><field name="TEXT">欢迎来到绘本里的公园！</field></shadow></value>
+                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"story_clickable","category":"story","title":"可点击绘本","ageGroup":"9-12 岁","description":"做一本点哪儿哪儿亮的可点击绘本：每点一次舞台，就翻到新的一页、换个场景、让伙伴角色冒出来讲故事。把「点击事件」和「切换场景 / 控制角色」组合起来。","missionBrief":"写一个可点击绘本：当开始运行时二零说「翻开绘本第一页」；再拖「当舞台被点击」事件，在里面「切换场景 公园」并「控制角色 三七」说一句绘本里的话。点运行后再点舞台，看绘本是不是翻页并请出了三七。","erLingHint":"① 拖绿色「当开始运行」→「说 翻开绘本第一页～ 2 秒」；② 拖蓝色「当舞台被点击」→ 放「切换场景 公园」接「控制角色 三七」→「说 欢迎来到绘本里的公园！ 2 秒」；③ 点运行，再点舞台看翻页效果。","steps":[{"id":1,"title":"用「当开始运行」事件翻开绘本"},{"id":2,"title":"添加「舞台被点击」事件，让绘本能翻页"},{"id":3,"title":"点击舞台后，场景切换、伙伴讲出绘本内容"}],"defaultXml":"$3","cast":["sanqi"]}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

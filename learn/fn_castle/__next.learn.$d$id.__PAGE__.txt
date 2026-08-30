@@ -1,0 +1,48 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T6a4,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_func_call">
+          <field name="NAME">画塔</field>
+          <next>
+            <block type="maker_goto">
+              <value name="X"><shadow type="math_number"><field name="NUM">120</field></shadow></value>
+              <value name="Y"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+              <next>
+                <block type="maker_func_call"><field name="NAME">画塔</field></block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+    <block type="maker_func_def" x="60" y="320">
+      <field name="NAME">画塔</field>
+      <statement name="DO">
+        <block type="maker_pen_down">
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS"><shadow type="math_number"><field name="NUM">60</field></shadow></value>
+                  <next>
+                    <block type="maker_turn">
+                      <value name="DEGREES"><shadow type="math_number"><field name="NUM">90</field></shadow></value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_pen_up"></block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"fn_castle","category":"fn","title":"组合函数画城堡","ageGroup":"9-12 岁","description":"定义「画塔」积木，调用两次并移动位置，拼出一座城堡。","missionBrief":"定义「画塔」积木（画一个正方形塔身），先画一座，移到右边再画一座，两座塔就是城堡的雏形。","erLingHint":"① 定义积木 画塔：落笔 → 重复 4 次（移动 60、右转 90）→ 抬笔；② 当开始运行：调用 画塔 → 移到 x:120 y:0 → 调用 画塔；③ 运行。","steps":[{"id":1,"title":"定义画塔的积木"},{"id":2,"title":"多次调用拼出城堡"},{"id":3,"title":"运行看到城堡"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

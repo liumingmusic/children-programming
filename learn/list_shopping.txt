@@ -1,0 +1,64 @@
+1:"$Sreact.fragment"
+2:I[52197,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+3:I[15167,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+4:I[39756,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+5:I[37457,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+7:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+b:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"ViewportBoundary"]
+d:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"MetadataBoundary"]
+f:I[68027,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default",1]
+:HL["/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","style"]
+0:{"P":null,"c":["","learn","list_shopping"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["id","list_shopping","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/children-programming/_next/static/chunks/3esszyw7dl5_w.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/2228ow89um_7z.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col font-sans","children":[["$","$L2",null,{}],["$","$L3",null,{}],["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":["$L6",[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true,"nonce":"$undefined"}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true,"nonce":"$undefined"}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true,"nonce":"$undefined"}]],["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]]}],{},null,false,null]},null,false,"$@a"]},null,false,"$@a"]},null,false,null],["$","$1","h",{"children":[null,["$","$Lb",null,{"children":"$Lc"}],["$","div",null,{"hidden":true,"children":["$","$Ld",null,{"children":["$","$8",null,{"name":"Next.Metadata","children":"$Le"}]}]}],null]}],false]],"m":"$undefined","G":["$f",[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ioncht-W3ESqzQkr4v2Kr"}
+10:[]
+a:"$W10"
+11:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+12:T90a,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_list_create">
+          <field name="NAME">购物清单</field>
+          <next>
+            <block type="maker_list_add">
+              <field name="NAME">购物清单</field>
+              <value name="VALUE"><shadow type="text"><field name="TEXT">苹果</field></shadow></value>
+              <next>
+                <block type="maker_list_add">
+                  <field name="NAME">购物清单</field>
+                  <value name="VALUE"><shadow type="text"><field name="TEXT">香蕉</field></shadow></value>
+                  <next>
+                    <block type="maker_list_add">
+                      <field name="NAME">购物清单</field>
+                      <value name="VALUE"><shadow type="text"><field name="TEXT">牛奶</field></shadow></value>
+                      <next>
+                        <block type="maker_list_add">
+                          <field name="NAME">购物清单</field>
+                          <value name="VALUE"><shadow type="text"><field name="TEXT">面包</field></shadow></value>
+                          <next>
+                            <block type="maker_say">
+                              <value name="TEXT"><block type="maker_list_var"><field name="NAME">购物清单</field></block></value>
+                              <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                              <next>
+                                <block type="maker_say">
+                                  <value name="TEXT"><block type="maker_list_length"><field name="NAME">购物清单</field></block></value>
+                                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                                </block>
+                              </next>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>6:["$","$L11",null,{"project":{"slug":"list_shopping","category":"list","title":"购物清单","ageGroup":"9-12 岁","description":"列表就像一个能装很多东西的购物袋。学会用「新建列表」和「把 X 加入列表」，把想买的东西一件件记下来，再让二零一口气念出来。","missionBrief":"用列表帮妈妈记一张购物清单。写一个程序：当开始运行时，新建一个叫「购物清单」的列表，把 苹果、香蕉、牛奶、面包 一样样加进去，最后让二零「说 列表 购物清单」把清单念出来，再「说 列表 购物清单 的长度」告诉大家一共买了几样。","erLingHint":"① 从「列表」分类拖「新建列表」，名字填 购物清单；② 连续拖 4 个「把 X 加入列表」，分别填 苹果、香蕉、牛奶、面包；③ 拖「说」，里面放「列表 购物清单」，再拖一个「说」放「列表 购物清单 的长度」。点运行，看二零念清单！","steps":[{"id":1,"title":"新建一个名为「购物清单」的列表"},{"id":2,"title":"把想买的东西一件件加入列表"},{"id":3,"title":"把列表内容展示出来，点运行看二零念清单"}],"defaultXml":"$12","goal":{"saidIncludes":["苹果"]}}}]
+c:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+13:I[27201,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"IconMark"]
+9:null
+e:[["$","title","0",{"children":"购物清单（9-12 岁·列表） - 造物星球"}],["$","meta","1",{"name":"description","content":"列表就像一个能装很多东西的购物袋。学会用「新建列表」和「把 X 加入列表」，把想买的东西一件件记下来，再让二零一口气念出来。"}],["$","meta","2",{"property":"og:title","content":"购物清单"}],["$","meta","3",{"property":"og:description","content":"列表就像一个能装很多东西的购物袋。学会用「新建列表」和「把 X 加入列表」，把想买的东西一件件记下来，再让二零一口气念出来。"}],["$","meta","4",{"property":"og:image","content":"https://liumingmusic.github.io/children-programming/og-image.png"}],["$","meta","5",{"property":"og:type","content":"article"}],["$","meta","6",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","7",{"name":"twitter:title","content":"造物星球 - 和二零一起，把想法种成作品"}],["$","meta","8",{"name":"twitter:description","content":"免费、无广告、项目驱动的少儿编程学习平台"}],["$","meta","9",{"name":"twitter:image","content":"https://liumingmusic.github.io/children-programming/og-image.png"}],["$","link","10",{"rel":"icon","href":"/children-programming/sun-parrot.svg"}],["$","$L13","11",{}]]

@@ -1,0 +1,38 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T5db,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="controls_repeat_ext">
+          <value name="TIMES"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+          <statement name="DO">
+            <block type="maker_play_note">
+              <field name="NOTE">do</field>
+              <value name="BEATS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+              <next>
+                <block type="maker_play_note">
+                  <field name="NOTE">re</field>
+                  <value name="BEATS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                  <next>
+                    <block type="maker_play_note">
+                      <field name="NOTE">mi</field>
+                      <value name="BEATS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                      <next>
+                        <block type="maker_play_note">
+                          <field name="NOTE">re</field>
+                          <value name="BEATS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </statement>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"music_loop","category":"music","title":"循环旋律","ageGroup":"9-12 岁","description":"用「重复执行」积木把一小段旋律反复弹奏，体会循环怎么让音乐自动一遍遍响起来，而不用手动复制一堆音符。","missionBrief":"写一个程序：当开始运行时，用「重复执行 4 次」包住 do、re、mi、re 四个音符，让这段旋律循环 4 遍。","erLingHint":"① 拖绿色「当开始运行」→ 接「重复执行 4 次」；② 在重复里面依次接 do、re、mi、re（各 1 拍）；③ 点运行，听旋律循环 4 遍。","steps":[{"id":1,"title":"用「当开始运行」开始"},{"id":2,"title":"用「重复执行」包住一小段旋律 do-re-mi-re"},{"id":3,"title":"点运行，听旋律自动循环"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

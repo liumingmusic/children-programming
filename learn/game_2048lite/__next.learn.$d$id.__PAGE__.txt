@@ -1,0 +1,26 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T772,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_list_create"><field name="NAME">数字块</field>
+          <next><block type="maker_list_add"><field name="NAME">数字块</field><value name="VALUE"><shadow type="text"><field name="TEXT">2</field></shadow></value>
+            <next><block type="maker_list_add"><field name="NAME">数字块</field><value name="VALUE"><shadow type="text"><field name="TEXT">2</field></shadow></value>
+              <next><block type="maker_list_add"><field name="NAME">数字块</field><value name="VALUE"><shadow type="text"><field name="TEXT">4</field></shadow></value>
+                <next><block type="maker_list_set"><field name="NAME">数字块</field><value name="INDEX"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="VALUE"><shadow type="text"><field name="TEXT">4</field></shadow></value>
+                  <next><block type="maker_list_remove"><field name="NAME">数字块</field><value name="INDEX"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                    <next><block type="maker_say"><value name="TEXT"><block type="maker_list_var"><field name="NAME">数字块</field></block></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                      <next><block type="maker_say"><value name="TEXT"><shadow type="text"><field name="TEXT">合成</field></shadow></value><value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value></block></next>
+                    </block></next>
+                  </block></next>
+                </block></next>
+              </block></next>
+            </block></next>
+          </block></next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"game_2048lite","category":"game","title":"数字合成（2048 入门）","ageGroup":"9-12 岁","description":"2048 的玩法核心是：把两个相同的数字碰到一起，合成一个更大的数。用「列表」装数字块，用「修改列表第几项」和「删除第几项」来模拟「合成」。","missionBrief":"把相邻的相同数字合成翻倍。当开始运行时，新建「数字块」列表，加入「2」「2」「4」；把第 1 项改成「4」（两个 2 合成），再删除第 2 项（旧的 2）；「说 列表 数字块」展示结果，最后「说 合成」。","erLingHint":"① 新建列表「数字块」并加入 2、2、4；② 用「修改列表 数字块 的第 1 项为 4」把前两个 2 合成；③ 用「删除列表 数字块 的第 2 项」去掉多余的 2；④「说 列表」「说 合成」。点运行，看数字块变少了、变大了。","steps":[{"id":1,"title":"新建「数字块」列表并放入数字"},{"id":2,"title":"用修改 / 删除把相同的数字合成（列表操作）"},{"id":3,"title":"运行展示合成结果并说出「合成」"}],"defaultXml":"$3","goal":{"saidIncludes":["合成"]}}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

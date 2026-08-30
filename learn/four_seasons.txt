@@ -1,0 +1,59 @@
+1:"$Sreact.fragment"
+2:I[52197,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+3:I[15167,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+4:I[39756,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+5:I[37457,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+7:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+b:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"ViewportBoundary"]
+d:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"MetadataBoundary"]
+f:I[68027,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default",1]
+:HL["/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","style"]
+0:{"P":null,"c":["","learn","four_seasons"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["id","four_seasons","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/children-programming/_next/static/chunks/3esszyw7dl5_w.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/2228ow89um_7z.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col font-sans","children":[["$","$L2",null,{}],["$","$L3",null,{}],["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":["$L6",[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true,"nonce":"$undefined"}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true,"nonce":"$undefined"}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true,"nonce":"$undefined"}]],["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]]}],{},null,false,null]},null,false,"$@a"]},null,false,"$@a"]},null,false,null],["$","$1","h",{"children":[null,["$","$Lb",null,{"children":"$Lc"}],["$","div",null,{"hidden":true,"children":["$","$Ld",null,{"children":["$","$8",null,{"name":"Next.Metadata","children":"$Le"}]}]}],null]}],false]],"m":"$undefined","G":["$f",[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ioncht-W3ESqzQkr4v2Kr"}
+10:[]
+a:"$W10"
+11:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+12:T5d9,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start_tl" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_emit_rain">
+          <field name="T0">0</field>
+          <field name="T1">4</field>
+          <field name="RATE">20</field>
+          <field name="SMIN">120</field>
+          <field name="SMAX">200</field>
+          <next>
+            <block type="maker_emit_snow">
+              <field name="T0">4</field>
+              <field name="T1">8</field>
+              <field name="RATE">15</field>
+              <field name="SMIN">40</field>
+              <field name="SMAX">80</field>
+              <next>
+                <block type="maker_when_at_scene">
+                  <field name="T">4</field>
+                  <field name="SCENE">night</field>
+                  <next>
+                    <block type="maker_when_at_say">
+                      <field name="ACTOR">erling</field>
+                      <field name="T">6</field>
+                      <value name="TEXT">
+                        <shadow type="text">
+                          <field name="TEXT">春天雨、冬天雪，四季真奇妙</field>
+                        </shadow>
+                      </value>
+                      <field name="SECONDS">2</field>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>6:["$","$L11",null,{"project":{"slug":"four_seasons","category":"pbl","title":"四季小屋","ageGroup":"6-8 岁","description":"用时间轴让小屋先下雨后下雪，切换夜空场景，再定时解说四季变化。","missionBrief":"小屋要经历春夏秋冬！写一个程序：当开始运行（时间轴）时，先让「开始下雨」覆盖 0~4 秒，再让「开始下雪」覆盖 4~8 秒，用「当时间到达 4 秒·切换场景」把背景换成夜晚星空，最后用「当时间到达·说话」让二零解说一句四季的话。把时间轴、天气粒子、场景和故事合起来，拍一段四季短片吧！","erLingHint":"① 拖一个橙色「当开始运行（时间轴）」；② 里面先放「开始下雨」（0 到 4 秒），再放「开始下雪」（4 到 8 秒），让两种天气一前一后落到小屋上；③ 加一个「当时间到达 4 秒·切换场景」选「夜晚·星空」，再放「当时间到达 6 秒，让 二零 说 春天雨、冬天雪，四季真奇妙」。点运行播放时间轴，看四季怎么变换！","steps":[{"id":1,"title":"时间轴开始，先让小屋下起雨"},{"id":2,"title":"后半段改成下雪，并切换成夜空场景"},{"id":3,"title":"让二零在指定时间解说四季"}],"timeline":true,"defaultXml":"$12"}}]
+c:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+13:I[27201,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"IconMark"]
+9:null
+e:[["$","title","0",{"children":"四季小屋（6-8 岁·综合） - 造物星球"}],["$","meta","1",{"name":"description","content":"用时间轴让小屋先下雨后下雪，切换夜空场景，再定时解说四季变化。"}],["$","meta","2",{"property":"og:title","content":"四季小屋"}],["$","meta","3",{"property":"og:description","content":"用时间轴让小屋先下雨后下雪，切换夜空场景，再定时解说四季变化。"}],["$","meta","4",{"property":"og:image","content":"https://liumingmusic.github.io/children-programming/og-image.png"}],["$","meta","5",{"property":"og:type","content":"article"}],["$","meta","6",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","7",{"name":"twitter:title","content":"造物星球 - 和二零一起，把想法种成作品"}],["$","meta","8",{"name":"twitter:description","content":"免费、无广告、项目驱动的少儿编程学习平台"}],["$","meta","9",{"name":"twitter:image","content":"https://liumingmusic.github.io/children-programming/og-image.png"}],["$","link","10",{"rel":"icon","href":"/children-programming/sun-parrot.svg"}],["$","$L13","11",{}]]

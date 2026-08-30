@@ -1,0 +1,49 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T779,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="60" y="60">
+      <statement name="STACK">
+        <block type="maker_func_call"><field name="NAME">画螺旋</field></block>
+      </statement>
+    </block>
+    <block type="maker_func_def" x="60" y="320">
+      <field name="NAME">画螺旋</field>
+      <statement name="DO">
+        <block type="maker_set_var">
+          <field name="NAME">步</field>
+          <value name="VALUE"><shadow type="math_number"><field name="NUM">5</field></shadow></value>
+          <next>
+            <block type="maker_pen_down">
+              <next>
+                <block type="controls_repeat_ext">
+                  <value name="TIMES"><shadow type="math_number"><field name="NUM">20</field></shadow></value>
+                  <statement name="DO">
+                    <block type="maker_move">
+                      <value name="STEPS"><block type="maker_get_var"><field name="NAME">步</field></block></value>
+                      <next>
+                        <block type="maker_change_var">
+                          <field name="NAME">步</field>
+                          <value name="DELTA"><shadow type="math_number"><field name="NUM">4</field></shadow></value>
+                          <next>
+                            <block type="maker_turn">
+                              <value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </statement>
+                  <next>
+                    <block type="maker_pen_up"></block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"fn_spiral","category":"fn","title":"用函数画螺旋","ageGroup":"9-12 岁","description":"在函数里用变量让每一步越走越长，画出漂亮的螺旋。","missionBrief":"定义「画螺旋」积木：每次移动后让步长变大一点，调用它就画出一圈圈向外散开的螺旋。","erLingHint":"① 定义积木 画螺旋：把变量 步 设为 5 → 落笔 → 重复 20 次（移动 步、变量 步 增加 4、右转 15）→ 抬笔；② 当开始运行里「调用我的积木 画螺旋」；③ 运行。","steps":[{"id":1,"title":"定义会越走越长的积木"},{"id":2,"title":"调用它画螺旋"},{"id":3,"title":"运行看到螺旋"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

@@ -1,0 +1,56 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T849,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_pen_down">
+          <next>
+            <block type="controls_repeat_ext">
+              <value name="TIMES">
+                <shadow type="math_number"><field name="NUM">4</field></shadow>
+              </value>
+              <statement name="DO">
+                <block type="maker_move">
+                  <value name="STEPS">
+                    <shadow type="math_number"><field name="NUM">100</field></shadow>
+                  </value>
+                  <next>
+                    <block type="maker_turn">
+                      <value name="DEGREES">
+                        <shadow type="math_number"><field name="NUM">90</field></shadow>
+                      </value>
+                    </block>
+                  </next>
+                </block>
+              </statement>
+              <next>
+                <block type="maker_pen_up">
+                  <next>
+                    <block type="maker_play_note">
+                      <field name="NOTE">do</field>
+                      <value name="BEATS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                      <next>
+                        <block type="maker_play_note">
+                          <field name="NOTE">re</field>
+                          <value name="BEATS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                          <next>
+                            <block type="maker_play_note">
+                              <field name="NOTE">mi</field>
+                              <value name="BEATS"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"singing_picture","category":"pbl","title":"会唱歌的画","ageGroup":"6-8 岁","description":"一边用循环画出图案，一边弹奏出旋律，把画画和音乐合在一起。","missionBrief":"把画画和音乐组合起来！写一个程序：当开始运行时，先「落笔」，用「重复执行 4 次」画出正方形，最后抬起笔，再接几个「弹奏音符」，让二零边画边唱出 do、re、mi。","erLingHint":"① 绿色「当开始运行」里先放「落笔」；② 放「重复执行 4 次」，里面放「移动 100 步」和「右转 90 度」，再接「抬笔」；③ 在后面接 3 个「弹奏音符」do、re、mi。点运行，看二零画出画还唱出歌！","steps":[{"id":1,"title":"用「落笔」开始画画"},{"id":2,"title":"用循环画出一幅图案"},{"id":3,"title":"弹奏出一段旋律"}],"defaultXml":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

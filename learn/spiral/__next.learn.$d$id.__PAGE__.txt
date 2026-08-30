@@ -1,0 +1,60 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+a:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+b:"$Sreact.suspense"
+3:Tbbb,<xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="maker_when_start" x="60" y="60">
+        <statement name="STACK">
+          <block type="maker_pen_down">
+            <next>
+              <block type="controls_repeat_ext">
+                <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                <statement name="DO">
+                  <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                    <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value></block></next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_repeat_ext">
+                    <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                    <statement name="DO">
+                      <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">20</field></shadow></value>
+                        <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value></block></next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="controls_repeat_ext">
+                        <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                        <statement name="DO">
+                          <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">30</field></shadow></value>
+                            <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value></block></next>
+                          </block>
+                        </statement>
+                        <next>
+                          <block type="controls_repeat_ext">
+                            <value name="TIMES"><shadow type="math_number"><field name="NUM">8</field></shadow></value>
+                            <statement name="DO">
+                              <block type="maker_move"><value name="STEPS"><shadow type="math_number"><field name="NUM">40</field></shadow></value>
+                                <next><block type="maker_turn"><value name="DEGREES"><shadow type="math_number"><field name="NUM">15</field></shadow></value></block></next>
+                              </block>
+                            </statement>
+                            <next><block type="maker_pen_up"></block></next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"spiral","category":"loop","title":"螺旋线","ageGroup":"6-8 岁","description":"用几段循环让二零画出越转越大的螺旋。","missionBrief":"蜗牛壳是螺旋形的！帮二零把几段「重复执行」拼起来，每一步走得更远，画出一条螺旋线吧。","erLingHint":"① 绿色「当开始运行」里放「落笔」；② 放 4 个「重复执行 8 次」，里面的「移动」步数分别用 10、20、30、40，每次都「右转 15 度」；③ 最后「抬笔」；④ 点「运行」看螺旋。","steps":[{"id":1,"title":"让二零落笔开始"},{"id":2,"title":"用多段循环画出螺旋"},{"id":3,"title":"运行看到螺旋线"}],"defaultXml":"$3"}}],["$L4","$L5","$L6","$L7","$L8"],"$L9"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+4:["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}]
+5:["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}]
+6:["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}]
+7:["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}]
+8:["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]
+9:["$","$La",null,{"children":["$","$b",null,{"name":"Next.MetadataOutlet","children":"$@c"}]}]
+c:null

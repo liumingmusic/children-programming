@@ -1,0 +1,50 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T90a,<xml xmlns="https://developers.google.com/blockly/xml">
+    <block type="maker_when_start" x="40" y="40">
+      <statement name="STACK">
+        <block type="maker_list_create">
+          <field name="NAME">购物清单</field>
+          <next>
+            <block type="maker_list_add">
+              <field name="NAME">购物清单</field>
+              <value name="VALUE"><shadow type="text"><field name="TEXT">苹果</field></shadow></value>
+              <next>
+                <block type="maker_list_add">
+                  <field name="NAME">购物清单</field>
+                  <value name="VALUE"><shadow type="text"><field name="TEXT">香蕉</field></shadow></value>
+                  <next>
+                    <block type="maker_list_add">
+                      <field name="NAME">购物清单</field>
+                      <value name="VALUE"><shadow type="text"><field name="TEXT">牛奶</field></shadow></value>
+                      <next>
+                        <block type="maker_list_add">
+                          <field name="NAME">购物清单</field>
+                          <value name="VALUE"><shadow type="text"><field name="TEXT">面包</field></shadow></value>
+                          <next>
+                            <block type="maker_say">
+                              <value name="TEXT"><block type="maker_list_var"><field name="NAME">购物清单</field></block></value>
+                              <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                              <next>
+                                <block type="maker_say">
+                                  <value name="TEXT"><block type="maker_list_length"><field name="NAME">购物清单</field></block></value>
+                                  <value name="SECONDS"><shadow type="math_number"><field name="NUM">2</field></shadow></value>
+                                </block>
+                              </next>
+                            </block>
+                          </next>
+                        </block>
+                      </next>
+                    </block>
+                  </next>
+                </block>
+              </next>
+            </block>
+          </next>
+        </block>
+      </statement>
+    </block>
+  </xml>0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"list_shopping","category":"list","title":"购物清单","ageGroup":"9-12 岁","description":"列表就像一个能装很多东西的购物袋。学会用「新建列表」和「把 X 加入列表」，把想买的东西一件件记下来，再让二零一口气念出来。","missionBrief":"用列表帮妈妈记一张购物清单。写一个程序：当开始运行时，新建一个叫「购物清单」的列表，把 苹果、香蕉、牛奶、面包 一样样加进去，最后让二零「说 列表 购物清单」把清单念出来，再「说 列表 购物清单 的长度」告诉大家一共买了几样。","erLingHint":"① 从「列表」分类拖「新建列表」，名字填 购物清单；② 连续拖 4 个「把 X 加入列表」，分别填 苹果、香蕉、牛奶、面包；③ 拖「说」，里面放「列表 购物清单」，再拖一个「说」放「列表 购物清单 的长度」。点运行，看二零念清单！","steps":[{"id":1,"title":"新建一个名为「购物清单」的列表"},{"id":2,"title":"把想买的东西一件件加入列表"},{"id":3,"title":"把列表内容展示出来，点运行看二零念清单"}],"defaultXml":"$3","goal":{"saidIncludes":["苹果"]}}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

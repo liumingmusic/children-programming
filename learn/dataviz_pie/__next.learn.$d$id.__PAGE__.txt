@@ -1,0 +1,35 @@
+1:"$Sreact.fragment"
+2:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+4:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T4f2,// 饼图：份额 → 角度 → 坐标
+const data = [30, 45, 25];                      // 三项各占多少
+const labels = ["阅读", "运动", "游戏"];
+const colors = ["#F59E0B", "#38bdf8", "#22C55E"];
+const cx = -70;         // 圆心
+const cy = 0;
+const R = 110;          // 半径
+
+let total = 0;                                  // 第一步：算出总和
+for (let i = 0; i < data.length; i++) {
+  total = total + data[i];
+}
+
+let angle = 90;                                 // 从正上方开始画（角度制）
+for (let i = 0; i < data.length; i++) {
+  const sweep = data[i] / total * 360;          // 这一块占多少度
+  for (let a = angle; a < angle + sweep; a = a + 2) {   // 每 2 度一条半径线
+    const rad = a * Math.PI / 180;              // 角度制 → 弧度制
+    __runtime.drawLine(cx, cy, cx + R * Math.cos(rad), cy + R * Math.sin(rad), colors[i], 6);
+  }
+  angle = angle + sweep;                        // 挪到下一块的起点
+}
+
+for (let i = 0; i < data.length; i++) {         // 右侧图例
+  const ly = 60 - i * 34;
+  __runtime.drawRect(80, ly, 18, 18, colors[i]);
+  __runtime.drawText(112, ly + 3, labels[i] + " " + data[i], "#E2E8F0", 15);
+}
+__runtime.drawText(-225, 155, "周末时间怎么花的", "#E2E8F0", 18);
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"project":{"slug":"dataviz_pie","title":"饼图：把份额画成角度","ageGroup":"13-16 岁","description":"想知道「各占多少」，就把每份换算成一个角度，再用 cos / sin 把角度变回坐标。","category":"dataviz","missionBrief":"柱状图适合比大小，饼图适合看**占比**：整体被分成几块，每块占多少。\n\n画饼图分三步：\n1. 算出总和 —— 把所有份额加起来\n2. 把每份换算成角度 —— `data[i] / total * 360`（一整圈是 360 度）\n3. 用 `Math.cos` / `Math.sin` 把角度变回坐标（和圆周运动那关一样）\n\n有个小机关：画布上只有「画线」，没有「画扇形」这条指令。\n所以我们的办法是——**在扇形的角度范围内，从圆心往外画很多条线**，线挨着线，看起来就是一块实心扇形。\n每 2 度画一条、线宽设成 6，相邻两条线就会重叠，不会有缝。\n\n画完再补一个**图例**（右边的小色块 + 文字），告诉读者每种颜色代表什么——没有图例的饼图等于没画。\n\n注意：这里用的是角度制（0–360），而 `Math.cos` / `Math.sin` 要的是弧度制，\n所以要先 `角度 * Math.PI / 180` 换算一下。","erLingHint":"提示：先循环算出 total；再从 angle = 90 开始（正上方），每块算 sweep = data[i] / total * 360，内层循环 for (let a = angle; a < angle + sweep; a = a + 2) 从圆心画半径线，画完 angle = angle + sweep; 最后画右侧图例。","steps":[{"id":1,"title":"用数组存下各份额，算出总和"},{"id":2,"title":"把每份换算成角度，用 cos / sin 画出来"},{"id":3,"title":"运行，看到饼图与图例"}],"codeMode":true,"defaultCode":"$3"}}],[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ioncht-W3ESqzQkr4v2Kr"}
+6:null

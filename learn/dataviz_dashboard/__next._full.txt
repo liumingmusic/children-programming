@@ -1,0 +1,60 @@
+1:"$Sreact.fragment"
+2:I[52197,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+3:I[15167,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+4:I[39756,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+5:I[37457,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default"]
+7:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+b:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"ViewportBoundary"]
+d:I[97367,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"MetadataBoundary"]
+f:I[68027,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"default",1]
+:HL["/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","style"]
+0:{"P":null,"c":["","learn","dataviz_dashboard"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["id","dataviz_dashboard","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/children-programming/_next/static/chunks/3esszyw7dl5_w.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/2228ow89um_7z.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col font-sans","children":[["$","$L2",null,{}],["$","$L3",null,{}],["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":["$L6",[["$","script","script-0",{"src":"/children-programming/_next/static/chunks/2f3m82_g47swu.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/children-programming/_next/static/chunks/0705wrvdqe-k-.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/children-programming/_next/static/chunks/2c4n8nnebui__.js","async":true,"nonce":"$undefined"}],["$","script","script-3",{"src":"/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","async":true,"nonce":"$undefined"}],["$","script","script-4",{"src":"/children-programming/_next/static/chunks/3y9liwfphjzw4.js","async":true,"nonce":"$undefined"}]],["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]]}],{},null,false,null]},null,false,"$@a"]},null,false,"$@a"]},null,false,null],["$","$1","h",{"children":[null,["$","$Lb",null,{"children":"$Lc"}],["$","div",null,{"hidden":true,"children":["$","$Ld",null,{"children":["$","$8",null,{"name":"Next.Metadata","children":"$Le"}]}]}],null]}],false]],"m":"$undefined","G":["$f",[["$","link","0",{"rel":"stylesheet","href":"/children-programming/_next/static/chunks/2ntjgy_fyl8tp.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ioncht-W3ESqzQkr4v2Kr"}
+10:[]
+a:"$W10"
+11:I[23979,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js","/children-programming/_next/static/chunks/2f3m82_g47swu.js","/children-programming/_next/static/chunks/0705wrvdqe-k-.js","/children-programming/_next/static/chunks/2c4n8nnebui__.js","/children-programming/_next/static/chunks/2m3eaxxqqdonj.js","/children-programming/_next/static/chunks/3y9liwfphjzw4.js"],"default"]
+12:T65b,// 实时仪表盘：数组当滑动窗口，每帧 push + shift + 重画
+const WINDOW = 20;          // 窗口里只留最近 20 个数据点
+const dt = 0.05;
+const data = [];
+let t = 0;
+
+for (let frame = 0; frame < 40; frame++) {
+  t = t + dt;
+  const value = 50 + 30 * Math.sin(t * 2);   // 假装是传感器读数（范围 20 ~ 80）
+  data.push(value);                          // 新数据从右边进
+  if (data.length > WINDOW) data.shift();    // 老数据从左边走
+
+  let hi = data[0], lo = data[0], sum = 0;   // 每帧都要重算，因为数据在变
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] > hi) hi = data[i];
+    if (data[i] < lo) lo = data[i];
+    sum = sum + data[i];
+  }
+  const avg = sum / data.length;
+
+  __runtime.clearCanvas();
+  __runtime.drawLine(-200, -90, 200, -90, "#475569", 2);      // 上下边界
+  __runtime.drawLine(-200, 90, 200, 90, "#475569", 2);
+
+  let lastX = 0, lastY = 0;
+  for (let i = 0; i < data.length; i++) {
+    const x = -200 + i * (400 / (WINDOW - 1));
+    const y = -80 + (data[i] - 20) / 60 * 160;                 // 20 ~ 80 映射到 -80 ~ 80
+    __runtime.drawCircle(x, y, 4, "#38bdf8");
+    if (i > 0) __runtime.drawLine(lastX, lastY, x, y, "#38bdf8", 2);
+    lastX = x;
+    lastY = y;
+  }
+
+  __runtime.drawText(-225, 155, "实时数据仪表盘", "#E2E8F0", 18);
+  __runtime.drawText(-225, 122, "当前：" + Math.round(value), "#F59E0B", 20);
+  __runtime.drawText(-70, 122, "平均：" + Math.round(avg), "#E2E8F0", 15);
+  __runtime.drawText(60, 122, "最高 " + Math.round(hi) + "  最低 " + Math.round(lo), "#94A3B8", 14);
+  __runtime.wait(dt);
+}
+6:["$","$L11",null,{"project":{"slug":"dataviz_dashboard","title":"实时仪表盘：会动的图表","ageGroup":"13-16 岁","description":"把数组当成滑动窗口：新数据从右边进、老数据从左边走，图表每帧重画一次就成了实时仪表盘。","category":"dataviz","missionBrief":"前面画的都是**静态**图——数据不变，画一次就完事。真实世界的数据是不断涌进来的：\n气温、心率、网速、股票……这一关做一个会自己动的仪表盘。\n\n核心是一个叫**滑动窗口**的技巧。用一个数组只保留最近 N 个数据：\n· `data.push(新值);` —— 新数据从右边进来\n· `if (data.length > N) data.shift();` —— 超长了就把最老的那个从左边扔掉\n\n`push` 往数组末尾加、`shift` 从数组开头删，两个配合起来就是一个固定长度的窗口。\n\n然后每一帧做三件事：\n1. 产生一个新数据（这里用 `Math.sin` 假装是传感器读数；真接上硬件就是真实数据）\n2. 重新算一遍统计值（最高 / 最低 / 平均）\n3. `clearCanvas()` 擦掉，把窗口里的数据重画一遍\n\n注意统计值必须在循环里**每帧重算**——因为数据每一帧都在变，算一次就固定住的话，数字就不动了。\n\n试试改 `WINDOW`（窗口留多长）或信号公式，看看图表的手感怎么变。","erLingHint":"提示：主循环里先 t = t + dt; value = 50 + 30 * Math.sin(t * 2); 然后 data.push(value); if (data.length > WINDOW) data.shift(); 接着循环求 hi / lo / sum 算出平均；最后 clearCanvas → 画上下边界 → 循环画点和连线 → drawText 写当前值/平均/最高最低 → wait(dt)。","steps":[{"id":1,"title":"用数组当滑动窗口：push 新数据、shift 老数据"},{"id":2,"title":"每帧重算统计值，并擦掉重画"},{"id":3,"title":"运行，看仪表盘动起来"}],"codeMode":true,"defaultCode":"$12"}}]
+c:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+13:I[27201,["/children-programming/_next/static/chunks/3esszyw7dl5_w.js","/children-programming/_next/static/chunks/2228ow89um_7z.js"],"IconMark"]
+9:null
+e:[["$","title","0",{"children":"实时仪表盘：会动的图表（13-16 岁·数据） - 造物星球"}],["$","meta","1",{"name":"description","content":"把数组当成滑动窗口：新数据从右边进、老数据从左边走，图表每帧重画一次就成了实时仪表盘。"}],["$","meta","2",{"property":"og:title","content":"实时仪表盘：会动的图表"}],["$","meta","3",{"property":"og:description","content":"把数组当成滑动窗口：新数据从右边进、老数据从左边走，图表每帧重画一次就成了实时仪表盘。"}],["$","meta","4",{"property":"og:image","content":"https://liumingmusic.github.io/children-programming/og-image.png"}],["$","meta","5",{"property":"og:type","content":"article"}],["$","meta","6",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","7",{"name":"twitter:title","content":"造物星球 - 和二零一起，把想法种成作品"}],["$","meta","8",{"name":"twitter:description","content":"免费、无广告、项目驱动的少儿编程学习平台"}],["$","meta","9",{"name":"twitter:image","content":"https://liumingmusic.github.io/children-programming/og-image.png"}],["$","link","10",{"rel":"icon","href":"/children-programming/sun-parrot.svg"}],["$","$L13","11",{}]]
