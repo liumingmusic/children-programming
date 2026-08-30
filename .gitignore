@@ -37,7 +37,10 @@ yarn-error.log*
 .vercel
 
 # deployment
+# dist/ 是静态导出产物；部署走 GitHub Actions（.github/workflows/pages.yml）推到 gh-pages 分支，
+# 本地产物不入库。tmp/ 是早期「手动 worktree 部署」留下的临时目录，现已被 Actions 取代。
 /dist
+/tmp
 
 # workbuddy
 .workbuddy
