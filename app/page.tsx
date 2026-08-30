@@ -374,7 +374,7 @@ export default function Home() {
               <AgeCard
                 age="9-12 岁"
                 title="代码初探"
-                desc="从积木过渡到 JavaScript，做工具和小游戏。"
+                desc="搭积木时同步看到生成的 JavaScript，用函数、变量与列表做更聪明的作品。"
                 icon={<Code2 className="h-6 w-6 text-[#378ADD]" />}
                 href="/missions/stage-9-12"
                 color="blue"
@@ -382,7 +382,7 @@ export default function Home() {
               <AgeCard
                 age="13-16 岁"
                 title="进阶工坊"
-                desc="用 Python 和网页技术做完整的独立项目。"
+                desc="离开积木、手写 JavaScript：做工具、模拟、算法与创意作品。"
                 icon={<Trophy className="h-6 w-6 text-[#0F6E56]" />}
                 href="/missions/stage-13-16"
                 color="teal"

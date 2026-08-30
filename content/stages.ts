@@ -33,7 +33,7 @@ export const stages: Stage[] = [
     id: "stage-9-12",
     ageRange: "9-12 岁",
     name: "代码初探",
-    tagline: "从积木过渡到 JavaScript，做小工具与互动游戏。",
+    tagline: "搭积木时同步看到生成的 JavaScript，用函数、变量与列表做更聪明的作品。",
     status: "open",
     projectSlugs: [
       "fn_square", "fn_polygon", "fn_house", "fn_snowflake", "fn_tree", "fn_toolbox",
@@ -56,7 +56,7 @@ export const stages: Stage[] = [
     id: "stage-13-16",
     ageRange: "13-16 岁",
     name: "进阶工坊",
-    tagline: "从积木过渡到 JavaScript，做工具、模拟与创意作品。",
+    tagline: "离开积木、手写 JavaScript：做工具、模拟、算法与创意作品。",
     status: "open",
     projectSlugs: [
       "js_square", "js_hello", "js_variable", "js_function", "js_array", "js_tool", "js_canvas",

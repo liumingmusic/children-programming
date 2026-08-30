@@ -787,10 +787,17 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       </footer>
       )}
 
-      {/* 生成的代码预览（调试用） */}
-      {generatedCode && (
-        <div className="hidden border-t border-black/5 bg-white px-4 py-2 text-xs text-[#5F5E5A]">
-          <pre className="font-mono">{generatedCode}</pre>
+      {/* 生成的代码预览：9-12「代码初探」阶段可见——搭积木时同步看到对应的 JavaScript，
+          为 13-16 手写代码做铺垫。6-8 仍隐藏（纯积木，避免低龄干扰）；
+          13-16 本身就是手写代码模式，不需要这块预览。 */}
+      {stage?.id === "stage-9-12" && generatedCode && (
+        <div className="border-t border-black/5 bg-white px-4 py-3 text-xs text-[#5F5E5A]">
+          <div className="mb-1 font-medium text-[#04342C]">
+            生成的 JavaScript · 你搭的积木就是这段代码
+          </div>
+          <pre className="max-h-32 overflow-auto rounded bg-[#F1EFE8] p-2 font-mono leading-relaxed">
+            {generatedCode}
+          </pre>
         </div>
       )}
 

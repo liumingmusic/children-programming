@@ -499,6 +499,14 @@ Phase 2d O·创意编程 **6/6 已铺满**（`creative_mandala`/`creative_random
 - 单路由 + `?stage=` 参数分龄，避免拆重路由的 UI 重复；`StudioClient` 读取 `window.location.search` 的 `stage`（仅接受 `stage-6-8` / `stage-9-12`）。
 - **6-8 岁 · 纯积木**：工具箱过滤为 `["事件","运动","外观","画笔","控制","侦测","运算","声音","角色"]`（不含变量/函数），无代码预览区。
 - **9-12 岁 · 代码初探**：全量工具箱 + 显示「生成的 JavaScript（代码初探）」预览区，让孩子从积木过渡到看代码。
+- ⚠️ **上述过滤的作用域仅 `/studio`**（2026-08-30 核实）：`STAGE6_CATEGORIES` 只由 `StudioClient` 通过 prop
+  `toolboxCategories` 传给 `BlocklyEditor`；**学习页 `/learn/[id]` 不传该 prop，走的是全量 `TOOLBOX`**（63 块，含变量/函数/列表）。
+  故「6-8 不含变量」**绝不可推广到学习页**——6-8 的数学与综合项目实际依赖变量积木：
+  `count10` / `count_apples` / `multiplication` / `calculator` / `compare_size` / `odd_even` / `step_counter`。
+  一旦在学习页过滤掉「变量」分类，这些项目的「自己做」环节会直接不可完成，
+  且**示范仍能正常跑**（defaultXml 不受工具箱影响），迷惑性极强、很难排查。
+- **9-12 学习页已显示生成的 JavaScript**（2026-08-30）：原先该预览块是 `hidden`（仅调试用），
+  现改为按 `stage.id === "stage-9-12"` 显示，兑现「代码初探」定位、为 13-16 手写 JS 铺垫；6-8 保持隐藏。
 - 工坊内可自由创作并 localStorage 本地保存（命名 / 我的作品 / 回放 / 删除）；任务页各阶段末尾 CTA 卡片 `Link href={\`/studio?stage=${current.id}\`}` 引导自由创作。
 
 ---
