@@ -4,11 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft, Heart, CheckCircle, Clock, BookOpen, Sparkles, Calendar, Flag,
-  PartyPopper, PencilLine, Search, ChevronDown, Download, Upload, ShieldCheck,
+  PartyPopper, PencilLine, Search, ChevronDown, Download, Upload, ShieldCheck, Flame,
+  AlertTriangle,
 } from "lucide-react";
 import type { Project, Progress } from "@/lib/db";
 import {
-  getAllProjects, getAllProgress, getTimeStats,
+  getAllProjects, getAllProgress, getTimeStats, getStreak,
   exportBackup, parseBackup, importBackup,
   type TimeStats,
 } from "@/lib/db";
@@ -42,6 +43,8 @@ type Item = { course: CourseProject; progress: Progress | null; saved: Project |
 export default function ParentClient() {
   const [stats, setStats] = useState<ChildStats | null>(null);
   const [timeStats, setTimeStats] = useState<TimeStats | null>(null);
+  // 连续学习天数（轻量激励：今天没学但昨天学了 streak 不归零）
+  const [streak, setStreak] = useState(0);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -53,10 +56,11 @@ export default function ParentClient() {
 
   // 抽成 useCallback：导入备份后可再次调用，页面上的进度立刻刷新，不必手动刷新浏览器
   const load = useCallback(async () => {
-      const [savedProjects, progressList, times] = await Promise.all([
+      const [savedProjects, progressList, times, streakDays] = await Promise.all([
         getAllProjects(),
         getAllProgress(),
         getTimeStats(),
+        getStreak(),
       ]);
       const progressMap = new Map(progressList.map((p) => [p.slug, p]));
       const savedMap = new Map(savedProjects.map((p) => [p.slug, p]));
@@ -89,6 +93,7 @@ export default function ParentClient() {
         recentProject: recentProject?.title || null,
       });
       setTimeStats(times);
+      setStreak(streakDays);
       setItems(merged);
 
       // 默认展开包含「已开始项目」的分类
@@ -230,6 +235,15 @@ export default function ParentClient() {
                   <div className="mb-4 flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-[#0F6E56]" />
                     <h2 className="text-lg font-medium text-[#04342C]">最近 7 天学习时长</h2>
+                    {streak > 0 && (
+                      <span
+                        aria-label={`已连续学习 ${streak} 天`}
+                        className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#FAEEDA] px-2.5 py-1 text-sm font-medium text-[#412402]"
+                      >
+                        <Flame className="h-3.5 w-3.5" />
+                        连续 {streak} 天
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-end gap-3 sm:gap-4">
                     {timeStats.last7Days.map((day) => {
@@ -257,12 +271,21 @@ export default function ParentClient() {
                   <ShieldCheck className="h-5 w-5 text-[#0F6E56]" />
                   <h2 className="text-lg font-medium text-[#04342C]">作品备份与隐私</h2>
                 </div>
+                {/* 顶部用黄色「警示色」明显区隔的提醒条——用户明确要求：必须让家长清楚
+                    「数据都在本地，清了就没了」。柔色文案的警示力度不够，会被一眼略过。 */}
+                <div className="mb-3 flex items-start gap-2 rounded-xl border border-[#E24C4B]/30 bg-[#FCE8E6] p-3 text-sm leading-relaxed text-[#501313]">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#E24C4B]" />
+                  <div>
+                    <strong className="font-medium text-[#04342C]">孩子的所有数据都只存在这台设备的浏览器里</strong>
+                    。我们不上传任何信息，也没有账号可以恢复。
+                    <strong className="font-medium text-[#04342C]">清理浏览器缓存、换设备或换浏览器时，记录会永久丢失，且无法找回</strong>。
+                    请每隔一段时间导出一份备份。
+                  </div>
+                </div>
                 <p className="mb-4 text-sm leading-relaxed text-[#0F6E56]">
-                  孩子的作品、进度和学习时长都只保存在
-                  <strong className="font-medium text-[#04342C]">这台设备的浏览器里</strong>
-                  ，造物星球<strong className="font-medium text-[#04342C]">不会上传任何信息</strong>
-                  ，也不需要注册账号。但清理浏览器数据、换设备或换浏览器时这些记录会丢失——
-                  建议偶尔导出一份备份收好，换设备时再导入回来。
+                  造物星球
+                  <strong className="font-medium text-[#04342C]">不会上传任何信息</strong>
+                  ，也不需要注册账号。换设备时只要导入备份，孩子的作品就还在。
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                   {/* 这两个按钮刻意**不写** aria-label：可见文字已经清楚，

@@ -199,6 +199,42 @@ export async function getTimeStats(): Promise<TimeStats> {
   return { totalSeconds, todaySeconds, byProject, last7Days };
 }
 
+/**
+ * 计算连续学习天数（基于 mp:time:slug:date 键）。
+ *
+ * 友好规则：今天没学但昨天学了，仍把昨天的 streak 算上（避免「今天还没学就被算 0」挫败感）；
+ * 哪天断了就清零，从更近的日期重新数。
+ * @returns 连续天数；从未学习过则返回 0
+ */
+export async function getStreak(): Promise<number> {
+  const s = ls();
+  if (!s) return 0;
+  const dates = new Set<string>();
+  for (let i = 0; i < s.length; i++) {
+    const k = s.key(i);
+    if (!k || !k.startsWith(`${NS}:time:`)) continue;
+    const rest = k.slice(`${NS}:time:`.length);
+    const idx = rest.lastIndexOf(":");
+    if (idx < 0) continue;
+    const date = rest.slice(idx + 1);
+    if (date) dates.add(date);
+  }
+  if (dates.size === 0) return 0;
+
+  let cur = new Date();
+  // 今天没学但昨天学了，streak 不归零
+  if (!dates.has(fmtDate(cur))) {
+    cur.setDate(cur.getDate() - 1);
+    if (!dates.has(fmtDate(cur))) return 0;
+  }
+  let n = 0;
+  while (dates.has(fmtDate(cur))) {
+    n++;
+    cur.setDate(cur.getDate() - 1);
+  }
+  return n;
+}
+
 // ---- 分类11·PBL 综合（造物工坊）：自由创作的本地存取 ----
 // 自由创作作品以 `free:` 前缀的 slug 保存，与课程项目（slug 为课程 id）区分开，
 // 避免污染「作品花园」的已保存课程进度，也便于在工坊内单独列出/删除。

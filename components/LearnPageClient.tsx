@@ -837,6 +837,14 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
           {autoSaved && (
             <span className="hidden text-xs text-[#5DCAA5] sm:inline">·已自动保存</span>
           )}
+          {/* 作品只在本机的常驻轻量提醒（用户明确要求）。仅一行小字，不打扰操作；
+              鼠标悬停能看到完整说明：清理浏览器数据后无法找回。 */}
+          <span
+            className="hidden text-[11px] text-[#9b988e] sm:inline"
+            title="作品只保存在这台设备的浏览器里。清理浏览器缓存、换设备或换浏览器后会永久丢失，无法找回。家长可在 /parent 导出备份。"
+          >
+            · 作品只在本机
+          </span>
         </div>
         <button
           onClick={handleRun}

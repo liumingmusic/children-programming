@@ -24,6 +24,7 @@ vi.mock("@/lib/db", () => ({
     byProject: {},
     last7Days: [],
   })),
+  getStreak: vi.fn(async () => 0),
   exportBackup: dbMock.exportBackup,
   importBackup: dbMock.importBackup,
   parseBackup: dbMock.parseBackup,
@@ -47,7 +48,8 @@ describe("家长页 · 作品备份与隐私", () => {
   it("隐私说明讲清了「只存在本机、不上传、不需注册」", async () => {
     render(<ParentClient />);
     await screen.findByText("作品备份与隐私");
-    expect(screen.getByText(/只保存在/)).toBeTruthy();
+    // 文案已强化为警示条（红色调 +「永久丢失、无法找回」），但语义要点没变
+    expect(screen.getByText(/只存在这台设备的浏览器里/)).toBeTruthy();
     expect(screen.getByText(/不会上传任何信息/)).toBeTruthy();
     expect(screen.getByText(/不需要注册账号/)).toBeTruthy();
   });
