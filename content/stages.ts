@@ -48,8 +48,9 @@ export const stages: Stage[] = [
       "math_prime_sieve", "math_polygon", "math_coords", "math_sudoku", "science_day_night",
       "science_seasons", "science_orbit", "science_water_cycle", "science_grow", "science_sound",
       "science_light", "list_shopping", "list_rollcall", "list_ranking", "list_lottery",
-      "list_todo", "list_words", "list_scores", "list_queue", "game_snake", "game_shooter",
-      "game_dodge", "game_race", "game_guess", "game_memory", "game_2048lite", "game_puzzle"
+      "list_todo", "list_words", "list_scores", "list_queue",       "game_snake", "game_shooter",
+      "game_dodge", "game_race", "game_guess", "game_memory", "game_2048lite", "game_puzzle",
+      "read_loops", "read_vars"
     ],
   },
   {

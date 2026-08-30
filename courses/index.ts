@@ -24,8 +24,13 @@ export interface CourseProject {
   scene?: ProjectScene;
   /** 舞台上需要收集的「星星/物品」坐标。传给 Runtime 作为可收集目标（碰触即收集），用于条件与游戏类收集项目。 */
   stars?: { x: number; y: number }[];
-  /** 特殊项目类型：memory=独立翻牌小游戏（不走 Blockly 积木，由专门组件实现）。 */
-  component?: "memory";
+  /** 特殊项目类型：
+   *  - memory = 独立翻牌小游戏（不走 Blockly 积木，由专门组件实现）；
+   *  - codequiz = 「读代码」选择题：只读代码片段并预测结果，不要求学生写代码，
+   *    是从「9-12 能看见自己搭的积木生成什么代码」走向「13-16 手写 JavaScript」的最低台阶。 */
+  component?: "memory" | "codequiz";
+  /** component === "codequiz" 时的题库。题目数量与 steps 一致（一步一题，答对即点亮该步）。 */
+  quiz?: CodeQuizQuestion[];
   /** 时间轴模式（分类10·科学）：走 Runtime 的独立时间轴子系统（时钟驱动状态场），
    * 而非默认的「事件→动作队列」。积木生成 __runtime.timeline 轨道，由时钟统一推进。 */
   timeline?: boolean;
@@ -55,6 +60,21 @@ export interface GoalSpec {
   drew?: boolean;
   moved?: boolean;
   saidIncludes?: string[];
+}
+
+/** 「读代码」（component="codequiz"）题库里的一题：给一段只读代码，让学生预测结果。
+ * 设计要点：只要求**读懂**、不要求会写——这是从积木走向手写代码的最低台阶。 */
+export interface CodeQuizQuestion {
+  /** 展示的代码片段（只读，不可编辑） */
+  code: string;
+  /** 提问 */
+  question: string;
+  /** 选项文本 */
+  options: string[];
+  /** 正确选项下标（从 0 开始） */
+  answer: number;
+  /** 作答后展示的讲解——答对答错都显示，把「看不懂」变成「看懂了」 */
+  explain: string;
 }
 
 /** 舞台上的装饰标记（纯展示用，例如小旗子、宝藏箱、石头、箭头）。 */

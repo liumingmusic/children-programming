@@ -71,8 +71,16 @@ describe("CompletionModal 完成弹窗", () => {
     expect(btn.getAttribute("href")).toContain("/learn/singing_picture");
   });
 
-  it("interactive_book 是阶段最后一个项目，不显示「挑战下一个」", () => {
+  // PBL 已由 4 项扩到 10 项，interactive_book 后面还接着 6 个综合作品，不再是阶段末尾
+  it("interactive_book 之后接 my_garden，显示「挑战下一个：我的小花园」并指向 /learn/my_garden", () => {
     render(<CompletionModal open onClose={() => {}} project={getProject("interactive_book")!} />);
+    const btn = screen.getByRole("link", { name: /挑战下一个/ }) as HTMLAnchorElement;
+    expect(btn).toHaveTextContent("我的小花园");
+    expect(btn.getAttribute("href")).toContain("/learn/my_garden");
+  });
+
+  it("step_counter 是阶段最后一个项目，不显示「挑战下一个」", () => {
+    render(<CompletionModal open onClose={() => {}} project={getProject("step_counter")!} />);
     expect(screen.queryByRole("link", { name: /挑战下一个/ })).toBeNull();
   });
 

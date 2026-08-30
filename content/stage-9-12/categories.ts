@@ -10,6 +10,9 @@ export const stage9Categories: ProjectCategory[] = [
     { id: "list", name: "列表与数据", shortTag: "列表", description: "用列表管理一组有序的数据。" },
     { id: "game", name: "综合小游戏", shortTag: "游戏", description: "贪吃蛇、井字棋、猜数字等综合小游戏。" },
     { id: "story", name: "交互绘本与故事", shortTag: "故事", description: "可点击、可分支的互动绘本。" },
-    { id: "science", name: "科学探究", shortTag: "科学", description: "昼夜、四季、水循环等科学模拟。" },
-    { id: "pbl", name: "自由创作工坊", shortTag: "自由创作", description: "不限题目，自由搭积木创作你的作品，保存到本地随时回看展示。" },
+  { id: "science", name: "科学探究", shortTag: "科学", description: "昼夜、四季、水循环等科学模拟。" },
+  // 代码阅读：9-12 的最后一级结构化台阶——只要求学生**读懂** JavaScript 并预测结果，
+  // 不要求动手写。承接「积木页能看到生成的代码」，铺垫 13-16 手写 JavaScript。
+  { id: "code", name: "读代码 · 预测结果", shortTag: "读代码", description: "读懂真正的 JavaScript，预测它会让二零做什么，为手写代码做准备。" },
+  { id: "pbl", name: "自由创作工坊", shortTag: "自由创作", description: "不限题目，自由搭积木创作你的作品，保存到本地随时回看展示。" },
 ];

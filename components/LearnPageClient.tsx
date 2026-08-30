@@ -18,6 +18,7 @@ const CAST_META: Record<string, { id: string; species: Species; name: string }> 
 };
 import type { CourseProject } from "@/courses";
 import MemoryGame from "@/components/MemoryGame";
+import CodeQuiz from "@/components/CodeQuiz";
 import { getNextProject, getStageOfProject, getProject } from "@/courses";
 import { loadProject, saveProject, markProgress, getProgress, getAllProgress, recordSessionTime } from "@/lib/db";
 import { computeSteps, coach, isGoalAchieved, diagnoseRuntimeError, precheckSyntax } from "@/lib/steps";
@@ -68,6 +69,9 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
   });
   const [logs, setLogs] = useState<string[]>([]);
   const [generatedCode, setGeneratedCode] = useState("");
+  // 「读代码」项目（component="codequiz"）已答对题数——它不产生积木代码，
+  // 步骤进度由答题结果驱动，而非 computeSteps。
+  const [quizSolved, setQuizSolved] = useState(0);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "loading">("idle");
   const [progress, setProgress] = useState({ completed: false, stars: 0 });
   const progressRef = useRef({ completed: false, stars: 0 });
@@ -445,6 +449,16 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     }
   }, [project.slug]);
 
+  // 「读代码」全部答对 → 标记完成。与 handleMemoryWin 同理：
+  // 独立组件项目不经过运行时的完成闸门，由组件自己在达成时上报。
+  const handleQuizPass = useCallback(() => {
+    if (!progressRef.current.completed) {
+      progressRef.current = { completed: true, stars: 3 };
+      setProgress(progressRef.current);
+      markProgress(project.slug, true, 3).catch(console.error);
+    }
+  }, [project.slug]);
+
   const handleSave = useCallback(async () => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -463,7 +477,11 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
     }
   }, [project, flashResetToast]);
 
-  const stepStatus = computeSteps(project, generatedCode, logs);
+  // 「读代码」项目不产生积木代码，步骤进度改由答题结果驱动（答对 n 题 = 点亮前 n 步）
+  const stepStatus =
+    project.component === "codequiz"
+      ? project.steps.map((s) => ({ ...s, done: s.id <= quizSolved }))
+      : computeSteps(project, generatedCode, logs);
 
   // 项目页「返回」应回到它所属的项目集合（学龄段页），而非首页
   const stage = getStageOfProject(project.slug);
@@ -650,6 +668,21 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
               <MemoryGame onWin={handleMemoryWin} />
             </div>
           </section>
+        ) : project.component === "codequiz" ? (
+          <section className="flex min-w-0 flex-1 flex-col rounded-xl border border-black/10 bg-white p-3">
+            <h2 className="mb-2 text-sm font-medium text-[#04342C]">读代码 · 预测结果</h2>
+            <div className="min-h-0 flex-1 overflow-auto">
+              {project.quiz && project.quiz.length > 0 ? (
+                <CodeQuiz
+                  quiz={project.quiz}
+                  onPass={handleQuizPass}
+                  onProgress={setQuizSolved}
+                />
+              ) : (
+                <p className="text-sm text-[#5F5E5A]">这个项目还没有题目哦～</p>
+              )}
+            </div>
+          </section>
         ) : (
           <>
             {/* 左侧工具区：积木模式=手风琴工具箱；代码模式=指令速查 */}
@@ -742,7 +775,8 @@ export default function LearnPageClient({ project }: LearnPageClientProps) {
       </div>
 
       {/* 底部操作栏（记忆翻牌等独立组件类项目不显示积木操作按钮） */}
-      {project.component !== "memory" && (
+      {/* 底部运行栏：memory / codequiz 是独立组件，没有「运行程序」这一说，故隐藏 */}
+      {project.component !== "memory" && project.component !== "codequiz" && (
       <footer className="flex h-14 items-center justify-between border-t border-black/5 bg-white px-4">
         <div className="flex items-center gap-3">
           <button

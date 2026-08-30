@@ -23,6 +23,8 @@ import { stage9MathProjects } from "./f";
 import { stage9ScienceProjects } from "./j";
 import { stage9ListProjects } from "./g";
 import { stage9GameProjects } from "./h";
+import { readLoopsProject } from "./code/read_loops";
+import { readVarsProject } from "./code/read_vars";
 
 export const stage9Projects: CourseProject[] = [
   fn_squareProject,
@@ -49,4 +51,8 @@ export const stage9Projects: CourseProject[] = [
   ...stage9ScienceProjects,
   ...stage9ListProjects,
   ...stage9GameProjects,
+  // 分类「读代码」（code）：9-12 的最后一级台阶——只读代码、预测结果，不要求动手写，
+  // 为 13-16 手写 JavaScript 铺垫。
+  readLoopsProject,
+  readVarsProject,
 ];
