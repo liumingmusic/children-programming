@@ -171,16 +171,22 @@ const SCIENCE_SLUGS = [
   "rainbow_bridge", "seed_grow", "earth_sun", "food_chain", "moon_phase",
 ];
 
-/** 分类 11 · 综合创意 / 毕业项目（pbl，全 4 项，slug 顺序与 projectSlugs 一致）。
+/** 分类 11 · 综合创意 / 毕业项目（pbl，全 10 项，slug 顺序与 projectSlugs 一致）。
  * 这些是「总结性作品」，每个都把前面多个分类的本领组合起来：
  *  - singing_picture 会唱歌的画：画笔（落笔/循环/移动/转向）+ 音乐（弹奏音符）
  *  - two_actor_show 双角色小剧场：故事双角色（控制角色/表情/场景/说话）
  *  - my_solar_system 我的太阳系：科学时间轴（公转轨道 + 大小 tween + 当时间到达说）
  *  - interactive_book 互动绘本游戏：事件（点击）+ 条件（碰到星星）+ 收集（飞向星星）
+ *  - my_garden 我的小花园：画笔（落笔/循环画边框）+ 说话
+ *  - my_band 我的小乐队：循环 + 音乐（弹奏音符）
+ *  - sea_concert 海底音乐会：画笔（海浪舞台）+ 双角色（控制角色）+ 音乐（音符 + 和弦）+ 说话
+ *  - four_seasons 四季小屋：科学时间轴 + 雨雪粒子 + 定时切换场景 + 定时说话解说
+ *  - magic_fashion 魔法变装秀：循环 + 改变大小 + 画笔变色 + 鼓点节拍 + 说话
+ *  - step_counter 步数记录仪：变量（设置/累加/读取）+ 循环 + 移动 + 说话汇报
  * 判定同样基于真实 JS 标记，不依赖积木类型名。完成判定以「步骤」为准（各项目无目标标记判定需求）。 */
 const PBL_SLUGS = [
   "singing_picture", "two_actor_show", "my_solar_system", "interactive_book",
-  "my_garden", "my_band",
+  "my_garden", "my_band", "sea_concert", "four_seasons", "magic_fashion", "step_counter",
 ];
 
 /** 分类 A · 函数与自定义积木（9-12 阶段，全 8 项）。判定基于真实 JS 标记：定义了函数、调用了函数。 */
@@ -1323,6 +1329,26 @@ export function computeSteps(
         if (id === 1) done = startFired;
         else if (id === 2) done = audioCount >= 1;
         else if (id === 3) done = audioCount >= 3 && finished;
+      } else if (project.slug === "sea_concert") {
+        // 海底音乐会：画笔画出海浪舞台 + 双角色轮流演奏（控制角色 + 音符）+ 和弦谢幕
+        if (id === 1) done = code.includes("__runtime.penDown()") && code.includes("__runtime.move") && code.includes("__runtime.turn");
+        else if (id === 2) done = controlCount >= 1 && audioCount >= 2;
+        else if (id === 3) done = code.includes("__runtime.playChord(") && sayCount >= 1 && finished;
+      } else if (project.slug === "four_seasons") {
+        // 四季小屋：时间轴 + 雨雪粒子轨道 + 定时切换场景 + 定时说话解说
+        if (id === 1) done = hasTimeline && code.includes('type: "particles"');
+        else if (id === 2) done = countMark(code, "__runtime.timeline.addTrack(") >= 2 && code.includes('kind: "snow"') && code.includes('kind: "setScene"');
+        else if (id === 3) done = hasWhenAt && code.includes('kind: "say"');
+      } else if (project.slug === "magic_fashion") {
+        // 魔法变装秀：循环 + 改变大小 + 画笔变色 + 鼓点节拍 + 说话谢幕
+        if (id === 1) done = hasLoop;
+        else if (id === 2) done = code.includes("__runtime.changeSize(") && code.includes("__runtime.changePenColor(");
+        else if (id === 3) done = code.includes("__runtime.playDrum(") && sayCount >= 1 && finished;
+      } else if (project.slug === "step_counter") {
+        // 步数记录仪：变量归零 + 循环累加 + 读取变量说出总步数
+        if (id === 1) done = code.includes("__runtime.setVar(");
+        else if (id === 2) done = hasLoop && code.includes("__runtime.changeVar(");
+        else if (id === 3) done = code.includes("__runtime.getVar(") && sayCount >= 1 && finished;
       }
     }
     else if (FN_SLUGS.includes(project.slug)) {
@@ -2080,6 +2106,26 @@ export function coach(slug: string, stepId: number): string {
       if (stepId === 1) return "先拖一个绿色「当开始运行」，里面放几个紫色「弹奏音符」（do、re、mi、fa）。";
       if (stepId === 2) return "把这几个音符整体放进「重复执行 2 次」，旋律就会循环演奏。";
       if (stepId === 3) return "点「运行」，听二零的小乐队是不是把旋律奏出来了！";
+    }
+    if (slug === "sea_concert") {
+      if (stepId === 1) return "先放绿色「落笔」，再用「重复执行 4 次」把「移动 60 步」和「右转 90 度」包起来，画完接一个「抬笔」——这就是海浪舞台。";
+      if (stepId === 2) return "放「控制角色 二零」+「弹奏音符 do」，再放「控制角色 三七」+「弹奏音符 mi」，两个伙伴要轮流上台才叫合奏。";
+      if (stepId === 3) return "最后放一个「弹和弦」（do、mi、sol）和一句「说 海底音乐会圆满成功！」，点运行看海浪舞台上的演出！";
+    }
+    if (slug === "four_seasons") {
+      if (stepId === 1) return "用橙色「当开始运行（时间轴）」开头，里面放「开始下雨」，把时间设成 0 到 4 秒，小屋就先进入雨季。";
+      if (stepId === 2) return "再放一个「开始下雪」设成 4 到 8 秒，让后半段飘雪；并加「当时间到达 4 秒·切换场景」选「夜晚·星空」。";
+      if (stepId === 3) return "最后放「当时间到达 6 秒，让 二零 说 春天雨、冬天雪，四季真奇妙」，点运行播放时间轴看四季变换！";
+    }
+    if (slug === "magic_fashion") {
+      if (stepId === 1) return "先放绿色「当开始运行」，里面放一个「重复执行 4 次」，二零就会连着换四套新装。";
+      if (stepId === 2) return "循环里依次放「改变大小 0.5」和「改变画笔颜色 60」，每循环一次二零就变大一点、换个新颜色。";
+      if (stepId === 3) return "循环里再放一个「敲响 镲」当走秀节拍，循环结束后接一句「说 变装秀好看吗？」，点运行看它换装！";
+    }
+    if (slug === "step_counter") {
+      if (stepId === 1) return "先放「把变量 steps 设为 0」，这就是计数器的起点（变量要先归零，数出来才准）。";
+      if (stepId === 2) return "放「重复执行 5 次」，里面放「移动 40 步」和「把变量 steps 增加 1」，每走一步计数就加一。";
+      if (stepId === 3) return "循环后放一个「说」，把「变量 steps」积木拖进说的框里，二零就会报出总步数，点运行试试！";
     }
     if (slug === "two_actor_chat") {
       if (stepId === 1) return "拖一个绿色「当开始运行」事件，程序才会启动。";

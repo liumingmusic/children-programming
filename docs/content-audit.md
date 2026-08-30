@@ -5,9 +5,9 @@
 
 ## 一、内容与差异化量化（事实）
 
-- **全站规模**：237 个引导项目（6-8 岁 **107** / 9-12 岁 77 / 13-16 岁 53）。
+- **全站规模**：241 个引导项目（6-8 岁 **111** / 9-12 岁 77 / 13-16 岁 53）。
 - **6-8 岁结构**：11 个分类（seq/loop/draw/event/cond/game/story/music/math/science/pbl），分布为
-  seq 11、其余 10 个分类各 10、pbl 6（本次由 4 补到 6）。
+  seq 11、其余 10 个分类各 10、pbl 10（两轮由 4 → 6 → **10**，已与其他分类持平）。
 - **差异化证据（关键）**：
   - 105 个原有标题 `sort | uniq -d` **零重复**——不存在「复制粘贴换名」的项目。
   - 每个项目的 `erLingHint`（步骤提示）平均 **179 字符**、共 105 条，**全部非空且具体**（如「落笔→循环→抬笔」分步）。
@@ -21,11 +21,11 @@
 | **品牌护城河** | 强 | 鹦鹉家族 IP（小太阳 / 二零 / 三七）视觉与角色统一，跨学段延续，竞品难复制。 |
 | **反馈护城河** | 强（本次新建） | 中文友好错误诊断 `diagnoseRuntimeError` + 运行前语法预检 `precheckSyntax` + 错题辅导 `coach`，按错误类型（语法/引用/类型/范围）给可执行的下一步。多数少儿编程竞品只给「运行失败」。 |
 | **进阶体系护城河** | 强 | 6-8 拖积木 → 9-12 变量/函数/多角色 → 13-16 写 JavaScript，三阶段能力阶梯平滑，且解锁链单一收口。 |
-| **内容密度（毕业实践）** | 薄弱→改善中 | PBL 综合项目原仅 4 个（其他分类均 10 个），毕业实践密度明显偏低；**本轮已补 2 个（my_garden / my_band），PBL 4→6**，仍需继续补。 |
+| **内容密度（毕业实践）** | 强（已补齐） | PBL 综合项目原仅 4 个（其他分类均 10 个），两轮共补 6 个至 **10 个**（已与其他分类持平）。新增项目刻意做成「多本领综合作品」而非单技能练习：海底音乐会（画笔+双角色+和弦）、四季小屋（时间轴+雨雪粒子+场景+解说）、魔法变装秀（循环+大小+变色+鼓点）、步数记录仪（变量+循环累加+汇报）。 |
 
 ## 三、P2 待补强项（按优先级）
 
-- **P2-1（高）**：PBL 综合项目继续补到 **8–10 个**（与其他分类平衡线），强化「学以致用」的毕业作品密度。建议主题：我的小城市（画图+事件）、四季农场（时间轴+故事）、小小发明家（物理+逻辑）。
+- **P2-1（高）✅ 已完成**：PBL 综合项目已补到 **10 个**（与其他分类持平线），毕业实践密度缺口已消除。新增 4 个均为多本领综合作品：海底音乐会（画笔+双角色+和弦）、四季小屋（时间轴+雨雪粒子+场景+解说）、魔法变装秀（循环+大小+变色+鼓点）、步数记录仪（变量+循环累加+汇报）——刻意避开与单技能分类（draw/rainbow、science/rain、music/drum_beat 等）雷同，每个都是「作品级」综合。
 - **P2-2（中）**：6-8 ↔ 9-12 衔接校验——确认「变量/函数」从拖积木到写代码的过渡是否平滑，是否需要桥接项目。
 - **P2-3（中，产品层）**：家长 / 教师端——进度看板、作品导出与分享（当前零后端、零用户系统，作品仅存 localStorage）。这是与「学校 / 机构」合作的关键门槛。
 - **P2-4（低）**：内容深度抽检——部分 6-8 项目难度梯度是否过陡 / 过缓，按需微调。
@@ -33,10 +33,13 @@
 ## 四、本轮已落地
 
 - **P1 教学有效性**：`lib/steps.ts` 新增 `diagnoseRuntimeError`（错误分类型中文诊断）+ `precheckSyntax`（运行前语法预检带行号）；`LearnPageClient` 接入（codeMode 预检 + 运行后诊断，覆盖时间轴模式）；单测 `tests/errorHint.test.ts`（8 测）。
-- **P2 内容补强**：新增 `content/stage-6-8/pbl/my_garden.ts`（画图+说话）、`my_band.ts`（音乐+循环）；`lib/steps.ts` 的 `PBL_SLUGS` / `computeSteps` / `coach` 三处扩展；`stages.ts`、`index.ts`、测试同步；PBL 4→6。
+- **P2 内容补强（第一轮）**：新增 `content/stage-6-8/pbl/my_garden.ts`（画图+说话）、`my_band.ts`（音乐+循环）；`lib/steps.ts` 的 `PBL_SLUGS` / `computeSteps` / `coach` 三处扩展；`stages.ts`、`index.ts`、测试同步；PBL 4→6。
+- **P2 内容补强（第二轮 · 2026-08-30）**：新增 4 个 PBL 综合作品 `sea_concert.ts`（画笔+双角色+和弦）、`four_seasons.ts`（时间轴+雨雪粒子+场景+解说）、`magic_fashion.ts`（循环+大小+变色+鼓点）、`step_counter.ts`（变量+循环累加+汇报）；`lib/steps.ts` 的 `PBL_SLUGS` / `computeSteps` / `coach` 三处扩展；`stages.ts` / `index.ts` / `courses.test.ts` 同步；PBL 6→10、6-8 107→111、全站 237→241。并补齐 `tests/pbl-exec.test.ts`（原仅覆盖 4 项，现覆盖全部 10 项）。
+- **选积木的避险原则（新增经验）**：新项目只用「已被现有项目实际使用过」的积木。经统计，`maker_broadcast` / `maker_when_receive` / `maker_set_size` / `maker_touching_apple` 等在 6-8 阶段**零项目使用**，且 `maker_when_receive` 的代码生成只返回内部语句（不生成事件标记，语义退化成顺序执行），故本轮全部避开，改用已验证积木（change_size 2 次、pen_change_color 2 次、play_drum 2 次、变量类 4–10 次等）。
 
 ## 五、验证
 
-- `npm run build` 0 错（已生成 `/learn/my_garden.html`、`/learn/my_band.html`）。
-- 单元回归：courses 10 + errorHint 8 + analytics 5 = **23/23 通过**；`tsc --noEmit` 0 错。
-- 注：新增 PBL 的 `defaultXml` 直接复用已验证的 `square` / `play_doremi` 合法积木模板（仅改数值 / 加 say / 外层循环），结构合法、判定标记沿用现有 PBL 同一套真实标记，风险已大幅降低。
+- `npm run build` 0 错（已生成 `/learn/my_garden.html`、`/learn/my_band.html`、`/learn/sea_concert.html`、`/learn/four_seasons.html`、`/learn/magic_fashion.html`、`/learn/step_counter.html`）。
+- 单元回归（第二轮）：`courses` 10 + `pbl-exec` 10（含 6 个新增作品）+ `all-projects-smoke` 1 + `timeline-completion` 4 + `audit-completion` 171 = **196 项通过**；`tsc --noEmit` 0 错。
+- 全量回归 `npx vitest run`：**997 passed / 2 failed**（失败为 `sequence-exec` / `cat4-6-exec` 的沙箱禁出站 `fetch failed`，与本轮改动无关，属已知非回归）。
+- 新增 PBL 的 `defaultXml` 全部复用已验证积木的真实 XML 写法（字段名 / input 名取自 `blockly-blocks.ts` 与既有项目），判定基于真实 JS 标记；`audit-completion` 的 A 组会逐个跑 6-8 示范并断言达成目标，已自动覆盖新增的 5 个非时间轴作品。

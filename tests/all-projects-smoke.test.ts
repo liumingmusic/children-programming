@@ -5,7 +5,7 @@ import { registerCustomBlocks, TOOLBOX } from "@/lib/blockly-blocks";
 import { projects } from "@/courses";
 
 /**
- * 全量冒烟：遍历 courses 中全部 105 个项目，确认每个非 memory 项目的 defaultXml
+ * 全量冒烟：遍历 courses 中全部项目（6-8 共 111 项 + 9-12 + 13-16），确认每个非 memory 项目的 defaultXml
  * 都能被 Blockly 代码生成器成功转成非空 JS。
  *
  * 价值：积木类型若被改名 / 从 blockly-blocks 删除，但某项目的 demo 仍引用它，

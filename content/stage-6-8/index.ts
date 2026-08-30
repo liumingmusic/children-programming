@@ -106,6 +106,10 @@ import { mySolarSystemProject } from "./pbl/my_solar_system";
 import { interactiveBookProject } from "./pbl/interactive_book";
 import { myGardenProject } from "./pbl/my_garden";
 import { myBandProject } from "./pbl/my_band";
+import { seaConcertProject } from "./pbl/sea_concert";
+import { fourSeasonsProject } from "./pbl/four_seasons";
+import { magicFashionProject } from "./pbl/magic_fashion";
+import { stepCounterProject } from "./pbl/step_counter";
 
 export const seqProjects: CourseProject[] = [helloProject, flagProject, stoneProject, shapeLProject, homeProject, mazeProject, arrowProject, zigzagProject, treasureProject, danceProject, frameProject];
 export const loopProjects: CourseProject[] = [squareProject, triangleProject, pentagonProject, spinProject, stairsProject, waveProject, spiralProject, fenceProject, windmillProject, pickfruitProject];
@@ -119,9 +123,11 @@ export const storyProjects: CourseProject[] = [selfIntroProject, expressionProje
 export const scienceProjects: CourseProject[] = [dayNightProject, rainProject, snowProject, volcanoProject, colorWheelProject, rainbowBridgeProject, seedGrowProject, earthSunProject, foodChainProject, moonPhaseProject];
 
 /** 分类 11 · 综合创意 / 毕业项目（pbl）：把前面学到的多种本领组合成总结性作品。
- * 目前 6 个：会唱歌的画（画笔+音乐+循环）、双角色小剧场（故事双角色+表情+场景）、
+ * 目前 10 个：会唱歌的画（画笔+音乐+循环）、双角色小剧场（故事双角色+表情+场景）、
  * 我的太阳系（科学时间轴公转+大小变化）、互动绘本游戏（事件+条件+收集）、
- * 我的小花园（画图+说话）、我的小乐队（音乐+循环）。 */
+ * 我的小花园（画图+说话）、我的小乐队（音乐+循环）、
+ * 海底音乐会（画笔+双角色+音符+和弦）、四季小屋（时间轴+雨雪粒子+场景+解说）、
+ * 魔法变装秀（循环+改变大小+画笔变色+鼓点）、步数记录仪（变量+循环累加+说话）。 */
 export const pblProjects: CourseProject[] = [
   singingPictureProject,
   twoActorShowProject,
@@ -129,9 +135,13 @@ export const pblProjects: CourseProject[] = [
   interactiveBookProject,
   myGardenProject,
   myBandProject,
+  seaConcertProject,
+  fourSeasonsProject,
+  magicFashionProject,
+  stepCounterProject,
 ];
 
-/** 全 105 项目，按 projectSlugs 规范顺序：seq→loop→draw→event→cond→game→music→math→story→science→pbl。
+/** 全 111 项目，按 projectSlugs 规范顺序：seq→loop→draw→event→cond→game→music→math→story→science→pbl。
  * 运行时的 MIRROR 坐标镜像、getProject、闯关路径等逻辑对本文件导出的对象照常生效。 */
 export const stage6Projects: CourseProject[] = [
   ...seqProjects,
