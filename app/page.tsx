@@ -21,15 +21,18 @@ import {
   Variable,
   CheckCircle2,
   GraduationCap,
+  Lock,
 } from "lucide-react";
 import ErLingAvatar from "@/components/ErLingAvatar";
 import SanQiAvatar from "@/components/SanQiAvatar";
 import SiteHeader from "@/components/SiteHeader";
-import { getProject, getStageProjects } from "@/courses";
+import { getProject, projects } from "@/courses";
+import { GAMES } from "@/games/registry";
 
-/* 真实项目数量（按阶段统计），用于模块全览徽标 */
-const COUNT_68 = getStageProjects("stage-6-8").length;
-const COUNT_912 = getStageProjects("stage-9-12").length;
+/* 项目总数：直接取全站项目数，而不是按阶段手加。
+   此前写成 `COUNT_68 + COUNT_912`（111 + 79 = 190），13-16 满编后漏了那 53 个，
+   首页一直显示「190 个项目」。用 projects.length 后新增学段也无需再同步这里。 */
+const COUNT_ALL = projects.length;
 
 /* 平台六大模块全览（含真实徽标） */
 const MODULES = [
@@ -38,14 +41,14 @@ const MODULES = [
     title: "星球任务",
     desc: "按年龄挑选能跑起来的小项目，像闯关一样一步步解锁，每个任务都有「看示范」参考答案。",
     href: "/missions",
-    badge: `${COUNT_68 + COUNT_912} 个项目`,
+    badge: `${COUNT_ALL} 个项目`,
   },
   {
     icon: <Gamepad2 className="h-6 w-6 text-[#7F77DD]" />,
     title: "星球游乐场",
     desc: "学累了来放松的小游戏：2048、打节拍、星球赛车、星星钢琴……和编程无关，纯粹好玩。",
     href: "/playground",
-    badge: "17 个小游戏",
+    badge: `${GAMES.length} 个小游戏`,
   },
   {
     icon: <Palette className="h-6 w-6 text-[#D85A30]" />,
@@ -139,7 +142,7 @@ const LADDER = [
     tag: "文本",
     icon: <Code2 className="h-5 w-5" />,
     color: "teal" as const,
-    desc: "积木背后就是 JavaScript——看得见代码，自然过渡到亲手写代码。",
+    desc: "积木背后就是 JavaScript。先通过「读代码」任务练会「看一段程序、说出它会做什么」，看懂了再动手写，过渡就不慌。",
     example: "读得懂、改得动自己做的工具",
   },
 ];
@@ -178,6 +181,10 @@ export default function Home() {
     { q: "需要会打字吗？", a: "6-8 岁阶段全程用彩色积木，拖一拖就能编程，不需要键盘打字。" },
     { q: "大一点的孩子（9-12 岁）学什么？", a: "9-12 岁从积木过渡到 JavaScript——拖积木的同时能看到它生成的代码，自然学会函数、变量，做出工具和小游戏。" },
     { q: "要花钱吗？", a: "完全免费、没有会员、没有广告，所有功能对孩子开放。" },
+    {
+      q: "孩子的作品存在哪里？会丢吗？",
+      a: "作品和进度都存在这台设备的浏览器里，我们不上传任何数据，也不需要注册账号。但清理浏览器缓存、换设备或换浏览器时会丢失，而且无法找回——建议家长去「家长入口」偶尔导出一份备份，换设备时再导入就能恢复。",
+    },
     { q: "孩子不会做怎么办？", a: "每个任务都有「看示范」参考答案，可以照着学，关掉就回到自己的画布继续探索。" },
   ];
 
@@ -374,7 +381,7 @@ export default function Home() {
               <AgeCard
                 age="9-12 岁"
                 title="代码初探"
-                desc="搭积木时同步看到生成的 JavaScript，用函数、变量与列表做更聪明的作品。"
+                desc="搭积木时同步看到它生成的 JavaScript，用函数、变量与列表做更聪明的作品；最后还有「读代码」任务，先学会看懂程序在做什么。"
                 icon={<Code2 className="h-6 w-6 text-[#378ADD]" />}
                 href="/missions/stage-9-12"
                 color="blue"
@@ -456,9 +463,9 @@ export default function Home() {
                 bg="amber"
               />
               <FeatureCard
-                icon={<Sparkles className="h-6 w-6 text-[#0F6E56]" />}
-                title="每个项目都有作品"
-                desc="学完不是结束，而是产出可分享的小作品。"
+                icon={<Lock className="h-6 w-6 text-[#0F6E56]" />}
+                title="数据只在本机，不上传"
+                desc="作品、进度都存在孩子自己的设备上，我们不收集任何信息，也不需要注册账号。"
                 bg="teal"
               />
               <FeatureCard
